@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "NutriHub",
+    "slug": "nutrihub",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "scheme": "nutrihub",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.nutrihub.app"
+    },
+    "android": {
+      "package": "com.nutrihub.app"
+    }
+  }
+}
