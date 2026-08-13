@@ -2,7 +2,7 @@
   "name": "@nutrihub/mobile",
   "private": true,
   "version": "0.1.0",
-  "main": "node_modules/expo/AppEntry.js",
+  "main": "index.js",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -10,15 +10,18 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@babel/runtime": "^7.24.0",
     "@nutrihub/shared": "workspace:*",
-    "@supabase/supabase-js": "^2.45.0",
+    "@react-native-async-storage/async-storage": "1.23.1",
     "expo": "~51.0.0",
+    "expo-constants": "~16.0.0",
     "expo-status-bar": "~1.12.0",
     "react": "^18.3.0",
     "react-native": "0.74.5"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
+    "@types/node": "^20.14.0",
     "@types/react": "^18.3.0",
     "typescript": "^5.5.0"
   }
