@@ -6,6 +6,7 @@ dist/
 .turbo/
 *.log
 .pnpm-store/
+*.tsbuildinfo
 
 # Env
 .env

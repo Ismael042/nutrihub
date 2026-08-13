@@ -36,7 +36,9 @@ services:
       - ../.env
     environment:
       DATABASE_URL: postgresql://nutrihub:nutrihub@db:5432/nutrihub
+      TENANT_DATABASE_URL: postgresql://nutrihub_app:nutrihub_app_dev_password@db:5432/nutrihub
       REDIS_URL: redis://redis:6379/0
+      CORS_ALLOW_ORIGINS: http://localhost:3000
     ports:
       - "8000:8000"
     depends_on:
