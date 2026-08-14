@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import "./globals.css";
+import { ToastProvider } from "@/components/Toast";
+import { ConfirmDialogProvider } from "@/components/ConfirmDialog";
 
 export const metadata = {
   title: "NutriHub",
@@ -9,7 +11,11 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body>
+        <ToastProvider>
+          <ConfirmDialogProvider>{children}</ConfirmDialogProvider>
+        </ToastProvider>
+      </body>
     </html>
   );
 }

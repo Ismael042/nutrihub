@@ -103,6 +103,40 @@ real: `maxWidth` sem `margin: "0 auto"` deixa o bloco grudado na esquerda em vez
 centralizado — era o padrão em quase toda página antiga. Página nova nunca deve voltar a
 usar `maxWidth` manual no `<main>`, sempre uma dessas duas classes.
 
+### App shell persistente + componentes compartilhados de estado de UI (2026-08-13, não commitado)
+
+Todas as páginas autenticadas foram movidas para `apps/web/app/(app)/` — route group do
+Next.js (não muda nenhuma URL). `(app)/layout.tsx` chama `useRequireAuth()` uma única vez
+e envolve `children` em `<AppShell>` (`components/AppShell.tsx`): sidebar com navegação
+agrupada (Atendimento / Meu conteúdo / Outros cadastros / Organização), topbar com avatar
++ menu do usuário + logout, versão mobile com overlay. Antes disso cada página tinha só um
+link "← Dashboard" solto, sem chrome persistente.
+
+Componentes novos em `apps/web/components/`, usados por praticamente toda página de
+listagem:
+- **`EmptyState.tsx`** — substitui o antigo `<p>Nenhum X cadastrado</p>` solto: ícone
+  temático (de `components/icons.tsx`, SVGs próprios sem lib externa) + título +
+  descrição opcional + botão de ação opcional (`actionLabel`/`actionHref`, só renderiza
+  se os dois vierem juntos).
+- **`Skeleton.tsx`** (`SkeletonRows`, `SkeletonText`, `SkeletonStatGrid`) — placeholder de
+  carregamento; usado no lugar de `{loading && <p>Carregando...</p>}`.
+- **`Toast.tsx`** / **`ConfirmDialog.tsx`** — providers globais montados em
+  `app/layout.tsx` (`ToastProvider` + `ConfirmDialogProvider` envolvendo `children`),
+  consumidos via `useToast()`/`useConfirm()`. Ainda não adotados em toda página — várias
+  telas mais antigas continuam usando `confirm()`/`alert()` nativos do browser.
+
+**How to apply:** página de listagem nova segue o padrão de `financeiro/page.tsx` —
+estado `loading`, `<SkeletonRows>` enquanto carrega, `<EmptyState icon={<IconX/>} .../>`
+quando a lista vem vazia. Página nova em geral não precisa mais do link manual
+"← Dashboard" nem de tratar navegação — isso é responsabilidade do `AppShell` agora.
+
+**Estado (2026-08-13):** rollout completo nas ~26 páginas autenticadas (typecheck limpo),
+mas **nada disso está commitado ainda** — é só working tree sobre a `main`, que no GitHub
+ainda reflete o commit `2e7cc84` (exposição pública em `nutrihub.isdev.online`). `Toast`/
+`ConfirmDialog` foram adotados só nas páginas tocadas nesta leva (financeiro, detalhe de
+paciente) — não em todas; próxima sessão que mexer em uma tela antiga pode aproveitar pra
+trocar `confirm()`/`alert()` nativos por eles, mas isso não é dívida bloqueante.
+
 ## Auth — estado atual: shim local, não é o Supabase Auth ainda
 
 O plano original desta seção era o Supabase Auth (JWT + `auth.users` gerenciados pelo
