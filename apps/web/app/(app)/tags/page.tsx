@@ -50,7 +50,6 @@ export default function TagsPage() {
 
   return (
     <main className="page-container">
-      <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Tags</h1>
       <p style={{ color: "#666" }}>Use tags para organizar pacientes (ex: gestante, atleta, diabético).</p>
 

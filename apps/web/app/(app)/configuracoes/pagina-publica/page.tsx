@@ -50,7 +50,6 @@ export default function PaginaPublicaConfigPage() {
 
   return (
     <main className="form-container">
-      <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Página pública</h1>
       <p style={{ color: "#666", fontSize: 14 }}>
         Uma página simples com seu nome e bio, com formulário de solicitação de horário — os pedidos caem em

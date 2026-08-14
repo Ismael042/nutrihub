@@ -61,7 +61,6 @@ export default function NutriPlanPage() {
 
   return (
     <main className="page-container">
-      <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>NutriPlan</h1>
       <p style={{ color: "#666" }}>Tarefas e notas rápidas.</p>
 

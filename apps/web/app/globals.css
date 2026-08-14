@@ -1359,7 +1359,8 @@ table {
 }
 
 .back-link {
-  display: inline-block;
+  display: block;
+  width: fit-content;
   font-size: 13px;
   font-weight: 600;
   color: var(--color-muted);
