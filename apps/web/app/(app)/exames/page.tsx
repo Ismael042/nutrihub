@@ -2,7 +2,8 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
-import type { LabExamRequest } from "@nutrihub/shared";
+import { formatDate, type LabExamRequest } from "@nutrihub/shared";
+import { useConfirm } from "@/components/ConfirmDialog";
 import EmptyState from "@/components/EmptyState";
 import { SkeletonRows } from "@/components/Skeleton";
 import { IconFlask } from "@/components/icons";
@@ -14,6 +15,7 @@ interface Patient {
 
 export default function ExamesPage() {
   const professional = useRequireAuth();
+  const confirm = useConfirm();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [requests, setRequests] = useState<LabExamRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +69,7 @@ export default function ExamesPage() {
   }
 
   async function remove(id: string) {
-    if (!confirm("Excluir esta solicitação?")) return;
+    if (!(await confirm({ title: "Excluir esta solicitação?", danger: true, confirmLabel: "Excluir" }))) return;
     await authFetch(`/lab-exam-requests/${id}`, { method: "DELETE" });
     load();
   }
@@ -111,8 +113,8 @@ export default function ExamesPage() {
         </div>
 
         <input placeholder="Observações (opcional)" value={notes} onChange={(e) => setNotes(e.target.value)} />
-        {error && <p style={{ color: "crimson" }}>{error}</p>}
-        <button type="submit" className="btn-primary" style={{ padding: 10 }}>
+        {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
+        <button type="submit" className="btn-primary">
           Solicitar
         </button>
       </form>
@@ -134,16 +136,16 @@ export default function ExamesPage() {
       {!loading && requests.length > 0 && (
         <ul style={{ listStyle: "none", padding: 0, marginTop: 20 }}>
           {requests.map((r) => (
-            <li key={r.id} style={{ padding: "10px 0", borderBottom: "1px solid #eee" }}>
+            <li key={r.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--color-border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <strong>{r.patient_name}</strong>
-                <button onClick={() => remove(r.id)} style={{ color: "crimson" }}>
+                <button onClick={() => remove(r.id)} style={{ color: "var(--color-error)" }}>
                   Excluir
                 </button>
               </div>
               <div>{r.exams.map((e) => e.name).join(", ")}</div>
-              <div style={{ color: "#666" }}>
-                {r.requested_at}
+              <div style={{ color: "var(--color-text-muted)" }}>
+                {formatDate(r.requested_at)}
                 {r.notes && ` · ${r.notes}`}
               </div>
             </li>

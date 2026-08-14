@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { clearSession, type Professional } from "@/lib/auth";
 import {
@@ -101,6 +101,25 @@ export default function AppShell({
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    function handlePointer(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setUserMenuOpen(false);
+    }
+    document.addEventListener("mousedown", handlePointer);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handlePointer);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [userMenuOpen]);
 
   function isActive(href: string) {
     return pathname === href || pathname.startsWith(href + "/");
@@ -189,7 +208,7 @@ export default function AppShell({
 
           <span />
 
-          <div className="app-user-menu">
+          <div className="app-user-menu" ref={userMenuRef}>
             <button
               type="button"
               onClick={() => setUserMenuOpen((v) => !v)}

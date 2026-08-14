@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
+import { formatMoney } from "@nutrihub/shared";
 import { useConfirm } from "@/components/ConfirmDialog";
 import { useToast } from "@/components/Toast";
 import EmptyState from "@/components/EmptyState";
@@ -15,10 +16,6 @@ interface InventoryItem {
   unit_price_cents: number;
 }
 
-function formatMoney(cents: number) {
-  return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
 export default function EstoquePage() {
   const professional = useRequireAuth();
   const confirm = useConfirm();
@@ -29,6 +26,7 @@ export default function EstoquePage() {
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [sellQuantity, setSellQuantity] = useState<Record<string, string>>({});
 
   async function load() {
@@ -49,24 +47,29 @@ export default function EstoquePage() {
       setError("Informe o nome do produto");
       return;
     }
-    const res = await authFetch("/inventory-items", {
-      method: "POST",
-      body: JSON.stringify({
-        name: name.trim(),
-        unit,
-        quantity: parseFloat(quantity || "0"),
-        unit_price_cents: priceCents
-      })
-    });
-    if (!res.ok) {
-      setError("Não foi possível salvar");
-      return;
+    setSaving(true);
+    try {
+      const res = await authFetch("/inventory-items", {
+        method: "POST",
+        body: JSON.stringify({
+          name: name.trim(),
+          unit,
+          quantity: parseFloat(quantity || "0"),
+          unit_price_cents: priceCents
+        })
+      });
+      if (!res.ok) {
+        setError("Não foi possível salvar");
+        return;
+      }
+      setName("");
+      setQuantity("");
+      setPrice("");
+      toast.success("Produto cadastrado.");
+      load();
+    } finally {
+      setSaving(false);
     }
-    setName("");
-    setQuantity("");
-    setPrice("");
-    toast.success("Produto cadastrado.");
-    load();
   }
 
   async function sell(id: string) {
@@ -140,8 +143,8 @@ export default function EstoquePage() {
               <p>{error}</p>
             </div>
           )}
-          <button type="submit" className="btn-primary">
-            Salvar produto
+          <button type="submit" className="btn-primary" disabled={saving}>
+            {saving ? "Salvando..." : "Salvar produto"}
           </button>
         </form>
       </details>

@@ -49,8 +49,8 @@ function NovoLocalForm() {
           </select>
         </label>
         <input placeholder="Endereço (opcional)" value={address} onChange={(e) => setAddress(e.target.value)} />
-        {error && <p style={{ color: "crimson" }}>{error}</p>}
-        <button type="submit" disabled={loading} className="btn-primary" style={{ padding: 10 }}>
+        {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
+        <button type="submit" disabled={loading} className="btn-primary">
           {loading ? "Salvando..." : "Salvar"}
         </button>
       </form>

@@ -2,6 +2,8 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
+import { formatDate } from "@nutrihub/shared";
+import { useConfirm } from "@/components/ConfirmDialog";
 import EmptyState from "@/components/EmptyState";
 import { SkeletonRows } from "@/components/Skeleton";
 import { IconTarget } from "@/components/icons";
@@ -22,6 +24,7 @@ interface Goal {
 
 export default function MetasPage() {
   const professional = useRequireAuth();
+  const confirm = useConfirm();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,7 +78,7 @@ export default function MetasPage() {
   }
 
   async function remove(id: string) {
-    if (!confirm("Excluir esta meta?")) return;
+    if (!(await confirm({ title: "Excluir esta meta?", danger: true, confirmLabel: "Excluir" }))) return;
     await authFetch(`/goals/${id}`, { method: "DELETE" });
     load();
   }
@@ -103,8 +106,8 @@ export default function MetasPage() {
           required
         />
         <input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} />
-        {error && <p style={{ color: "crimson" }}>{error}</p>}
-        <button type="submit" style={{ padding: 10 }}>
+        {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
+        <button type="submit" className="btn-primary">
           Adicionar meta
         </button>
       </form>
@@ -124,16 +127,16 @@ export default function MetasPage() {
           {goals.map((g) => (
             <li
               key={g.id}
-              style={{ padding: "10px 0", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between" }}
+              style={{ padding: "10px 0", borderBottom: "1px solid var(--color-border)", display: "flex", justifyContent: "space-between" }}
             >
               <div>
                 <span style={{ textDecoration: g.achieved ? "line-through" : "none" }}>{g.description}</span>
-                <span style={{ color: "#666" }}> · {g.patient_name}</span>
-                {g.target_date && <span style={{ color: "#666" }}> · até {g.target_date}</span>}
+                <span style={{ color: "var(--color-text-muted)" }}> · {g.patient_name}</span>
+                {g.target_date && <span style={{ color: "var(--color-text-muted)" }}> · até {formatDate(g.target_date)}</span>}
               </div>
               <div style={{ display: "flex", gap: 6 }}>
                 <button onClick={() => toggleAchieved(g)}>{g.achieved ? "Reabrir" : "Concluir"}</button>
-                <button onClick={() => remove(g.id)} style={{ color: "crimson" }}>
+                <button onClick={() => remove(g.id)} style={{ color: "var(--color-error)" }}>
                   Excluir
                 </button>
               </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
+import { useConfirm } from "@/components/ConfirmDialog";
 import EmptyState from "@/components/EmptyState";
 import { SkeletonRows } from "@/components/Skeleton";
 import { IconCheckSquare } from "@/components/icons";
@@ -15,6 +16,7 @@ interface NoteTask {
 
 export default function NutriPlanPage() {
   const professional = useRequireAuth();
+  const confirm = useConfirm();
   const [items, setItems] = useState<NoteTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [kind, setKind] = useState<"task" | "note">("task");
@@ -49,7 +51,9 @@ export default function NutriPlanPage() {
     load();
   }
 
-  async function remove(id: string) {
+  async function remove(id: string, kind: "task" | "note") {
+    const title = kind === "task" ? "Excluir esta tarefa?" : "Excluir esta nota?";
+    if (!(await confirm({ title, danger: true, confirmLabel: "Excluir" }))) return;
     await authFetch(`/notes-tasks/${id}`, { method: "DELETE" });
     load();
   }
@@ -63,7 +67,7 @@ export default function NutriPlanPage() {
     <main className="page-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>NutriPlan</h1>
-      <p style={{ color: "#666" }}>Tarefas e notas rápidas.</p>
+      <p style={{ color: "var(--color-text-muted)" }}>Tarefas e notas rápidas.</p>
 
       <form onSubmit={handleSubmit} style={{ display: "flex", gap: 8, marginTop: 12 }}>
         <select value={kind} onChange={(e) => setKind(e.target.value as "task" | "note")}>
@@ -77,7 +81,7 @@ export default function NutriPlanPage() {
           required
           style={{ flex: 1 }}
         />
-        <button type="submit" style={{ padding: 10 }}>
+        <button type="submit" className="btn-primary">
           Adicionar
         </button>
       </form>
@@ -98,7 +102,7 @@ export default function NutriPlanPage() {
                   <label style={{ textDecoration: t.done ? "line-through" : "none" }}>
                     <input type="checkbox" checked={t.done} onChange={() => toggleDone(t)} /> {t.content}
                   </label>
-                  <button onClick={() => remove(t.id)} style={{ color: "crimson" }}>
+                  <button onClick={() => remove(t.id, "task")} style={{ color: "var(--color-error)" }}>
                     Excluir
                   </button>
                 </li>
@@ -114,7 +118,7 @@ export default function NutriPlanPage() {
               {notes.map((n) => (
                 <li key={n.id} style={{ padding: "6px 0", display: "flex", justifyContent: "space-between" }}>
                   <span>{n.content}</span>
-                  <button onClick={() => remove(n.id)} style={{ color: "crimson" }}>
+                  <button onClick={() => remove(n.id, "note")} style={{ color: "var(--color-error)" }}>
                     Excluir
                   </button>
                 </li>

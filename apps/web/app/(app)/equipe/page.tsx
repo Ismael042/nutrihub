@@ -3,6 +3,8 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
 import type { TeamMember } from "@nutrihub/shared";
+import { useConfirm } from "@/components/ConfirmDialog";
+import { useToast } from "@/components/Toast";
 import EmptyState from "@/components/EmptyState";
 import { SkeletonRows } from "@/components/Skeleton";
 import { IconTeam } from "@/components/icons";
@@ -15,6 +17,8 @@ const ROLE_LABELS: Record<string, string> = {
 
 export default function EquipePage() {
   const professional = useRequireAuth();
+  const confirm = useConfirm();
+  const toast = useToast();
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
@@ -70,17 +74,18 @@ export default function EquipePage() {
     if (res.ok) load();
     else {
       const data = await res.json();
-      alert(data.detail ?? "Não foi possível alterar o papel");
+      toast.error(data.detail ?? "Não foi possível alterar o papel");
     }
   }
 
   async function remove(id: string) {
-    if (!confirm("Remover este profissional do consultório?")) return;
+    if (!(await confirm({ title: "Remover este profissional do consultório?", danger: true, confirmLabel: "Remover" })))
+      return;
     const res = await authFetch(`/team/${id}`, { method: "DELETE" });
     if (res.ok) load();
     else {
       const data = await res.json();
-      alert(data.detail ?? "Não foi possível remover");
+      toast.error(data.detail ?? "Não foi possível remover");
     }
   }
 
@@ -88,7 +93,7 @@ export default function EquipePage() {
     <main className="page-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Equipe</h1>
-      <p style={{ color: "#666", fontSize: 14 }}>
+      <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>
         Outros profissionais e assistentes que atendem no mesmo consultório (mesmo tenant).
       </p>
 
@@ -110,8 +115,8 @@ export default function EquipePage() {
               <option value="assistant">Assistente</option>
               <option value="admin">Administrador</option>
             </select>
-            {error && <p style={{ color: "crimson" }}>{error}</p>}
-            <button type="submit" disabled={saving} className="btn-primary" style={{ padding: 10 }}>
+            {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
+            <button type="submit" disabled={saving} className="btn-primary">
               {saving ? "Convidando..." : "Convidar"}
             </button>
           </form>
@@ -135,10 +140,10 @@ export default function EquipePage() {
       {!loading && members.length > 0 && (
         <ul style={{ listStyle: "none", padding: 0, marginTop: 20 }}>
           {members.map((m) => (
-            <li key={m.id} style={{ padding: "10px 0", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <li key={m.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--color-border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
                 <strong>{m.name}</strong>
-                <span style={{ color: "#666" }}> · {m.email}</span>
+                <span style={{ color: "var(--color-text-muted)" }}> · {m.email}</span>
                 <span className="badge" style={{ marginLeft: 8 }}>{ROLE_LABELS[m.role] ?? m.role}</span>
               </div>
               {isAdmin && (
@@ -148,7 +153,7 @@ export default function EquipePage() {
                     <option value="nutritionist">Nutricionista</option>
                     <option value="assistant">Assistente</option>
                   </select>
-                  <button onClick={() => remove(m.id)} style={{ color: "crimson" }}>Remover</button>
+                  <button onClick={() => remove(m.id)} style={{ color: "var(--color-error)" }}>Remover</button>
                 </div>
               )}
             </li>

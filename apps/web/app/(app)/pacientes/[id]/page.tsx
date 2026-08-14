@@ -207,7 +207,7 @@ export default function PacienteDetalhePage() {
               </label>
               <input id="p-name" value={patient.name} onChange={(e) => setPatient({ ...patient, name: e.target.value })} />
             </div>
-            <div className="field">
+            <div className="field field-sm">
               <label className="field-label" htmlFor="p-birth">
                 Nascimento
               </label>
@@ -231,7 +231,7 @@ export default function PacienteDetalhePage() {
                 placeholder="Sem e-mail cadastrado"
               />
             </div>
-            <div className="field">
+            <div className="field field-md">
               <label className="field-label" htmlFor="p-phone">
                 Telefone
               </label>

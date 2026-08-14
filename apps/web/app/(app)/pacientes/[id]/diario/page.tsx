@@ -41,14 +41,14 @@ export default function DiarioPacientePage() {
     <main className="page-container">
       <a href={`/pacientes/${params.id}`} className="back-link">← {patient?.name ?? "Paciente"}</a>
       <h1>Diário alimentar</h1>
-      <p style={{ color: "#666", fontSize: 14 }}>Registros feitos pelo próprio paciente no app.</p>
+      <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>Registros feitos pelo próprio paciente no app.</p>
 
       <ul style={{ listStyle: "none", padding: 0, marginTop: 20 }}>
         {entries.map((e) => (
-          <li key={e.id} style={{ padding: "10px 0", borderBottom: "1px solid #eee" }}>
+          <li key={e.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--color-border)" }}>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               {e.meal_kind && <span className="badge">{MEAL_LABELS[e.meal_kind] ?? e.meal_kind}</span>}
-              <span style={{ color: "#666", fontSize: 13 }}>{new Date(e.logged_at).toLocaleString("pt-BR")}</span>
+              <span style={{ color: "var(--color-text-muted)", fontSize: 13 }}>{new Date(e.logged_at).toLocaleString("pt-BR")}</span>
             </div>
             <div style={{ marginTop: 4 }}>{e.description}</div>
           </li>

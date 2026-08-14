@@ -409,6 +409,15 @@ textarea:focus {
   box-shadow: var(--shadow-focus);
 }
 
+/* Campo obrigatório vazio não deve parecer "com erro" antes do usuário interagir —
+   o navegador pinta :invalid nativamente; erro de verdade usa a classe .has-error. */
+input:invalid,
+select:invalid,
+textarea:invalid {
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+
 input:disabled,
 select:disabled,
 textarea:disabled {
@@ -454,18 +463,18 @@ textarea:disabled {
   gap: 4px;
 }
 
-.field input,
-.field select,
-.field textarea,
+.field input.has-error,
+.field select.has-error,
+.field textarea.has-error,
 input.has-error,
 select.has-error,
 textarea.has-error {
   border-color: var(--color-error);
 }
 
-.field input:focus,
-.field select:focus,
-.field textarea:focus,
+.field input.has-error:focus,
+.field select.has-error:focus,
+.field textarea.has-error:focus,
 input.has-error:focus,
 select.has-error:focus,
 textarea.has-error:focus {
@@ -488,6 +497,23 @@ textarea.has-error:focus {
 .field-row > * {
   flex: 1;
   min-width: 160px;
+}
+
+/* Larguras diferenciadas por tipo de conteúdo dentro de .field-row — evita que CPF,
+   data e telefone ocupem o mesmo espaço que nome/e-mail/endereço. */
+.field-row > .field-xs {
+  flex: 0 1 110px;
+  min-width: 100px;
+}
+
+.field-row > .field-sm {
+  flex: 0 1 150px;
+  min-width: 130px;
+}
+
+.field-row > .field-md {
+  flex: 0 1 220px;
+  min-width: 180px;
 }
 
 fieldset.form-section {

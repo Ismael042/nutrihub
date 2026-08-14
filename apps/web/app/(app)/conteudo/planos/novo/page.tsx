@@ -64,8 +64,8 @@ export default function NovoPlanoPage() {
           onChange={(e) => setName(e.target.value)}
           required
         />
-        {error && <p style={{ color: "crimson" }}>{error}</p>}
-        <button type="submit" className="btn-primary" style={{ padding: 10 }}>
+        {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
+        <button type="submit" className="btn-primary">
           Criar plano
         </button>
       </form>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
+import { formatDate, formatMoney } from "@nutrihub/shared";
 import { useConfirm } from "@/components/ConfirmDialog";
 import { useToast } from "@/components/Toast";
 import EmptyState from "@/components/EmptyState";
@@ -25,10 +26,6 @@ interface RecurringCharge {
   active: boolean;
 }
 
-function formatMoney(cents: number) {
-  return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
 export default function CobrancaRecorrentePage() {
   const professional = useRequireAuth();
   const confirm = useConfirm();
@@ -43,6 +40,7 @@ export default function CobrancaRecorrentePage() {
   const [nextDueDate, setNextDueDate] = useState("");
   const [patientId, setPatientId] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   async function load() {
     const [chargesRes, patientsRes] = await Promise.all([
@@ -66,29 +64,34 @@ export default function CobrancaRecorrentePage() {
       setError("Preencha descrição, valor e próxima data");
       return;
     }
-    const res = await authFetch("/recurring-charges", {
-      method: "POST",
-      body: JSON.stringify({
-        patient_id: patientId || null,
-        kind,
-        description: description.trim(),
-        amount_cents: amountCents,
-        category: category || null,
-        frequency,
-        next_due_date: nextDueDate
-      })
-    });
-    if (!res.ok) {
-      setError("Não foi possível salvar");
-      return;
+    setSaving(true);
+    try {
+      const res = await authFetch("/recurring-charges", {
+        method: "POST",
+        body: JSON.stringify({
+          patient_id: patientId || null,
+          kind,
+          description: description.trim(),
+          amount_cents: amountCents,
+          category: category || null,
+          frequency,
+          next_due_date: nextDueDate
+        })
+      });
+      if (!res.ok) {
+        setError("Não foi possível salvar");
+        return;
+      }
+      setDescription("");
+      setAmount("");
+      setCategory("");
+      setNextDueDate("");
+      setPatientId("");
+      toast.success("Cobrança recorrente criada.");
+      load();
+    } finally {
+      setSaving(false);
     }
-    setDescription("");
-    setAmount("");
-    setCategory("");
-    setNextDueDate("");
-    setPatientId("");
-    toast.success("Cobrança recorrente criada.");
-    load();
   }
 
   async function generate(id: string) {
@@ -194,8 +197,8 @@ export default function CobrancaRecorrentePage() {
               <p>{error}</p>
             </div>
           )}
-          <button type="submit" className="btn-primary">
-            Salvar
+          <button type="submit" className="btn-primary" disabled={saving}>
+            {saving ? "Salvando..." : "Salvar"}
           </button>
         </form>
       </details>
@@ -216,7 +219,7 @@ export default function CobrancaRecorrentePage() {
                     {c.description}
                     {c.patient_name && <span style={{ color: "var(--color-text-muted)" }}> · {c.patient_name}</span>}
                     <div className="text-caption">
-                      {c.frequency === "monthly" ? "mensal" : "semanal"} · próxima: {c.next_due_date}
+                      {c.frequency === "monthly" ? "mensal" : "semanal"} · próxima: {formatDate(c.next_due_date)}
                     </div>
                   </td>
                   <td className="table-actions">

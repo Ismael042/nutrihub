@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
+import { useConfirm } from "@/components/ConfirmDialog";
 import EmptyState from "@/components/EmptyState";
 import { SkeletonRows } from "@/components/Skeleton";
 import { IconFileText } from "@/components/icons";
@@ -20,6 +21,7 @@ interface Template {
 
 export default function QuestionariosPage() {
   const professional = useRequireAuth();
+  const confirm = useConfirm();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [kind, setKind] = useState<"anamnesis" | "pre_consultation">("anamnesis");
@@ -61,7 +63,7 @@ export default function QuestionariosPage() {
   }
 
   async function remove(id: string) {
-    if (!confirm("Excluir este modelo?")) return;
+    if (!(await confirm({ title: "Excluir este modelo?", danger: true, confirmLabel: "Excluir" }))) return;
     await authFetch(`/questionnaires/templates/${id}`, { method: "DELETE" });
     load();
   }
@@ -98,7 +100,7 @@ export default function QuestionariosPage() {
           + Adicionar pergunta
         </button>
 
-        <button type="submit" style={{ padding: 10 }}>
+        <button type="submit" className="btn-primary">
           Salvar modelo
         </button>
       </form>
@@ -120,14 +122,14 @@ export default function QuestionariosPage() {
       {!loading && templates.length > 0 && (
         <ul style={{ listStyle: "none", padding: 0, marginTop: 20 }}>
           {templates.map((t) => (
-            <li key={t.id} style={{ padding: "10px 0", borderBottom: "1px solid #eee" }}>
+            <li key={t.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--color-border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <strong>{t.name}</strong>
-                <button onClick={() => remove(t.id)} style={{ color: "crimson" }}>
+                <button onClick={() => remove(t.id)} style={{ color: "var(--color-error)" }}>
                   Excluir
                 </button>
               </div>
-              <div style={{ color: "#666" }}>
+              <div style={{ color: "var(--color-text-muted)" }}>
                 {t.kind === "anamnesis" ? "Anamnese" : "Pré-consulta"} · {t.fields.map((f) => f.label).join(", ")}
               </div>
             </li>

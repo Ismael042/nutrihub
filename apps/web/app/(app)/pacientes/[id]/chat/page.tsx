@@ -68,7 +68,7 @@ export default function ChatPacientePage() {
     <main className="page-container">
       <a href={`/pacientes/${params.id}`} className="back-link">← {patient?.name ?? "Paciente"}</a>
       <h1>Chat</h1>
-      <p style={{ color: "#666", fontSize: 13 }}>
+      <p style={{ color: "var(--color-text-muted)", fontSize: 13 }}>
         Requer que o paciente tenha acesso ao app habilitado (ver perfil do paciente).
       </p>
 

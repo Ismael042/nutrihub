@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
+import { useConfirm } from "@/components/ConfirmDialog";
 import EmptyState from "@/components/EmptyState";
 import { SkeletonRows } from "@/components/Skeleton";
 import { IconStore } from "@/components/icons";
@@ -15,6 +16,7 @@ interface Pharmacy {
 
 export default function FarmaciasPage() {
   const professional = useRequireAuth();
+  const confirm = useConfirm();
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
@@ -51,7 +53,7 @@ export default function FarmaciasPage() {
   }
 
   async function remove(id: string) {
-    if (!confirm("Excluir esta farmácia?")) return;
+    if (!(await confirm({ title: "Excluir esta farmácia?", danger: true, confirmLabel: "Excluir" }))) return;
     await authFetch(`/pharmacies/${id}`, { method: "DELETE" });
     load();
   }
@@ -67,7 +69,7 @@ export default function FarmaciasPage() {
         <input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} required />
         <input placeholder="Telefone" value={phone} onChange={(e) => setPhone(e.target.value)} />
         <input placeholder="Observações" value={notes} onChange={(e) => setNotes(e.target.value)} />
-        <button type="submit" style={{ padding: 10 }}>
+        <button type="submit" className="btn-primary">
           Adicionar farmácia
         </button>
       </form>
@@ -85,13 +87,13 @@ export default function FarmaciasPage() {
       {!loading && pharmacies.length > 0 && (
         <ul style={{ listStyle: "none", padding: 0, marginTop: 20 }}>
           {pharmacies.map((f) => (
-            <li key={f.id} style={{ padding: "10px 0", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between" }}>
+            <li key={f.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--color-border)", display: "flex", justifyContent: "space-between" }}>
               <div>
                 <strong>{f.name}</strong>
-                {f.phone && <span style={{ color: "#666" }}> · {f.phone}</span>}
-                {f.notes && <span style={{ color: "#666" }}> · {f.notes}</span>}
+                {f.phone && <span style={{ color: "var(--color-text-muted)" }}> · {f.phone}</span>}
+                {f.notes && <span style={{ color: "var(--color-text-muted)" }}> · {f.notes}</span>}
               </div>
-              <button onClick={() => remove(f.id)} style={{ color: "crimson" }}>
+              <button onClick={() => remove(f.id)} style={{ color: "var(--color-error)" }}>
                 Excluir
               </button>
             </li>

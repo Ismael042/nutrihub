@@ -89,7 +89,7 @@ export default function PreencherQuestionarioPage() {
               />
             </label>
           ))}
-          <button type="submit" disabled={!patientId} className="btn-primary" style={{ padding: 10 }}>
+          <button type="submit" disabled={!patientId} className="btn-primary">
             Salvar respostas
           </button>
           {saved && <p style={{ color: "green" }}>Respostas salvas.</p>}

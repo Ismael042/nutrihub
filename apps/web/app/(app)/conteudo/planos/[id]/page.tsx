@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { authFetch, useRequireAuth, API_URL, getToken } from "@/lib/auth";
+import { useConfirm } from "@/components/ConfirmDialog";
 
 interface Food {
   id: string;
@@ -34,6 +35,7 @@ interface DietPlanDetail {
 
 export default function PlanoDetalhePage() {
   const professional = useRequireAuth();
+  const confirm = useConfirm();
   const params = useParams<{ id: string }>();
   const [plan, setPlan] = useState<DietPlanDetail | null>(null);
   const [foods, setFoods] = useState<Food[]>([]);
@@ -51,7 +53,7 @@ export default function PlanoDetalhePage() {
       if (res.ok) setFoods(await res.json());
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [professional]);
+  }, [professional, params.id]);
 
   async function addMeal(e: React.FormEvent) {
     e.preventDefault();
@@ -65,16 +67,20 @@ export default function PlanoDetalhePage() {
   }
 
   async function deleteMeal(mealId: string) {
-    if (!confirm("Excluir esta refeição e todos os itens?")) return;
+    if (
+      !(await confirm({ title: "Excluir esta refeição e todos os itens?", danger: true, confirmLabel: "Excluir" }))
+    )
+      return;
     await authFetch(`/diet-plans/${params.id}/meals/${mealId}`, { method: "DELETE" });
     load();
   }
 
   async function addItem(mealId: string, foodId: string, quantity: string, unit: string) {
-    if (!foodId || !quantity) return;
+    const qty = parseFloat(quantity);
+    if (!foodId || !quantity || Number.isNaN(qty) || qty <= 0) return;
     await authFetch(`/diet-plans/${params.id}/meals/${mealId}/items`, {
       method: "POST",
-      body: JSON.stringify({ food_id: foodId, quantity: parseFloat(quantity), unit })
+      body: JSON.stringify({ food_id: foodId, quantity: qty, unit })
     });
     load();
   }
@@ -111,13 +117,13 @@ export default function PlanoDetalhePage() {
           Baixar PDF
         </button>
       </div>
-      <p style={{ color: "#666" }}>Paciente: {plan.patient_name}</p>
+      <p style={{ color: "var(--color-text-muted)" }}>Paciente: {plan.patient_name}</p>
 
       {plan.meals.map((meal) => (
-        <section key={meal.id} style={{ marginTop: 20, border: "1px solid #ddd", padding: 12 }}>
+        <section key={meal.id} style={{ marginTop: 20, border: "1px solid var(--color-border)", padding: 12 }}>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <h3 style={{ margin: 0 }}>{meal.name}</h3>
-            <button onClick={() => deleteMeal(meal.id)} style={{ color: "crimson" }}>
+            <button onClick={() => deleteMeal(meal.id)} style={{ color: "var(--color-error)" }}>
               Excluir refeição
             </button>
           </div>
@@ -127,7 +133,7 @@ export default function PlanoDetalhePage() {
                 <span>
                   {item.food_name} — {item.quantity} {item.unit}
                 </span>
-                <button onClick={() => deleteItem(meal.id, item.id)} style={{ color: "crimson" }}>
+                <button onClick={() => deleteItem(meal.id, item.id)} style={{ color: "var(--color-error)" }}>
                   x
                 </button>
               </li>
@@ -144,7 +150,7 @@ export default function PlanoDetalhePage() {
           onChange={(e) => setNewMealName(e.target.value)}
           style={{ flex: 1 }}
         />
-        <button type="submit" style={{ padding: 10 }}>
+        <button type="submit" className="btn-primary">
           + Adicionar refeição
         </button>
       </form>
@@ -175,6 +181,10 @@ function AddItemForm({
       </select>
       <input
         placeholder="Qtd"
+        type="number"
+        min="0"
+        step="any"
+        inputMode="decimal"
         value={quantity}
         onChange={(e) => setQuantity(e.target.value)}
         style={{ padding: 6, width: 60 }}

@@ -37,32 +37,52 @@ export default function CadastroPage() {
 
   return (
     <main className="form-container">
+      <a href="/" className="back-link">
+        ← NutriHub
+      </a>
       <h1>Criar conta</h1>
-      <p>Cadastro da nutricionista no NutriHub.</p>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <input
-          placeholder="Nome"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <input
-          placeholder="E-mail"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          placeholder="Senha (mín. 8 caracteres)"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={8}
-        />
-        {error && <p style={{ color: "crimson" }}>{error}</p>}
-        <button type="submit" disabled={loading} className="btn-primary" style={{ padding: 10 }}>
+      <p className="page-subtitle">Cadastro da nutricionista no NutriHub.</p>
+      <form onSubmit={handleSubmit}>
+        <div className="field">
+          <label className="field-label field-required" htmlFor="name">
+            Nome
+          </label>
+          <input id="name" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} required />
+        </div>
+        <div className="field">
+          <label className="field-label field-required" htmlFor="email">
+            E-mail
+          </label>
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div className="field">
+          <label className="field-label field-required" htmlFor="password">
+            Senha
+          </label>
+          <input
+            id="password"
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={8}
+          />
+          <span className="field-hint">Mínimo de 8 caracteres.</span>
+        </div>
+        {error && (
+          <div className="alert alert-error" style={{ marginBottom: "var(--space-4)" }}>
+            <p>{error}</p>
+          </div>
+        )}
+        <button type="submit" disabled={loading} className="btn-primary btn-block">
           {loading ? "Cadastrando..." : "Cadastrar"}
         </button>
       </form>

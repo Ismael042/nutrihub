@@ -3,7 +3,8 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useParams } from "next/navigation";
 import { authFetch, useRequireAuth } from "@/lib/auth";
-import type { AnthropometricMeasurement, Patient } from "@nutrihub/shared";
+import { formatDate, type AnthropometricMeasurement, type Patient } from "@nutrihub/shared";
+import { useConfirm } from "@/components/ConfirmDialog";
 
 const FIELDS: { key: keyof AnthropometricMeasurement; label: string; unit: string }[] = [
   { key: "weight_kg", label: "Peso", unit: "kg" },
@@ -56,6 +57,7 @@ function Sparkline({ points }: { points: { x: number; y: number }[] }) {
 
 export default function AntropometriaPage() {
   const professional = useRequireAuth();
+  const confirm = useConfirm();
   const params = useParams<{ id: string }>();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [measurements, setMeasurements] = useState<AnthropometricMeasurement[]>([]);
@@ -103,7 +105,7 @@ export default function AntropometriaPage() {
   }
 
   async function remove(id: string) {
-    if (!confirm("Excluir esta medição?")) return;
+    if (!(await confirm({ title: "Excluir esta medição?", danger: true, confirmLabel: "Excluir" }))) return;
     const res = await authFetch(`/anthropometric-measurements/${id}`, { method: "DELETE" });
     if (res.ok) load();
   }
@@ -125,14 +127,14 @@ export default function AntropometriaPage() {
       <h1>Antropometria</h1>
 
       {latestBmi && (
-        <p style={{ color: "#666" }}>
+        <p style={{ color: "var(--color-text-muted)" }}>
           IMC mais recente: <strong>{latestBmi.toFixed(1)}</strong> ({bmiLabel(latestBmi)})
         </p>
       )}
 
       {weightPoints.length >= 2 && (
         <div className="card" style={{ marginTop: 12, display: "inline-block" }}>
-          <p style={{ margin: "0 0 8px", fontSize: 13, color: "#666" }}>Evolução do peso</p>
+          <p style={{ margin: "0 0 8px", fontSize: 13, color: "var(--color-text-muted)" }}>Evolução do peso</p>
           <Sparkline points={weightPoints} />
         </div>
       )}
@@ -163,8 +165,8 @@ export default function AntropometriaPage() {
             value={form.notes ?? ""}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
           />
-          {error && <p style={{ color: "crimson" }}>{error}</p>}
-          <button type="submit" disabled={saving} className="btn-primary" style={{ padding: 10 }}>
+          {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
+          <button type="submit" disabled={saving} className="btn-primary">
             {saving ? "Salvando..." : "Salvar medição"}
           </button>
         </form>
@@ -173,7 +175,7 @@ export default function AntropometriaPage() {
       <div className="table-scroll" style={{ marginTop: 20, overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ textAlign: "left", borderBottom: "1px solid #ccc" }}>
+            <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border-strong)" }}>
               <th>Data</th>
               {FIELDS.map((f) => (
                 <th key={f.key}>{f.label}</th>
@@ -186,14 +188,14 @@ export default function AntropometriaPage() {
             {measurements.map((m) => {
               const measurementBmi = bmi(m.weight_kg, m.height_cm);
               return (
-                <tr key={m.id} style={{ borderBottom: "1px solid #eee" }}>
-                  <td>{m.measured_at}</td>
+                <tr key={m.id} style={{ borderBottom: "1px solid var(--color-border)" }}>
+                  <td>{formatDate(m.measured_at)}</td>
                   {FIELDS.map((f) => (
                     <td key={f.key}>{m[f.key] != null ? String(m[f.key]) : "—"}</td>
                   ))}
                   <td>{measurementBmi ? measurementBmi.toFixed(1) : "—"}</td>
                   <td>
-                    <button onClick={() => remove(m.id)} style={{ color: "crimson" }}>
+                    <button onClick={() => remove(m.id)} style={{ color: "var(--color-error)" }}>
                       Excluir
                     </button>
                   </td>

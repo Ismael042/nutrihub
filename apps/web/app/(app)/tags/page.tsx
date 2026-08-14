@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
+import { useConfirm } from "@/components/ConfirmDialog";
 import EmptyState from "@/components/EmptyState";
 import { SkeletonRows } from "@/components/Skeleton";
 import { IconTag } from "@/components/icons";
@@ -13,6 +14,7 @@ interface Tag {
 
 export default function TagsPage() {
   const professional = useRequireAuth();
+  const confirm = useConfirm();
   const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
@@ -42,6 +44,7 @@ export default function TagsPage() {
   }
 
   async function remove(id: string) {
+    if (!(await confirm({ title: "Excluir esta tag?", danger: true, confirmLabel: "Excluir" }))) return;
     await authFetch(`/tags/${id}`, { method: "DELETE" });
     load();
   }
@@ -52,11 +55,11 @@ export default function TagsPage() {
     <main className="page-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Tags</h1>
-      <p style={{ color: "#666" }}>Use tags para organizar pacientes (ex: gestante, atleta, diabético).</p>
+      <p style={{ color: "var(--color-text-muted)" }}>Use tags para organizar pacientes (ex: gestante, atleta, diabético).</p>
 
       <form onSubmit={handleSubmit} style={{ display: "flex", gap: 8, marginTop: 12 }}>
         <input placeholder="Nova tag" value={name} onChange={(e) => setName(e.target.value)} required style={{ flex: 1 }} />
-        <button type="submit" style={{ padding: 10 }}>
+        <button type="submit" className="btn-primary">
           Adicionar
         </button>
       </form>
@@ -74,9 +77,9 @@ export default function TagsPage() {
       {!loading && tags.length > 0 && (
         <ul style={{ listStyle: "none", padding: 0, marginTop: 16 }}>
           {tags.map((t) => (
-            <li key={t.id} style={{ padding: "8px 0", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between" }}>
+            <li key={t.id} style={{ padding: "8px 0", borderBottom: "1px solid var(--color-border)", display: "flex", justifyContent: "space-between" }}>
               {t.name}
-              <button onClick={() => remove(t.id)} style={{ color: "crimson" }}>
+              <button onClick={() => remove(t.id)} style={{ color: "var(--color-error)" }}>
                 Excluir
               </button>
             </li>

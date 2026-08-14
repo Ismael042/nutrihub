@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
+import { formatMoney } from "@nutrihub/shared";
 import EmptyState from "@/components/EmptyState";
 import { IconTrendUp } from "@/components/icons";
 
@@ -16,10 +17,6 @@ interface MonthRow {
   month: string;
   income_cents: number;
   expense_cents: number;
-}
-
-function formatMoney(cents: number) {
-  return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
 export default function RelatoriosFinanceiroPage() {

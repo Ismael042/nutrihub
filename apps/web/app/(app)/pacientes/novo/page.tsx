@@ -64,18 +64,20 @@ export default function NovoPacientePage() {
           <input id="email" placeholder="paciente@email.com" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
 
-        <div className="field">
-          <label className="field-label" htmlFor="phone">
-            Telefone
-          </label>
-          <input id="phone" placeholder="(00) 00000-0000" value={phone} onChange={(e) => setPhone(e.target.value)} />
-        </div>
+        <div className="field-row">
+          <div className="field field-md">
+            <label className="field-label" htmlFor="phone">
+              Telefone
+            </label>
+            <input id="phone" placeholder="(00) 00000-0000" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          </div>
 
-        <div className="field">
-          <label className="field-label" htmlFor="birthDate">
-            Data de nascimento
-          </label>
-          <input id="birthDate" type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
+          <div className="field field-sm">
+            <label className="field-label" htmlFor="birthDate">
+              Nascimento
+            </label>
+            <input id="birthDate" type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
+          </div>
         </div>
 
         {error && (

@@ -71,7 +71,7 @@ export default function NovoLancamentoPage() {
       <h1>Novo lançamento</h1>
       <form onSubmit={handleSubmit}>
         <div className="field-row">
-          <div className="field">
+          <div className="field field-sm">
             <label className="field-label" htmlFor="kind">
               Tipo
             </label>

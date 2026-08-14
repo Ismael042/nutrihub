@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { API_URL, authFetch, useRequireAuth } from "@/lib/auth";
+import { authFetch, useRequireAuth } from "@/lib/auth";
 
 export default function PaginaPublicaConfigPage() {
   const professional = useRequireAuth();
@@ -52,7 +52,7 @@ export default function PaginaPublicaConfigPage() {
     <main className="form-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Página pública</h1>
-      <p style={{ color: "#666", fontSize: 14 }}>
+      <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>
         Uma página simples com seu nome e bio, com formulário de solicitação de horário — os pedidos caem em
         "Solicitações" na Agenda para você aprovar ou recusar.
       </p>
@@ -79,14 +79,14 @@ export default function PaginaPublicaConfigPage() {
           <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
           Página pública habilitada
         </label>
-        {error && <p style={{ color: "crimson" }}>{error}</p>}
+        {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
         {message && <p style={{ color: "var(--color-primary, #0F9D74)" }}>{message}</p>}
-        <button type="submit" disabled={saving} className="btn-primary" style={{ padding: 10 }}>
+        <button type="submit" disabled={saving} className="btn-primary">
           {saving ? "Salvando..." : "Salvar"}
         </button>
       </form>
       <p style={{ marginTop: 16, fontSize: 13 }}>
-        <a href="/agenda/solicitacoes">Ver solicitações de horário</a> · API: {API_URL}
+        <a href="/agenda/solicitacoes">Ver solicitações de horário</a>
       </p>
     </main>
   );

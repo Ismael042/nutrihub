@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
+import { useConfirm } from "@/components/ConfirmDialog";
 import EmptyState from "@/components/EmptyState";
 import { SkeletonRows } from "@/components/Skeleton";
 import { IconBook } from "@/components/icons";
@@ -14,6 +15,7 @@ interface Recipe {
 
 export default function ReceitasPage() {
   const professional = useRequireAuth();
+  const confirm = useConfirm();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
@@ -48,7 +50,7 @@ export default function ReceitasPage() {
   }
 
   async function remove(id: string) {
-    if (!confirm("Excluir esta receita?")) return;
+    if (!(await confirm({ title: "Excluir esta receita?", danger: true, confirmLabel: "Excluir" }))) return;
     await authFetch(`/recipes/${id}`, { method: "DELETE" });
     load();
   }
@@ -68,7 +70,7 @@ export default function ReceitasPage() {
           onChange={(e) => setInstructions(e.target.value)}
           rows={3}
         />
-        <button type="submit" style={{ padding: 10 }}>
+        <button type="submit" className="btn-primary">
           Salvar receita
         </button>
       </form>
@@ -86,14 +88,14 @@ export default function ReceitasPage() {
       {!loading && recipes.length > 0 && (
         <ul style={{ listStyle: "none", padding: 0, marginTop: 20 }}>
           {recipes.map((r) => (
-            <li key={r.id} style={{ padding: "10px 0", borderBottom: "1px solid #eee" }}>
+            <li key={r.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--color-border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <strong>{r.name}</strong>
-                <button onClick={() => remove(r.id)} style={{ color: "crimson" }}>
+                <button onClick={() => remove(r.id)} style={{ color: "var(--color-error)" }}>
                   Excluir
                 </button>
               </div>
-              {r.instructions && <div style={{ color: "#666" }}>{r.instructions}</div>}
+              {r.instructions && <div style={{ color: "var(--color-text-muted)" }}>{r.instructions}</div>}
             </li>
           ))}
         </ul>

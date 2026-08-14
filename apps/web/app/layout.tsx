@@ -4,7 +4,11 @@ import { ToastProvider } from "@/components/Toast";
 import { ConfirmDialogProvider } from "@/components/ConfirmDialog";
 
 export const metadata = {
-  title: "NutriHub",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://nutrihub.isdev.online"),
+  title: {
+    default: "NutriHub",
+    template: "%s"
+  },
   description: "Painel de gestão para nutricionistas"
 };
 

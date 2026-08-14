@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
 import type { Prescription, PrescriptionItem } from "@nutrihub/shared";
+import { useConfirm } from "@/components/ConfirmDialog";
 import EmptyState from "@/components/EmptyState";
 import { SkeletonRows } from "@/components/Skeleton";
 import { IconPill } from "@/components/icons";
@@ -16,6 +17,7 @@ const EMPTY_ITEM: PrescriptionItem = { description: "", dosage: null, frequency:
 
 export default function PrescricoesPage() {
   const professional = useRequireAuth();
+  const confirm = useConfirm();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,7 +74,7 @@ export default function PrescricoesPage() {
   }
 
   async function remove(id: string) {
-    if (!confirm("Excluir esta prescrição?")) return;
+    if (!(await confirm({ title: "Excluir esta prescrição?", danger: true, confirmLabel: "Excluir" }))) return;
     await authFetch(`/prescriptions/${id}`, { method: "DELETE" });
     load();
   }
@@ -138,8 +140,8 @@ export default function PrescricoesPage() {
           </button>
         </div>
 
-        {error && <p style={{ color: "crimson" }}>{error}</p>}
-        <button type="submit" className="btn-primary" style={{ padding: 10 }}>
+        {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
+        <button type="submit" className="btn-primary">
           Adicionar prescrição
         </button>
       </form>
@@ -157,14 +159,14 @@ export default function PrescricoesPage() {
       {!loading && prescriptions.length > 0 && (
         <ul style={{ listStyle: "none", padding: 0, marginTop: 20 }}>
           {prescriptions.map((p) => (
-            <li key={p.id} style={{ padding: "10px 0", borderBottom: "1px solid #eee" }}>
+            <li key={p.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--color-border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <strong>{p.patient_name}</strong>
-                <button onClick={() => remove(p.id)} style={{ color: "crimson" }}>
+                <button onClick={() => remove(p.id)} style={{ color: "var(--color-error)" }}>
                   Excluir
                 </button>
               </div>
-              <div style={{ color: "#666" }}>{p.kind === "supplement" ? "Suplemento" : "Fitoterápico"}</div>
+              <div style={{ color: "var(--color-text-muted)" }}>{p.kind === "supplement" ? "Suplemento" : "Fitoterápico"}</div>
               <ul style={{ marginTop: 6 }}>
                 {p.items.map((item, i) => (
                   <li key={i} style={{ fontSize: 14 }}>

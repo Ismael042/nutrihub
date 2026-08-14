@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
+import { formatDate, formatMoney } from "@nutrihub/shared";
 import { useConfirm } from "@/components/ConfirmDialog";
 import { useToast } from "@/components/Toast";
 import EmptyState from "@/components/EmptyState";
@@ -26,10 +27,6 @@ interface Summary {
   balance_cents: number;
   pending_count: number;
   pending_cents: number;
-}
-
-function formatMoney(cents: number) {
-  return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
 const FILTERS = [
@@ -198,7 +195,7 @@ export default function FinanceiroPage() {
                   </td>
                   <td>{t.patient_name ?? "—"}</td>
                   <td>{t.category ? <span className="badge">{t.category}</span> : "—"}</td>
-                  <td style={{ color: "var(--color-text-muted)" }}>{t.due_date ?? "—"}</td>
+                  <td style={{ color: "var(--color-text-muted)" }}>{t.due_date ? formatDate(t.due_date) : "—"}</td>
                   <td>
                     <span className={`badge ${t.paid_at ? "badge-success" : "badge-warning"}`}>
                       {t.paid_at ? "Pago" : "Pendente"}

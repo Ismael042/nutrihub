@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
+import { formatMoney } from "@nutrihub/shared";
 import { SkeletonStatGrid } from "@/components/Skeleton";
 import { IconAlertCircle, IconCalendar, IconTrendUp, IconUsers, IconWallet } from "@/components/icons";
 
@@ -20,10 +21,6 @@ interface Summary {
   balance_cents: number;
   pending_count: number;
   pending_cents: number;
-}
-
-function formatMoney(cents: number) {
-  return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
 function isSameDay(a: Date, b: Date) {

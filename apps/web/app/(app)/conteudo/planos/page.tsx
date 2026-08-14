@@ -60,9 +60,9 @@ export default function PlanosPage() {
       {!loading && plans.length > 0 && (
         <ul style={{ listStyle: "none", padding: 0, marginTop: 16 }}>
           {plans.map((p) => (
-            <li key={p.id} style={{ padding: "10px 0", borderBottom: "1px solid #eee" }}>
+            <li key={p.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--color-border)" }}>
               <a href={`/conteudo/planos/${p.id}`}>{p.name}</a>
-              <span style={{ color: "#666" }}> · {p.patient_name}</span>
+              <span style={{ color: "var(--color-text-muted)" }}> · {p.patient_name}</span>
             </li>
           ))}
         </ul>

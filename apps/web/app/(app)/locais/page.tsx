@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
 import type { Location } from "@nutrihub/shared";
+import { useConfirm } from "@/components/ConfirmDialog";
 import EmptyState from "@/components/EmptyState";
 import { SkeletonRows } from "@/components/Skeleton";
 import { IconMapPin } from "@/components/icons";
 
 export default function LocaisPage() {
   const professional = useRequireAuth();
+  const confirm = useConfirm();
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +59,15 @@ export default function LocaisPage() {
   }
 
   async function remove(id: string) {
-    if (!confirm("Excluir este local? Agendamentos que já usam ele mantêm o histórico.")) return;
+    if (
+      !(await confirm({
+        title: "Excluir este local?",
+        description: "Agendamentos que já usam ele mantêm o histórico.",
+        danger: true,
+        confirmLabel: "Excluir"
+      }))
+    )
+      return;
     const res = await authFetch(`/locations/${id}`, { method: "DELETE" });
     if (res.ok) load();
   }
@@ -70,7 +80,7 @@ export default function LocaisPage() {
         <a href="/locais/novo" className="btn-primary">+ Novo local</a>
       </div>
 
-      {error && <p style={{ color: "crimson" }}>{error}</p>}
+      {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
 
       {loading && (
         <div style={{ marginTop: 20 }}>
@@ -116,11 +126,11 @@ export default function LocaisPage() {
                     <span className="badge">{location.kind === "video" ? "Vídeo" : "Presencial"}</span>
                   </div>
                   {location.address && (
-                    <p style={{ marginTop: 8, fontSize: 14, color: "#666" }}>{location.address}</p>
+                    <p style={{ marginTop: 8, fontSize: 14, color: "var(--color-text-muted)" }}>{location.address}</p>
                   )}
                   <div style={{ display: "flex", gap: 12, marginTop: 12 }}>
                     <button onClick={() => startEdit(location)}>Editar</button>
-                    <button onClick={() => remove(location.id)} style={{ color: "crimson" }}>Excluir</button>
+                    <button onClick={() => remove(location.id)} style={{ color: "var(--color-error)" }}>Excluir</button>
                   </div>
                 </>
               )}

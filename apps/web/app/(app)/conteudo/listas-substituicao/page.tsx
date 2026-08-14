@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
 import type { SubstitutionItem, SubstitutionList } from "@nutrihub/shared";
+import { useConfirm } from "@/components/ConfirmDialog";
 import EmptyState from "@/components/EmptyState";
 import { SkeletonRows } from "@/components/Skeleton";
 import { IconRepeat } from "@/components/icons";
@@ -22,6 +23,7 @@ const EMPTY_ITEM: SubstitutionItem = { name: "", portion: "" };
 
 export default function ListasSubstituicaoPage() {
   const professional = useRequireAuth();
+  const confirm = useConfirm();
   const [lists, setLists] = useState<SubstitutionList[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,7 +103,7 @@ export default function ListasSubstituicaoPage() {
   }
 
   async function remove(id: string) {
-    if (!confirm("Excluir esta lista?")) return;
+    if (!(await confirm({ title: "Excluir esta lista?", danger: true, confirmLabel: "Excluir" }))) return;
     const res = await authFetch(`/substitution-lists/${id}`, { method: "DELETE" });
     if (res.ok) load();
   }
@@ -112,7 +114,7 @@ export default function ListasSubstituicaoPage() {
     <main className="page-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Listas de substituição</h1>
-      <p style={{ color: "#666" }}>Modelos prontos do sistema + suas próprias listas.</p>
+      <p style={{ color: "var(--color-text-muted)" }}>Modelos prontos do sistema + suas próprias listas.</p>
 
       <details style={{ marginTop: 16 }}>
         <summary>+ Criar lista de substituição</summary>
@@ -138,8 +140,8 @@ export default function ListasSubstituicaoPage() {
           <button type="button" onClick={() => setItems([...items, { ...EMPTY_ITEM }])}>
             + Adicionar item
           </button>
-          {error && <p style={{ color: "crimson" }}>{error}</p>}
-          <button type="submit" disabled={saving} className="btn-primary" style={{ padding: 10 }}>
+          {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
+          <button type="submit" disabled={saving} className="btn-primary">
             {saving ? "Salvando..." : "Salvar lista"}
           </button>
         </form>
@@ -217,7 +219,7 @@ export default function ListasSubstituicaoPage() {
                         {list.tenant_id !== null && (
                           <div style={{ display: "flex", gap: 12, marginTop: 12 }}>
                             <button onClick={() => startEdit(list)}>Editar</button>
-                            <button onClick={() => remove(list.id)} style={{ color: "crimson" }}>Excluir</button>
+                            <button onClick={() => remove(list.id)} style={{ color: "var(--color-error)" }}>Excluir</button>
                           </div>
                         )}
                       </>

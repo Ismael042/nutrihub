@@ -21,7 +21,15 @@ export function getToken(): string | null {
 export function getStoredProfessional(): Professional | null {
   if (typeof window === "undefined") return null;
   const raw = localStorage.getItem("nutrihub_professional");
-  return raw ? JSON.parse(raw) : null;
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as Professional;
+  } catch {
+    // Sessão local corrompida (ex: extensão de terceiros mexeu no storage, formato antigo) —
+    // trata como sessão inválida em vez de derrubar a página com exceção não tratada.
+    clearSession();
+    return null;
+  }
 }
 
 export function setSession(token: string, professional: Professional) {

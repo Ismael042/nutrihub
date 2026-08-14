@@ -36,24 +36,43 @@ export default function LoginPage() {
 
   return (
     <main className="form-container">
+      <a href="/" className="back-link">
+        ← NutriHub
+      </a>
       <h1>Entrar</h1>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <input
-          placeholder="E-mail"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          placeholder="Senha"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        {error && <p style={{ color: "crimson" }}>{error}</p>}
-        <button type="submit" disabled={loading} className="btn-primary" style={{ padding: 10 }}>
+      <form onSubmit={handleSubmit}>
+        <div className="field">
+          <label className="field-label field-required" htmlFor="email">
+            E-mail
+          </label>
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div className="field">
+          <label className="field-label field-required" htmlFor="password">
+            Senha
+          </label>
+          <input
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        {error && (
+          <div className="alert alert-error" style={{ marginBottom: "var(--space-4)" }}>
+            <p>{error}</p>
+          </div>
+        )}
+        <button type="submit" disabled={loading} className="btn-primary btn-block">
           {loading ? "Entrando..." : "Entrar"}
         </button>
       </form>

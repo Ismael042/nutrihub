@@ -37,20 +37,26 @@ export default function AlimentosPage() {
   const [carbs, setCarbs] = useState("");
   const [fat, setFat] = useState("");
 
-  async function load(q: string) {
+  async function load(q: string, signal: AbortSignal) {
     setLoading(true);
     try {
-      const res = await authFetch(`/foods${q ? `?search=${encodeURIComponent(q)}` : ""}`);
+      const res = await authFetch(`/foods${q ? `?search=${encodeURIComponent(q)}` : ""}`, { signal });
       if (res.ok) setFoods(await res.json());
+    } catch (err) {
+      if (err instanceof Error && err.name !== "AbortError") throw err;
     } finally {
-      setLoading(false);
+      if (!signal.aborted) setLoading(false);
     }
   }
 
   useEffect(() => {
     if (!professional) return;
-    const debounce = setTimeout(() => load(search), 250);
-    return () => clearTimeout(debounce);
+    const controller = new AbortController();
+    const debounce = setTimeout(() => load(search, controller.signal), 250);
+    return () => {
+      clearTimeout(debounce);
+      controller.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [professional, search]);
 
@@ -72,7 +78,7 @@ export default function AlimentosPage() {
       setProtein("");
       setCarbs("");
       setFat("");
-      load(search);
+      load(search, new AbortController().signal);
     }
   }
 
@@ -82,7 +88,7 @@ export default function AlimentosPage() {
     <main className="page-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Alimentos</h1>
-      <p style={{ color: "#666" }}>
+      <p style={{ color: "var(--color-text-muted)" }}>
         Base compartilhada (~90 alimentos comuns, referência TACO — não é a tabela oficial completa)
         + seus alimentos próprios. Valores por 100g.
       </p>
@@ -104,7 +110,7 @@ export default function AlimentosPage() {
             <input placeholder="Carbo (g)" value={carbs} onChange={(e) => setCarbs(e.target.value)} style={{ flex: 1 }} />
             <input placeholder="Gordura (g)" value={fat} onChange={(e) => setFat(e.target.value)} style={{ flex: 1 }} />
           </div>
-          <button type="submit" style={{ padding: 10 }}>
+          <button type="submit" className="btn-primary">
             Salvar alimento
           </button>
         </form>
@@ -127,7 +133,7 @@ export default function AlimentosPage() {
       {foods.length > 0 && (
         <table style={{ width: "100%", marginTop: 20, borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ textAlign: "left", borderBottom: "1px solid #ccc" }}>
+            <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border-strong)" }}>
               <th>Nome</th>
               <th>Fonte</th>
               <th>Kcal</th>
@@ -138,9 +144,9 @@ export default function AlimentosPage() {
           </thead>
           <tbody>
             {foods.map((f) => (
-              <tr key={f.id} style={{ borderBottom: "1px solid #eee" }}>
+              <tr key={f.id} style={{ borderBottom: "1px solid var(--color-border)" }}>
                 <td>{f.name}</td>
-                <td style={{ color: "#666" }}>{SOURCE_LABEL[f.source] ?? f.source}</td>
+                <td style={{ color: "var(--color-text-muted)" }}>{SOURCE_LABEL[f.source] ?? f.source}</td>
                 <td>{f.kcal}</td>
                 <td>{f.protein_g}</td>
                 <td>{f.carbs_g}</td>
