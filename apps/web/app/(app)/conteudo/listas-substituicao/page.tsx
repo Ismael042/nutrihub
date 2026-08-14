@@ -110,6 +110,7 @@ export default function ListasSubstituicaoPage() {
 
   return (
     <main className="page-container">
+      <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Listas de substituição</h1>
       <p style={{ color: "#666" }}>Modelos prontos do sistema + suas próprias listas.</p>
 

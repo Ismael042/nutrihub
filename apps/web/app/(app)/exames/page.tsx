@@ -76,6 +76,7 @@ export default function ExamesPage() {
 
   return (
     <main className="page-container">
+      <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Solicitações de exames</h1>
 
       <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>

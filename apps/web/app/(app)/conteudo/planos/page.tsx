@@ -33,6 +33,7 @@ export default function PlanosPage() {
 
   return (
     <main className="page-container">
+      <a href="/dashboard" className="back-link">← Dashboard</a>
       <div className="page-title-row">
         <h1>Planos alimentares</h1>
         <a href="/conteudo/planos/novo" className="btn-primary">

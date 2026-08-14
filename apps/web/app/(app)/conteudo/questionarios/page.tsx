@@ -70,6 +70,7 @@ export default function QuestionariosPage() {
 
   return (
     <main className="page-container">
+      <a href="/dashboard" className="back-link">← Dashboard</a>
       <div className="page-title-row">
         <h1>Anamnese / Questionário</h1>
         <a href="/conteudo/questionarios/preencher" className="btn-primary">

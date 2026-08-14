@@ -86,6 +86,7 @@ export default function EquipePage() {
 
   return (
     <main className="page-container">
+      <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Equipe</h1>
       <p style={{ color: "#666", fontSize: 14 }}>
         Outros profissionais e assistentes que atendem no mesmo consultório (mesmo tenant).

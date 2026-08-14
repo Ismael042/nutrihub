@@ -80,6 +80,7 @@ export default function AlimentosPage() {
 
   return (
     <main className="page-container">
+      <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Alimentos</h1>
       <p style={{ color: "#666" }}>
         Base compartilhada (~90 alimentos comuns, referência TACO — não é a tabela oficial completa)
