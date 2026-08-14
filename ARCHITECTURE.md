@@ -278,12 +278,54 @@ pra vazar pro build. Adicionado `.dockerignore` na raiz excluindo `node_modules`
 `.next`, `.expo`, `.turbo`, `.git`. **How to apply:** todo `COPY . .` num Dockerfile
 deste monorepo depende desse `.dockerignore` existir — não remover.
 
-**Portas em conflito com outros projetos na mesma máquina**: se `5432` (Postgres) ou
-`8000` (API) já estiverem em uso por outro projeto rodando em paralelo (aconteceu nesta
-sessão com um projeto "vitrine" não relacionado), sobrescrever a porta do host
-temporariamente (`ports: ["5433:5432"]` etc.) só localmente pra testar, sem commitar a
-mudança — as portas 5432/8000 no `docker-compose.yml` são o padrão esperado, batendo
-com `.env`/`.env.example`.
+**Portas do host configuráveis (`DB_HOST_PORT`/`API_HOST_PORT`, 2026-08-13)**: `db` e
+`api` publicam `${DB_HOST_PORT:-5432}:5432` e `${API_HOST_PORT:-8000}:8000` — default
+continua 5432/8000 (o que `.env.example` documenta), mas dá pra sobrescrever via `.env`
+sem editar o `docker-compose.yml` quando outra coisa na máquina já usa essas portas
+(aconteceu com um projeto "vitrine" não relacionado rodando em paralelo). **Lembrete de
+uso**: com `.env` na raiz e comando rodado de lá, o Docker Compose usado neste projeto
+não carrega esse `.env` sozinho para substituição de variável dentro do compose file
+(`${VAR}`) — só via `env_file:` (isso injeta no container, não resolve `${VAR}` no
+arquivo). Sempre passar `--env-file .env` explícito:
+```bash
+docker compose -f infra/docker-compose.yml --env-file .env up -d
+```
+
+## Túnel público (Cloudflare Tunnel) — nutrihub.isdev.online
+
+Instância pública de demonstração, criada 2026-08-13 no domínio pessoal do Ismael
+(`isdev.online`, já gerenciado via Cloudflare nesta máquina — mesmo padrão dos túneis
+`vitrine`/`site-mei`/`wksolutions`, ver `~/.cloudflared/`). **Não faz parte do
+`docker-compose.yml` nem de nenhum arquivo do repo** — é infraestrutura local desta
+máquina, criada via CLI:
+
+- Tunnel `nutrihub` (id `d338dc2a-5d68-4f7d-8234-690927377e58`), config em
+  `~/.cloudflared/config-nutrihub.yml` (fora do repo, não versionado):
+  - `nutrihub.isdev.online` → `http://localhost:3000` (web)
+  - `api-nutrihub.isdev.online` → `http://localhost:8002` (api — porta 8002, não 8000,
+    por causa do conflito de porta com o projeto vitrine nesta máquina; ver
+    `DB_HOST_PORT`/`API_HOST_PORT` acima)
+- Roda com `cloudflared tunnel --config ~/.cloudflared/config-nutrihub.yml run nutrihub`
+  — processo separado do Docker, precisa estar rodando pro domínio responder. **Não é
+  serviço gerenciado (systemd/task scheduler) ainda** — se a máquina reiniciar ou o
+  processo for encerrado, o domínio para de responder até rodar o comando de novo.
+- **Segredos rotacionados especificamente pra essa exposição pública** (senha da role
+  `nutrihub_app`, `API_SECRET_KEY`) — diferentes dos valores de desenvolvimento local
+  puro anteriores a 2026-08-13. Vivem só em `.env` (gitignored), nunca no repo.
+- `apps/web/Dockerfile` ganhou `ARG NEXT_PUBLIC_API_URL` (default
+  `http://localhost:8000`, preserva o build local de sempre) — `docker-compose.yml`
+  passa isso como `build.args` a partir de `.env`, porque `NEXT_PUBLIC_*` é inlined no
+  bundle do client no momento do `next build`, não lido em runtime do container.
+- Páginas públicas de marketing: `/` (pitch pro nutricionista, CTA cadastro/login) e
+  `/paciente` (explica o app do paciente; deixa claro que o acesso é liberado pelo
+  nutricionista, não self-signup — o app ainda não está publicado nas lojas).
+
+**How to apply:** pra replicar esse tipo de exposição pública num projeto novo —
+`cloudflared tunnel create <nome>`, escrever `~/.cloudflared/config-<nome>.yml` com
+`credentials-file` apontando pro JSON gerado, `cloudflared tunnel route dns <nome>
+<hostname>` por hostname (pode falhar com "Tunnel not found" logo depois do `create` —
+esperar alguns segundos e tentar de novo, ou usar o UUID em vez do nome), e rodar
+`cloudflared tunnel --config ... run <nome>` como processo de longa duração.
 
 ## Módulos implementados (atualizado 2026-08-13)
 

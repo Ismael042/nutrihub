@@ -9,6 +9,11 @@ COPY packages/shared/package.json packages/shared/package.json
 RUN pnpm install --filter @nutrihub/web...
 
 FROM base AS build
+# NEXT_PUBLIC_* precisa existir no ambiente de `next build` (é inlined no bundle do
+# client, não lido em runtime) — por isso vira build arg, não só env de runtime do
+# container. Default preserva o comportamento local de sempre (localhost:8000).
+ARG NEXT_PUBLIC_API_URL=http://localhost:8000
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 COPY --from=deps /repo /repo
 COPY . .
 RUN pnpm --filter @nutrihub/web... build

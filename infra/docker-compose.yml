@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: nutrihub
       POSTGRES_DB: nutrihub
     ports:
-      - "5432:5432"
+      - "${DB_HOST_PORT:-5432}:5432"
     volumes:
       - nutrihub_db_data:/var/lib/postgresql/data
       - ../supabase/migrations:/docker-entrypoint-initdb.d:ro
@@ -36,11 +36,9 @@ services:
       - ../.env
     environment:
       DATABASE_URL: postgresql://nutrihub:nutrihub@db:5432/nutrihub
-      TENANT_DATABASE_URL: postgresql://nutrihub_app:nutrihub_app_dev_password@db:5432/nutrihub
       REDIS_URL: redis://redis:6379/0
-      CORS_ALLOW_ORIGINS: http://localhost:3000
     ports:
-      - "8000:8000"
+      - "${API_HOST_PORT:-8000}:8000"
     depends_on:
       db:
         condition: service_healthy
@@ -51,11 +49,11 @@ services:
     build:
       context: ..
       dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
     restart: unless-stopped
     env_file:
       - ../.env
-    environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8000
     ports:
       - "3000:3000"
     depends_on:
