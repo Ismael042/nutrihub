@@ -130,12 +130,64 @@ estado `loading`, `<SkeletonRows>` enquanto carrega, `<EmptyState icon={<IconX/>
 quando a lista vem vazia. Página nova em geral não precisa mais do link manual
 "← Dashboard" nem de tratar navegação — isso é responsabilidade do `AppShell` agora.
 
-**Estado (2026-08-13):** rollout completo nas ~26 páginas autenticadas (typecheck limpo),
-mas **nada disso está commitado ainda** — é só working tree sobre a `main`, que no GitHub
-ainda reflete o commit `2e7cc84` (exposição pública em `nutrihub.isdev.online`). `Toast`/
-`ConfirmDialog` foram adotados só nas páginas tocadas nesta leva (financeiro, detalhe de
-paciente) — não em todas; próxima sessão que mexer em uma tela antiga pode aproveitar pra
-trocar `confirm()`/`alert()` nativos por eles, mas isso não é dívida bloqueante.
+**Estado (2026-08-14):** rollout completo nas ~29 páginas autenticadas, commitado e em
+produção. `Toast`/`ConfirmDialog` agora são o padrão em toda página com exclusão — os
+últimos `confirm()`/`alert()` nativos do browser foram substituídos na "leva de polish"
+descrita na seção seguinte.
+
+### Bug de CSS real: `.field input { border-color: var(--color-error) }` pintava tudo de vermelho
+
+Achado durante a leva de polish (2026-08-14): a regra de erro de campo tinha um seletor
+solto — `.field input, .field select, .field textarea, input.has-error, ...` — sem exigir
+`.has-error`, então **todo** input dentro de um `.field` (praticamente todo formulário do
+app) ficava com borda vermelha o tempo todo, não só em erro de validação. A classe
+`.has-error` nunca era aplicada por nenhum componente (grep confirmou zero uso), então o
+bloco inteiro nunca funcionou como "estado de erro" de verdade — só produzia esse efeito
+colateral. Corrigido para exigir `.has-error` também nos seletores de `.field`. Só foi
+percebido porque um screenshot real do `/login` foi comparado antes/depois — não seria
+visível só lendo o CSS. Ver `.field input.has-error` em `globals.css`.
+
+## Páginas públicas, SEO e error boundaries (2026-08-14)
+
+Na mesma leva de polish, a app ganhou infraestrutura que não existia antes:
+
+- **`app/error.tsx` + `app/global-error.tsx`**: primeiro error boundary do projeto. Antes,
+  qualquer exceção não tratada durante render (ex: resposta inesperada da API, já que não
+  há validação de schema no cliente) derrubava a árvore inteira em tela branca. Segue o
+  padrão visual do `EmptyState`.
+- **`app/p/[slug]/page.tsx` virou Server Component** (era 100% client-side): busca os
+  dados públicos do profissional no servidor (`fetch` direto no `API_URL`, sem passar por
+  `authFetch`, já que é rota pública), gera `<title>`/Open Graph dinâmicos por profissional
+  via `generateMetadata`, e mostra um `EmptyState` de "não encontrado" real em vez de texto
+  solto. A parte interativa (formulário de solicitação de horário) foi extraída pra
+  `app/p/[slug]/BookingForm.tsx`, client component recebendo os dados já carregados como
+  props — não há mais fetch client-side nem tela em branco de loading nessa rota.
+- **`app/robots.ts`, `app/sitemap.ts`, `app/icon.tsx`**: primeira vez que o projeto tem
+  esses arquivos. `sitemap.ts`/`layout.tsx` (`metadataBase`) usam
+  `NEXT_PUBLIC_SITE_URL`, com fallback pro domínio de produção atual
+  (`https://nutrihub.isdev.online`) — setar essa env var se o domínio mudar. `icon.tsx`
+  gera o favicon via `next/og` `ImageResponse` (sem precisar de arquivo de imagem no
+  repo).
+- **`/` e `/paciente`** passaram a usar as classes `.marketing-*`/`.pricing-*`/`.faq-item`
+  que já existiam em `globals.css` desde antes mas nunca tinham sido usadas por nenhuma
+  página real.
+- **`/login` e `/cadastro`** ganharam `app/login/layout.tsx` / `app/cadastro/layout.tsx` —
+  necessário porque essas páginas são Client Components (`"use client"`, por causa de
+  `useState`/`useRouter`) e o Next.js App Router não permite `export const metadata` num
+  Client Component; um `layout.tsx` (Server Component) no mesmo segmento resolve isso sem
+  mudar a página em si.
+- **`packages/shared/src/format.ts`** (novo): `formatMoney()` e `formatDate()`
+  compartilhados entre as páginas que antes duplicavam essa lógica. `formatDate()` existe
+  porque `new Date("YYYY-MM-DD")` do JS interpreta a string como UTC meia-noite — em fuso
+  negativo (Brasil, UTC-3) isso pode exibir o dia anterior; a função faz o parse manual
+  (`split("-")` + `new Date(year, month-1, day)`) pra evitar esse bug em todo campo de data
+  "sem horário" vindo da API (`due_date`, `target_date`, `next_due_date`, `measured_at`,
+  `requested_at` de exames — todos `date` no Pydantic, não `datetime`).
+
+**How to apply:** página pública nova que precise de SEO por rota e for Client Component
+segue o padrão login/cadastro (`layout.tsx` irmão pra metadata). Campo de data vindo da API
+sem horário (`date` no Pydantic) sempre usa `formatDate()` de `@nutrihub/shared`, nunca
+`new Date(string).toLocaleDateString()` direto.
 
 ## Auth — estado atual: shim local, não é o Supabase Auth ainda
 
@@ -360,6 +412,58 @@ máquina, criada via CLI:
 <hostname>` por hostname (pode falhar com "Tunnel not found" logo depois do `create` —
 esperar alguns segundos e tentar de novo, ou usar o UUID em vez do nome), e rodar
 `cloudflared tunnel --config ... run <nome>` como processo de longa duração.
+
+## Front no Cloudflare Workers via OpenNext (preparado em 2026-08-14, ainda não em produção)
+
+Motivação: tirar a dependência do `web` (front) do desktop do Ismael/túnel local — só o
+front por enquanto, API+Postgres continuam no túnel (seção acima). Tentativa anterior no
+mesmo dia (build local no Windows) foi abortada por bugs de symlink/`next/og`/bind-mount
+específicos do Windows — ver histórico de decisões do cofre. Esta rodada usa **Git
+integration do Cloudflare (Workers Builds)**: o build roda no CI do próprio Cloudflare
+(Linux), não na máquina do Ismael, o que evita os bugs de Windows por completo.
+
+**Cloudflare Pages clássico (`@cloudflare/next-on-pages`) está descontinuado** para
+Next.js — o caminho atual e suportado é **Workers + adaptador `@opennextjs/cloudflare`**,
+configurado via Git integration no dashboard (Workers & Pages → Create → Connect to Git).
+
+Preparado em `apps/web` (branch `deploy/cloudflare-workers`):
+- `wrangler.jsonc`: Worker `nutrihub-web`, `main: .open-next/worker.js`,
+  `compatibility_flags: ["nodejs_compat"]` (exigido pelo adaptador), assets em
+  `.open-next/assets`, rota de domínio customizado `nutrihub.isdev.online` já declarada
+  (`routes: [{ pattern: "nutrihub.isdev.online", custom_domain: true }]`) — quando o
+  Worker for publicado pela primeira vez via `wrangler deploy`/CI, o Cloudflare cria o
+  registro DNS e o certificado automaticamente. **Pré-requisito:** o CNAME atual desse
+  hostname (apontando pro túnel) precisa ser removido antes, senão a criação do Custom
+  Domain falha (Cloudflare não sobrescreve CNAME existente).
+- `open-next.config.ts`: config mínima (`defineCloudflareConfig()`).
+- `package.json`: `next` subiu de `14.2.5` para `14.2.35` (patch dentro da mesma minor,
+  necessário — `@opennextjs/cloudflare@1.14.10` exige `next ^14.2.35`; versões mais novas
+  do adaptador exigem Next 15+, fora de escopo aqui). Scripts novos `preview:cf`/
+  `deploy:cf`/`cf-typegen` (não mexem no `build` normal usado pelo `Dockerfile`/Docker
+  Compose local, que continua com `next build` puro).
+- `.gitignore`: `.open-next/`, `.wrangler/`, `cloudflare-env.d.ts`.
+
+**Validado nesta rodada:** `tsc --noEmit` limpo e rebuild completo da imagem Docker do
+`web` (`next build` normal, não o transform do OpenNext) com `next@14.2.35` — confirma que
+o bump de versão não quebrou nada. **Não validado ainda:** o build do próprio
+`opennextjs-cloudflare` (roda em Linux; não testado localmente no Windows de propósito,
+pra não repetir os bugs da tentativa anterior) — só vai ser exercitado de verdade quando o
+Cloudflare buildar via Git integration.
+
+**Falta para ir ao ar** (depende de ação manual do Ismael no dashboard, não automatizável
+por API/CLI num repo privado):
+1. Autorizar o GitHub App do Cloudflare no repo privado `Ismael042/nutrihub`.
+2. Conectar o Worker ao repo (Workers & Pages → Create → Connect to Git), root directory
+   `apps/web`, build command `pnpm deploy:cf` (ou equivalente configurado no wizard).
+3. Configurar as build variables `NEXT_PUBLIC_API_URL=https://api-nutrihub.isdev.online` e
+   `NEXT_PUBLIC_SITE_URL=https://nutrihub.isdev.online` (são inlined em build-time, sem
+   isso o Worker builda com o fallback `localhost:8000`).
+4. Remover o CNAME atual de `nutrihub.isdev.online` (túnel) antes do primeiro
+   deploy/Custom Domain do Worker.
+
+**How to apply:** próxima sessão que mexer nisso deve confirmar se os 4 passos acima já
+foram feitos antes de assumir que o front já saiu do desktop. `api-nutrihub.isdev.online`
+não muda nesta migração — continua no túnel/Docker local.
 
 ## Módulos implementados (atualizado 2026-08-13)
 
