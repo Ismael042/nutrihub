@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { API_URL } from "@/lib/auth";
 import EmptyState from "@/components/EmptyState";
 import { IconUsers } from "@/components/icons";
 import BookingForm from "./BookingForm";
@@ -10,18 +9,20 @@ interface PublicPage {
 }
 
 async function fetchPage(slug: string): Promise<PublicPage | null> {
-  console.error(
-    `fetchPage debug: typeof API_URL=${typeof API_URL} API_URL=${JSON.stringify(API_URL)} typeof process.env.NEXT_PUBLIC_API_URL=${typeof process.env.NEXT_PUBLIC_API_URL} raw=${JSON.stringify(process.env.NEXT_PUBLIC_API_URL)}`
-  );
+  // Lido em runtime, dentro da função (não como const de módulo) - no Worker do
+  // Cloudflare (OpenNext), process.env só fica populado depois que o handler da
+  // request começa a rodar. Uma const de módulo top-level captura o valor cedo
+  // demais e fica presa nesse valor errado pro resto da vida do isolate.
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
   try {
-    const res = await fetch(`${API_URL}/public/${slug}`, { cache: "no-store" });
+    const res = await fetch(`${apiUrl}/public/${slug}`, { cache: "no-store" });
     if (!res.ok) {
-      console.error(`fetchPage: ${API_URL}/public/${slug} -> HTTP ${res.status}`);
+      console.error(`fetchPage: ${apiUrl}/public/${slug} -> HTTP ${res.status}`);
       return null;
     }
     return (await res.json()) as PublicPage;
   } catch (err) {
-    console.error(`fetchPage: ${API_URL}/public/${slug} ->`, err);
+    console.error(`fetchPage: ${apiUrl}/public/${slug} ->`, err);
     return null;
   }
 }
