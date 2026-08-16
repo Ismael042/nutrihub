@@ -62,6 +62,7 @@ export default function PacientesPage() {
 
   return (
     <div className="content-stack">
+      <a href="/dashboard" className="back-link">← Dashboard</a>
       <div className="page-title-row">
         <h1>Pacientes</h1>
         <a href="/pacientes/novo" className="btn-primary">

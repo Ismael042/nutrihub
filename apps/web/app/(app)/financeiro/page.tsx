@@ -92,6 +92,7 @@ export default function FinanceiroPage() {
 
   return (
     <div className="content-stack">
+      <a href="/dashboard" className="back-link">← Dashboard</a>
       <div className="page-title-row">
         <h1>Financeiro</h1>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>

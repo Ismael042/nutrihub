@@ -91,6 +91,7 @@ export default function AgendaPage() {
 
   return (
     <div className="content-stack">
+      <a href="/dashboard" className="back-link">← Dashboard</a>
       <div className="page-title-row">
         <h1>Agenda</h1>
         <div style={{ display: "flex", gap: 8 }}>
