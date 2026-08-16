@@ -349,9 +349,16 @@ padrão (`index.js` próprio + `@babel/runtime` explícito), não do template pa
 - `db`: Postgres 16, schema aplicado a partir de `supabase/migrations/`
 - `redis`: cache e fila (ex. lembretes de agendamento, processamento de PDF assíncrono) — declarado mas nenhum código consome ainda
 - `api`: FastAPI containerizado
-- `web`: Next.js containerizado (build de produção)
+- `tunnel` (2026-08-16, só nesta máquina): entra via `infra/docker-compose.override.yml`,
+  não versionado — ver seção "Túnel público" abaixo.
 
-Em produção, `db`/`auth`/`storage` passam a ser o Supabase gerenciado (cloud) — o Postgres local do Compose existe só para desenvolvimento offline e paridade de schema. `api` e `web` usam a mesma imagem Docker tanto localmente quanto no deploy (Fly.io, Railway ou VPS próprio).
+Em produção, `db`/`auth`/`storage` passam a ser o Supabase gerenciado (cloud) — o Postgres
+local do Compose existe só para desenvolvimento offline e paridade de schema. `api` usa a
+mesma imagem Docker tanto localmente quanto no deploy. **O serviço `web` foi removido em
+2026-08-16** — existia pra rodar o front containerizado localmente/em produção, mas desde
+que o front passou a ser publicado via Cloudflare Workers (seção acima) ficou redundante;
+`apps/web/Dockerfile` continua no repo (build manual ainda funciona se precisar), só não
+está mais no `docker-compose.yml`.
 
 **Bug real encontrado e corrigido (2026-08-13): faltava `.dockerignore`.** Sem ele, o
 `COPY . .` do estágio `build` do `apps/web/Dockerfile` copiava o `node_modules` do host
@@ -372,10 +379,17 @@ sem editar o `docker-compose.yml` quando outra coisa na máquina já usa essas p
 uso**: com `.env` na raiz e comando rodado de lá, o Docker Compose usado neste projeto
 não carrega esse `.env` sozinho para substituição de variável dentro do compose file
 (`${VAR}`) — só via `env_file:` (isso injeta no container, não resolve `${VAR}` no
-arquivo). Sempre passar `--env-file .env` explícito:
+arquivo). Sempre passar `--env-file` explícito. Rodar a partir de `infra/` (não passar `-f`
+explícito) pra também pegar o `docker-compose.override.yml` local automaticamente:
 ```bash
-docker compose -f infra/docker-compose.yml --env-file .env up -d
+cd infra && docker compose --env-file ../.env up -d
 ```
+**Cuidado:** `docker compose -f infra/docker-compose.yml ... up -d` (com `-f` explícito,
+de outro diretório) **não** carrega o `docker-compose.override.yml` sozinho — o
+auto-merge do override só acontece na descoberta automática de arquivo, que exige rodar
+sem `-f` no diretório onde os arquivos estão. Rodar assim sobe só `db`/`redis`/`api`, sem
+o `tunnel` (aconteceu nesta sessão: subiu sem o override e sem `--env-file`, recriou `api`
+na porta default 8000 em vez de 8002 — corrigido rodando o comando acima).
 
 ## Túnel público (Cloudflare Tunnel) — nutrihub.isdev.online
 
@@ -386,40 +400,37 @@ Instância pública de demonstração, criada 2026-08-13 no domínio pessoal do 
 máquina, criada via CLI:
 
 - Tunnel `nutrihub` (id `d338dc2a-5d68-4f7d-8234-690927377e58`).
-- **Rodando como container Docker desde 2026-08-16** (antes era processo `cloudflared`
-  solto no Windows — passou por uma tentativa intermediária de Scheduled Task, abandonada
-  porque abria janela de terminal e não tinha por que reinventar restart/dependência já
-  que o Docker Desktop já resolve isso pros outros serviços). Fora do repo, infraestrutura
-  só desta máquina:
-  - Compose separado em `~/.cloudflared/docker-compose.nutrihub-tunnel.yml` (projeto
-    `nutrihub-tunnel`, serviço `tunnel`, imagem `cloudflare/cloudflared:latest`,
-    `restart: unless-stopped`), conectado à network externa `nutrihub_default` (a mesma
-    que o `docker-compose.yml` principal cria) — sobe/cai junto com o Docker Desktop,
-    sem depender de login do Windows nem de script de espera.
-  - Config em `~/.cloudflared/config-nutrihub-docker.yml`, montada read-only no container
-    junto com o JSON de credenciais:
-    - `nutrihub.isdev.online` → `http://web:3000` (nome do serviço na rede Docker — hoje
-      sem efeito prático, porque o DNS público desse hostname já foi movido pro Custom
-      Domain do Worker, ver seção do Cloudflare Workers acima; mantido só por paridade)
-    - `api-nutrihub.isdev.online` → `http://api:8000` (nome do serviço + porta interna do
-      container, não a porta publicada no host — dentro da rede Docker não existe o
-      conflito de porta 8002 do host)
-  - `~/.cloudflared/config-nutrihub.yml` (a versão antiga, apontando pra
-    `localhost:8002`/`localhost:3000`) ficou obsoleta, não é mais usada — mantida no disco
-    só como histórico, sem risco por não estar em uso.
-- Subir/parar manualmente: `docker compose -f ~/.cloudflared/docker-compose.nutrihub-tunnel.yml up -d` /
-  `down`, do próprio diretório `~/.cloudflared/` (compose file usa caminho absoluto do
-  Windows nos volumes, não é portável pra outra máquina sem editar).
+- **Rodando como container Docker desde 2026-08-16**, dentro do mesmo projeto compose
+  `nutrihub` (antes era processo `cloudflared` solto no Windows — passou por uma tentativa
+  intermediária de Scheduled Task, abandonada por abrir janela de terminal; depois por uma
+  tentativa de projeto compose separado (`nutrihub-tunnel`), abandonada porque o Ismael
+  queria um único stack/container pra tudo do NutriHub em vez de dois `docker compose`
+  independentes):
+  - `infra/docker-compose.override.yml` — **não versionado** (ver `.gitignore`), com
+    caminhos absolutos do Windows e a referência às credenciais do túnel, específicos
+    desta máquina. Docker Compose carrega esse arquivo automaticamente junto com o
+    `docker-compose.yml` sempre que rodado a partir de `infra/`, então `docker compose up
+    -d` sobe `db`+`redis`+`api`+`tunnel` juntos, sem flag extra.
+  - Serviço `tunnel`: imagem `cloudflare/cloudflared:latest`, `restart: unless-stopped`,
+    monta `~/.cloudflared/config-nutrihub-docker.yml` (config) e o JSON de credenciais do
+    túnel, read-only. Fica na mesma rede (`nutrihub_default`) que `api`/`db`/`redis` por
+    já pertencer ao mesmo projeto compose — não precisa de `networks: external`.
+  - Ingress: só `api-nutrihub.isdev.online` → `http://api:8000` (nome do serviço + porta
+    interna do container — não a porta publicada no host, nem `localhost`). O serviço
+    `web` foi removido do `docker-compose.yml` em 2026-08-16 (o front de produção já roda
+    no Cloudflare Workers, ver seção acima — não fazia mais sentido manter um segundo
+    front rodando local só pelo Docker), então a rota `nutrihub.isdev.online` que existia
+    aqui também foi removida.
+  - `~/.cloudflared/config-nutrihub.yml` (a versão antiga, do processo solto no Windows,
+    apontando pra `localhost:8002`/`localhost:3000`) ficou obsoleta — mantida no disco só
+    como histórico, sem risco por não estar em uso.
 - **Segredos rotacionados especificamente pra essa exposição pública** (senha da role
   `nutrihub_app`, `API_SECRET_KEY`) — diferentes dos valores de desenvolvimento local
   puro anteriores a 2026-08-13. Vivem só em `.env` (gitignored), nunca no repo.
-- `apps/web/Dockerfile` ganhou `ARG NEXT_PUBLIC_API_URL` (default
-  `http://localhost:8000`, preserva o build local de sempre) — `docker-compose.yml`
-  passa isso como `build.args` a partir de `.env`, porque `NEXT_PUBLIC_*` é inlined no
-  bundle do client no momento do `next build`, não lido em runtime do container.
 - Páginas públicas de marketing: `/` (pitch pro nutricionista, CTA cadastro/login) e
   `/paciente` (explica o app do paciente; deixa claro que o acesso é liberado pelo
-  nutricionista, não self-signup — o app ainda não está publicado nas lojas).
+  nutricionista, não self-signup — o app ainda não está publicado nas lojas). Hoje essas
+  páginas vivem no build do front no Cloudflare Workers, não num container `web` local.
 
 **How to apply:** pra replicar esse tipo de exposição pública num projeto novo —
 `cloudflared tunnel create <nome>`, escrever `~/.cloudflared/config-<nome>.yml` com

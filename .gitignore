@@ -40,3 +40,7 @@ supabase/.temp/
 .open-next/
 .wrangler/
 apps/web/cloudflare-env.d.ts
+
+# Docker Compose override local (túnel Cloudflare desta máquina — caminhos/credenciais
+# específicos, ver ARCHITECTURE.md)
+infra/docker-compose.override.yml
