@@ -75,10 +75,30 @@ export default function PaginaPublicaConfigPage() {
           Bio
           <textarea rows={4} value={bio} onChange={(e) => setBio(e.target.value)} />
         </label>
-        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
-          Página pública habilitada
-        </label>
+        <div className="switch-field">
+          <div className="switch-field-text">
+            <span className="switch-field-label">
+              Página pública
+              <span className={`badge ${enabled ? "badge-success" : "badge-neutral"}`}>
+                {enabled ? "Ativa" : "Desativada"}
+              </span>
+            </span>
+            <span className="switch-field-hint">
+              {enabled
+                ? "Qualquer pessoa com o link pode ver seu perfil e solicitar horário."
+                : "O link fica fora do ar até você ativar de novo."}
+            </span>
+          </div>
+          <label className="switch">
+            <input
+              type="checkbox"
+              checked={enabled}
+              onChange={(e) => setEnabled(e.target.checked)}
+              aria-label="Página pública habilitada"
+            />
+            <span className="switch-track" />
+          </label>
+        </div>
         {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
         {message && <p style={{ color: "var(--color-primary, #0F9D74)" }}>{message}</p>}
         <button type="submit" disabled={saving} className="btn-primary">
