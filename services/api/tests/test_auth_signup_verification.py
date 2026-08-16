@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -7,6 +8,10 @@ from app.core import db
 from tests.conftest import fake_cpf
 
 pytestmark = pytest.mark.asyncio
+
+
+def _unique(label: str) -> str:
+    return f"{label}-{uuid.uuid4().hex[:8]}"
 
 
 async def _noop_send(**kwargs) -> None:
@@ -21,14 +26,15 @@ async def _signup(client: AsyncClient, monkeypatch, *, suffix: str, cpf: str | N
 
     monkeypatch.setattr("app.routers.auth.send_verification_email", _fake_send)
 
-    email = f"sv.{suffix}@example.com"
+    unique_suffix = _unique(suffix)
+    email = f"sv.{unique_suffix}@example.com"
     res = await client.post(
         "/auth/signup",
         json={
             "name": f"Verificação {suffix}",
             "email": email,
             "password": "senha1234",
-            "cpf": cpf or fake_cpf(suffix),
+            "cpf": cpf or fake_cpf(unique_suffix),
         },
     )
     return res, email, captured
@@ -123,15 +129,15 @@ async def test_resend_code_respects_cooldown_then_works(client: AsyncClient, mon
 
 async def test_duplicate_email_returns_409(client: AsyncClient, monkeypatch):
     monkeypatch.setattr("app.routers.auth.send_verification_email", _noop_send)
-    email = "sv.dup-email@example.com"
+    email = f"sv.{_unique('dup-email')}@example.com"
     first = await client.post(
         "/auth/signup",
-        json={"name": "Dup", "email": email, "password": "senha1234", "cpf": fake_cpf("dupemail1")},
+        json={"name": "Dup", "email": email, "password": "senha1234", "cpf": fake_cpf(_unique("dupemail1"))},
     )
-    assert first.status_code == 201
+    assert first.status_code == 201, first.text
     second = await client.post(
         "/auth/signup",
-        json={"name": "Dup", "email": email, "password": "senha1234", "cpf": fake_cpf("dupemail2")},
+        json={"name": "Dup", "email": email, "password": "senha1234", "cpf": fake_cpf(_unique("dupemail2"))},
     )
     assert second.status_code == 409
     assert "E-mail" in second.json()["detail"]
@@ -139,15 +145,25 @@ async def test_duplicate_email_returns_409(client: AsyncClient, monkeypatch):
 
 async def test_duplicate_cpf_returns_409(client: AsyncClient, monkeypatch):
     monkeypatch.setattr("app.routers.auth.send_verification_email", _noop_send)
-    cpf = fake_cpf("dupcpf")
+    cpf = fake_cpf(_unique("dupcpf"))
     first = await client.post(
         "/auth/signup",
-        json={"name": "Dup CPF", "email": "sv.dupcpf1@example.com", "password": "senha1234", "cpf": cpf},
+        json={
+            "name": "Dup CPF",
+            "email": f"sv.{_unique('dupcpf1')}@example.com",
+            "password": "senha1234",
+            "cpf": cpf,
+        },
     )
-    assert first.status_code == 201
+    assert first.status_code == 201, first.text
     second = await client.post(
         "/auth/signup",
-        json={"name": "Dup CPF", "email": "sv.dupcpf2@example.com", "password": "senha1234", "cpf": cpf},
+        json={
+            "name": "Dup CPF",
+            "email": f"sv.{_unique('dupcpf2')}@example.com",
+            "password": "senha1234",
+            "cpf": cpf,
+        },
     )
     assert second.status_code == 409
     assert "CPF" in second.json()["detail"]
@@ -157,17 +173,22 @@ async def test_duplicate_cpf_returns_409(client: AsyncClient, monkeypatch):
 async def test_invalid_cpf_returns_422(client: AsyncClient, bad_cpf: str):
     res = await client.post(
         "/auth/signup",
-        json={"name": "Bad CPF", "email": "sv.badcpf@example.com", "password": "senha1234", "cpf": bad_cpf},
+        json={
+            "name": "Bad CPF",
+            "email": f"sv.{_unique('badcpf')}@example.com",
+            "password": "senha1234",
+            "cpf": bad_cpf,
+        },
     )
     assert res.status_code == 422
 
 
 async def test_login_before_verification_is_blocked(client: AsyncClient, monkeypatch):
     monkeypatch.setattr("app.routers.auth.send_verification_email", _noop_send)
-    email = "sv.unverified@example.com"
+    email = f"sv.{_unique('unverified')}@example.com"
     await client.post(
         "/auth/signup",
-        json={"name": "Unverified", "email": email, "password": "senha1234", "cpf": fake_cpf("unverified")},
+        json={"name": "Unverified", "email": email, "password": "senha1234", "cpf": fake_cpf(_unique("unverified"))},
     )
 
     login_res = await client.post("/auth/login", json={"email": email, "password": "senha1234"})
@@ -175,9 +196,10 @@ async def test_login_before_verification_is_blocked(client: AsyncClient, monkeyp
 
 
 async def test_google_signup_without_cpf_requires_cpf(client: AsyncClient, monkeypatch):
+    email = f"sv.{_unique('google1')}@example.com"
     monkeypatch.setattr(
         "app.routers.auth.google_id_token.verify_oauth2_token",
-        lambda *a, **k: {"sub": "google-new-1", "email": "sv.google1@example.com", "name": "Google One"},
+        lambda *a, **k: {"sub": _unique("google-new-1"), "email": email, "name": "Google One"},
     )
     res = await client.post("/auth/google", json={"id_token": "fake"})
     assert res.status_code == 422
@@ -185,11 +207,12 @@ async def test_google_signup_without_cpf_requires_cpf(client: AsyncClient, monke
 
 
 async def test_google_signup_with_cpf_issues_token_and_skips_verification(client: AsyncClient, monkeypatch):
+    email = f"sv.{_unique('google2')}@example.com"
     monkeypatch.setattr(
         "app.routers.auth.google_id_token.verify_oauth2_token",
-        lambda *a, **k: {"sub": "google-new-2", "email": "sv.google2@example.com", "name": "Google Two"},
+        lambda *a, **k: {"sub": _unique("google-new-2"), "email": email, "name": "Google Two"},
     )
-    res = await client.post("/auth/google", json={"id_token": "fake", "cpf": fake_cpf("googlenew2")})
+    res = await client.post("/auth/google", json={"id_token": "fake", "cpf": fake_cpf(_unique("googlenew2"))})
     assert res.status_code == 200, res.text
     assert res.json()["access_token"]
 
@@ -201,9 +224,10 @@ async def test_google_links_existing_email_password_account(client: AsyncClient,
         "/auth/verify-email", json={"professional_id": professional_id, "code": captured[email]}
     )
 
+    google_sub = _unique("google-link-1")
     monkeypatch.setattr(
         "app.routers.auth.google_id_token.verify_oauth2_token",
-        lambda *a, **k: {"sub": "google-link-1", "email": email, "name": "Linked"},
+        lambda *a, **k: {"sub": google_sub, "email": email, "name": "Linked"},
     )
     google_res = await client.post("/auth/google", json={"id_token": "fake"})
     assert google_res.status_code == 200, google_res.text

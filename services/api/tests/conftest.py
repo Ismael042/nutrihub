@@ -40,10 +40,19 @@ async def client():
 
 def fake_cpf(seed: str) -> str:
     """Gera 11 dígitos numéricos válidos (dígitos verificadores corretos) a partir de um seed,
-    só pra satisfazer o CPF único exigido no signup em teste — não precisa ser um CPF real."""
+    só pra satisfazer o CPF único exigido no signup em teste — não precisa ser um CPF real.
+
+    Usa hash (não só os primeiros N caracteres do seed) porque seeds como "dupemail1-<hex>"
+    tem a parte fixa mais longa que qualquer prefixo curto, e um prefixo fixo faria o CPF sair
+    sempre igual entre execuções mesmo com um sufixo aleatório no seed — foi exatamente o bug
+    que apareceu aqui antes desta versão.
+    """
+    import hashlib
+
     from app.core.cpf import _check_digit
 
-    base = "".join(str(ord(c) % 10) for c in seed[:9]).ljust(9, "1")[:9]
+    digest = hashlib.sha256(seed.encode()).hexdigest()
+    base = "".join(str(int(c, 16) % 10) for c in digest[:9])
     d1 = _check_digit(base, range(10, 1, -1))
     d2 = _check_digit(base + str(d1), range(11, 1, -1))
     return base + str(d1) + str(d2)

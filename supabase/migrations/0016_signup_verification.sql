@@ -10,6 +10,13 @@ alter table professionals add column google_id text unique;
 -- já verificou o e-mail antes de emitir o ID token).
 alter table professionals add column email_verified boolean not null default false;
 
+-- Backfill: profissionais que já existiam antes desta migration já estavam logando
+-- normalmente — sem isso, todo mundo ficaria trancado fora no primeiro deploy (a
+-- coluna nasce false pra todo mundo, inclusive quem nunca passou por um fluxo de
+-- verificação porque ele não existia ainda). Só cadastros novos, a partir daqui,
+-- nascem com false de verdade e precisam confirmar o código.
+update professionals set email_verified = true;
+
 -- CPF: dígitos-only, obrigatório em contas novas (aplicado na API, não na constraint —
 -- profissionais existentes têm cpf null e não há como backfillar retroativamente).
 alter table professionals add constraint professionals_cpf_format
