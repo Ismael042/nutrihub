@@ -385,16 +385,31 @@ Instância pública de demonstração, criada 2026-08-13 no domínio pessoal do 
 `docker-compose.yml` nem de nenhum arquivo do repo** — é infraestrutura local desta
 máquina, criada via CLI:
 
-- Tunnel `nutrihub` (id `d338dc2a-5d68-4f7d-8234-690927377e58`), config em
-  `~/.cloudflared/config-nutrihub.yml` (fora do repo, não versionado):
-  - `nutrihub.isdev.online` → `http://localhost:3000` (web)
-  - `api-nutrihub.isdev.online` → `http://localhost:8002` (api — porta 8002, não 8000,
-    por causa do conflito de porta com o projeto vitrine nesta máquina; ver
-    `DB_HOST_PORT`/`API_HOST_PORT` acima)
-- Roda com `cloudflared tunnel --config ~/.cloudflared/config-nutrihub.yml run nutrihub`
-  — processo separado do Docker, precisa estar rodando pro domínio responder. **Não é
-  serviço gerenciado (systemd/task scheduler) ainda** — se a máquina reiniciar ou o
-  processo for encerrado, o domínio para de responder até rodar o comando de novo.
+- Tunnel `nutrihub` (id `d338dc2a-5d68-4f7d-8234-690927377e58`).
+- **Rodando como container Docker desde 2026-08-16** (antes era processo `cloudflared`
+  solto no Windows — passou por uma tentativa intermediária de Scheduled Task, abandonada
+  porque abria janela de terminal e não tinha por que reinventar restart/dependência já
+  que o Docker Desktop já resolve isso pros outros serviços). Fora do repo, infraestrutura
+  só desta máquina:
+  - Compose separado em `~/.cloudflared/docker-compose.nutrihub-tunnel.yml` (projeto
+    `nutrihub-tunnel`, serviço `tunnel`, imagem `cloudflare/cloudflared:latest`,
+    `restart: unless-stopped`), conectado à network externa `nutrihub_default` (a mesma
+    que o `docker-compose.yml` principal cria) — sobe/cai junto com o Docker Desktop,
+    sem depender de login do Windows nem de script de espera.
+  - Config em `~/.cloudflared/config-nutrihub-docker.yml`, montada read-only no container
+    junto com o JSON de credenciais:
+    - `nutrihub.isdev.online` → `http://web:3000` (nome do serviço na rede Docker — hoje
+      sem efeito prático, porque o DNS público desse hostname já foi movido pro Custom
+      Domain do Worker, ver seção do Cloudflare Workers acima; mantido só por paridade)
+    - `api-nutrihub.isdev.online` → `http://api:8000` (nome do serviço + porta interna do
+      container, não a porta publicada no host — dentro da rede Docker não existe o
+      conflito de porta 8002 do host)
+  - `~/.cloudflared/config-nutrihub.yml` (a versão antiga, apontando pra
+    `localhost:8002`/`localhost:3000`) ficou obsoleta, não é mais usada — mantida no disco
+    só como histórico, sem risco por não estar em uso.
+- Subir/parar manualmente: `docker compose -f ~/.cloudflared/docker-compose.nutrihub-tunnel.yml up -d` /
+  `down`, do próprio diretório `~/.cloudflared/` (compose file usa caminho absoluto do
+  Windows nos volumes, não é portável pra outra máquina sem editar).
 - **Segredos rotacionados especificamente pra essa exposição pública** (senha da role
   `nutrihub_app`, `API_SECRET_KEY`) — diferentes dos valores de desenvolvimento local
   puro anteriores a 2026-08-13. Vivem só em `.env` (gitignored), nunca no repo.
