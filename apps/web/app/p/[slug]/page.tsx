@@ -10,6 +10,9 @@ interface PublicPage {
 }
 
 async function fetchPage(slug: string): Promise<PublicPage | null> {
+  console.error(
+    `fetchPage debug: typeof API_URL=${typeof API_URL} API_URL=${JSON.stringify(API_URL)} typeof process.env.NEXT_PUBLIC_API_URL=${typeof process.env.NEXT_PUBLIC_API_URL} raw=${JSON.stringify(process.env.NEXT_PUBLIC_API_URL)}`
+  );
   try {
     const res = await fetch(`${API_URL}/public/${slug}`, { cache: "no-store" });
     if (!res.ok) {
