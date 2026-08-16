@@ -12,9 +12,13 @@ interface PublicPage {
 async function fetchPage(slug: string): Promise<PublicPage | null> {
   try {
     const res = await fetch(`${API_URL}/public/${slug}`, { cache: "no-store" });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error(`fetchPage: ${API_URL}/public/${slug} -> HTTP ${res.status}`);
+      return null;
+    }
     return (await res.json()) as PublicPage;
-  } catch {
+  } catch (err) {
+    console.error(`fetchPage: ${API_URL}/public/${slug} ->`, err);
     return null;
   }
 }
