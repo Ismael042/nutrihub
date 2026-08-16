@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { authFetch, useRequireAuth } from "@/lib/auth";
+import { formatPhone } from "@/lib/masks";
 import { useToast } from "@/components/Toast";
 
 export default function NovoPacientePage() {
@@ -69,7 +70,14 @@ export default function NovoPacientePage() {
             <label className="field-label" htmlFor="phone">
               Telefone
             </label>
-            <input id="phone" placeholder="(00) 00000-0000" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <input
+              id="phone"
+              type="tel"
+              autoComplete="tel"
+              placeholder="(00) 00000-0000"
+              value={phone}
+              onChange={(e) => setPhone(formatPhone(e.target.value))}
+            />
           </div>
 
           <div className="field field-sm">

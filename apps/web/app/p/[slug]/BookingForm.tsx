@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { API_URL } from "@/lib/auth";
+import { formatPhone } from "@/lib/masks";
 
 export default function BookingForm({ slug, name, bio }: { slug: string; name: string; bio: string | null }) {
   const [formName, setFormName] = useState("");
@@ -79,7 +80,14 @@ export default function BookingForm({ slug, name, bio }: { slug: string; name: s
               <label className="field-label" htmlFor="patient-phone">
                 Telefone (opcional)
               </label>
-              <input id="patient-phone" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+              <input
+                id="patient-phone"
+                type="tel"
+                autoComplete="tel"
+                placeholder="(00) 00000-0000"
+                value={phone}
+                onChange={(e) => setPhone(formatPhone(e.target.value))}
+              />
             </div>
           </div>
           <div className="field">

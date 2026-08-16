@@ -606,6 +606,70 @@ textarea.has-error:focus {
   cursor: not-allowed;
 }
 
+/* ============================================================================
+   OTP / CÓDIGO DE VERIFICAÇÃO
+   ============================================================================ */
+
+.otp-field input {
+  width: 100%;
+  font-size: 1.5rem;
+  letter-spacing: 0.5em;
+  text-align: center;
+  padding: 10px 8px 10px 16px;
+}
+
+.otp-resend {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-3);
+}
+
+.otp-resend button {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.otp-resend button:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+/* ============================================================================
+   AUTH DIVIDER + BOTÃO GOOGLE
+   ============================================================================ */
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-5) 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.auth-google-button {
+  display: flex;
+  justify-content: center;
+}
+
+.auth-google-button[data-disabled="true"] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 fieldset.form-section {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);

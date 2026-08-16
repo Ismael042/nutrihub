@@ -154,6 +154,7 @@ export default function AntropometriaPage() {
             {FIELDS.map((field) => (
               <input
                 key={field.key}
+                inputMode="decimal"
                 placeholder={`${field.label} (${field.unit})`}
                 value={form[field.key] ?? ""}
                 onChange={(e) => setForm({ ...form, [field.key]: e.target.value })}

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { authFetch, useRequireAuth } from "@/lib/auth";
+import { formatPhone } from "@/lib/masks";
 import { useToast } from "@/components/Toast";
 import { useConfirm } from "@/components/ConfirmDialog";
 import EmptyState from "@/components/EmptyState";
@@ -226,6 +227,8 @@ export default function PacienteDetalhePage() {
               </label>
               <input
                 id="p-email"
+                type="email"
+                autoComplete="email"
                 value={patient.email ?? ""}
                 onChange={(e) => setPatient({ ...patient, email: e.target.value })}
                 placeholder="Sem e-mail cadastrado"
@@ -237,8 +240,10 @@ export default function PacienteDetalhePage() {
               </label>
               <input
                 id="p-phone"
+                type="tel"
+                autoComplete="tel"
                 value={patient.phone ?? ""}
-                onChange={(e) => setPatient({ ...patient, phone: e.target.value })}
+                onChange={(e) => setPatient({ ...patient, phone: formatPhone(e.target.value) })}
                 placeholder="Sem telefone cadastrado"
               />
             </div>

@@ -14,6 +14,11 @@ class Settings(BaseSettings):
     redis_url: str = "redis://redis:6379/0"
     supabase_url: str = ""
     supabase_service_role_key: str = ""
+    # Google Identity Services — verificação do ID token em POST /auth/google.
+    google_client_id: str = ""
+    # Resend — envio do código de verificação de e-mail no signup (app/core/email.py).
+    resend_api_key: str = ""
+    email_from: str = "NutriHub <no-reply@isdev.online>"
     # Lista separada por vírgula; sem default de produção proposital (só localhost
     # pra dev) — cada ambiente novo declara suas próprias origens via env.
     cors_allow_origins: str = "http://localhost:3000"

@@ -11,6 +11,43 @@ export interface Professional {
   name: string;
   email: string;
   role?: "admin" | "nutritionist" | "assistant";
+  cpf?: string | null;
+  email_verified?: boolean;
+  google_id?: string | null;
+}
+
+interface AuthResponse {
+  access_token: string;
+  professional: Professional;
+}
+
+async function postJSON<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${API_URL}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  const data = res.status === 204 ? {} : await res.json();
+  if (!res.ok) {
+    throw new Error(data.detail ?? "Erro inesperado");
+  }
+  return data as T;
+}
+
+export function signup(input: { name: string; email: string; password: string; cpf: string }) {
+  return postJSON<{ professional_id: string; email: string }>("/auth/signup", input);
+}
+
+export function verifyEmailCode(input: { professional_id: string; code: string }) {
+  return postJSON<AuthResponse>("/auth/verify-email", input);
+}
+
+export function resendCode(input: { professional_id: string }) {
+  return postJSON<Record<string, never>>("/auth/resend-code", input);
+}
+
+export function signInWithGoogle(input: { id_token: string; cpf?: string }) {
+  return postJSON<AuthResponse>("/auth/google", input);
 }
 
 export function getToken(): string | null {

@@ -54,12 +54,15 @@ async def invite_member(
         # user_id em `professionals` referencia auth.users — usa a conexão de app aqui
         # é seguro porque INSERT em auth.users não tem RLS (ver 0000_local_auth_stub.sql
         # / stub de paridade local; em produção quem é dono de auth.users é o Supabase).
+        # email_verified=true direto: quem convida já é um admin autenticado definindo a
+        # senha na hora, não um self-signup anônimo — não faz sentido pedir confirmação
+        # por e-mail de uma conta que o próprio time acabou de criar.
         try:
             user_id = await conn.fetchval("insert into auth.users (email) values ($1) returning id", payload.email)
             row = await conn.fetchrow(
                 """
-                insert into professionals (tenant_id, user_id, name, email, password_hash, role)
-                values ($1, $2, $3, $4, $5, $6)
+                insert into professionals (tenant_id, user_id, name, email, password_hash, role, email_verified)
+                values ($1, $2, $3, $4, $5, $6, true)
                 returning id, name, email, role
                 """,
                 current.tenant_id,

@@ -3,7 +3,7 @@ import uuid
 import pytest
 from httpx import AsyncClient
 
-from tests.conftest import auth_headers
+from tests.conftest import auth_headers, fake_cpf
 
 pytestmark = pytest.mark.asyncio
 
@@ -26,7 +26,12 @@ async def test_signup_rejects_duplicate_email(client: AsyncClient, make_professi
     _, professional = await make_professional()
     res = await client.post(
         "/auth/signup",
-        json={"name": "Duplicado", "email": professional["email"], "password": "senha1234"},
+        json={
+            "name": "Duplicado",
+            "email": professional["email"],
+            "password": "senha1234",
+            "cpf": fake_cpf("dupauthtest"),
+        },
     )
     assert res.status_code == 409
 

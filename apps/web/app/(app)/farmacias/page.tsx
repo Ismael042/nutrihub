@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
+import { formatPhone } from "@/lib/masks";
 import { useConfirm } from "@/components/ConfirmDialog";
 import EmptyState from "@/components/EmptyState";
 import { SkeletonRows } from "@/components/Skeleton";
@@ -67,7 +68,13 @@ export default function FarmaciasPage() {
 
       <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
         <input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} required />
-        <input placeholder="Telefone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <input
+          type="tel"
+          autoComplete="tel"
+          placeholder="Telefone"
+          value={phone}
+          onChange={(e) => setPhone(formatPhone(e.target.value))}
+        />
         <input placeholder="Observações" value={notes} onChange={(e) => setNotes(e.target.value)} />
         <button type="submit" className="btn-primary">
           Adicionar farmácia

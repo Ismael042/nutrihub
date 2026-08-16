@@ -38,22 +38,49 @@ async def client():
         yield ac
 
 
+def fake_cpf(seed: str) -> str:
+    """Gera 11 dígitos numéricos válidos (dígitos verificadores corretos) a partir de um seed,
+    só pra satisfazer o CPF único exigido no signup em teste — não precisa ser um CPF real."""
+    from app.core.cpf import _check_digit
+
+    base = "".join(str(ord(c) % 10) for c in seed[:9]).ljust(9, "1")[:9]
+    d1 = _check_digit(base, range(10, 1, -1))
+    d2 = _check_digit(base + str(d1), range(11, 1, -1))
+    return base + str(d1) + str(d2)
+
+
 @pytest_asyncio.fixture
-async def make_professional(client: AsyncClient):
-    """Cria um profissional (+ tenant novo) e devolve (token, professional_dict).
+async def make_professional(client: AsyncClient, monkeypatch):
+    """Cria um profissional (+ tenant novo), confirma o e-mail e devolve (token, professional_dict).
 
     Cada chamada gera um tenant isolado, pra testes de RLS/isolamento poderem criar
     dois tenants distintos sem colidir. Os tenants criados são apagados no teardown.
     """
     created_tenant_ids: list[str] = []
+    captured_codes: dict[str, str] = {}
+
+    async def _fake_send(*, to: str, name: str, code: str) -> None:
+        captured_codes[to] = code
+
+    monkeypatch.setattr("app.routers.auth.send_verification_email", _fake_send)
 
     async def _make(name: str | None = None, password: str = "senha1234"):
         suffix = uuid.uuid4().hex[:10]
         name = name or f"QA {suffix}"
         email = f"qa.{suffix}@example.com"
-        res = await client.post("/auth/signup", json={"name": name, "email": email, "password": password})
+        res = await client.post(
+            "/auth/signup",
+            json={"name": name, "email": email, "password": password, "cpf": fake_cpf(suffix)},
+        )
         assert res.status_code == 201, res.text
-        body = res.json()
+        signup_body = res.json()
+
+        code = captured_codes[email]
+        verify_res = await client.post(
+            "/auth/verify-email", json={"professional_id": signup_body["professional_id"], "code": code}
+        )
+        assert verify_res.status_code == 200, verify_res.text
+        body = verify_res.json()
         created_tenant_ids.append(body["professional"]["tenant_id"])
         return body["access_token"], body["professional"]
 
