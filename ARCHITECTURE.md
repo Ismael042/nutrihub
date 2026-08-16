@@ -413,7 +413,7 @@ máquina, criada via CLI:
 esperar alguns segundos e tentar de novo, ou usar o UUID em vez do nome), e rodar
 `cloudflared tunnel --config ... run <nome>` como processo de longa duração.
 
-## Front no Cloudflare Workers via OpenNext (preparado em 2026-08-14, ainda não em produção)
+## Front no Cloudflare Workers via OpenNext (em produção desde 2026-08-15, Git integration conectada em 2026-08-16)
 
 Motivação: tirar a dependência do `web` (front) do desktop do Ismael/túnel local — só o
 front por enquanto, API+Postgres continuam no túnel (seção acima). Tentativa anterior no
@@ -421,6 +421,16 @@ mesmo dia (build local no Windows) foi abortada por bugs de symlink/`next/og`/bi
 específicos do Windows — ver histórico de decisões do cofre. Esta rodada usa **Git
 integration do Cloudflare (Workers Builds)**: o build roda no CI do próprio Cloudflare
 (Linux), não na máquina do Ismael, o que evita os bugs de Windows por completo.
+
+**Histórico real (diferente do planejado inicialmente):** o primeiro deploy em produção
+(2026-08-15) foi manual, via `wrangler deploy` local — 3 deployments naquele dia, todos com
+`Source: Upload` no `wrangler deployments list` (não veio do CI do Cloudflare). O Custom
+Domain `nutrihub.isdev.online` já foi criado nesse primeiro deploy manual (o CNAME do túnel
+antigo já não existia mais quando a Git integration foi configurada no dia seguinte). A
+conexão Git integration (Workers & Pages → `nutrihub-web` → Settings → Build → Connect) só
+foi feita em 2026-08-16, ligando o Worker já existente ao repo `Ismael042/nutrihub`
+(branch `main`, root directory `apps/web`) — a partir daí, todo push em `main` builda e
+publica automaticamente via CI do Cloudflare, sem passo manual.
 
 **Cloudflare Pages clássico (`@cloudflare/next-on-pages`) está descontinuado** para
 Next.js — o caminho atual e suportado é **Workers + adaptador `@opennextjs/cloudflare`**,
@@ -443,27 +453,26 @@ Preparado em `apps/web` (branch `deploy/cloudflare-workers`):
   Compose local, que continua com `next build` puro).
 - `.gitignore`: `.open-next/`, `.wrangler/`, `cloudflare-env.d.ts`.
 
-**Validado nesta rodada:** `tsc --noEmit` limpo e rebuild completo da imagem Docker do
-`web` (`next build` normal, não o transform do OpenNext) com `next@14.2.35` — confirma que
-o bump de versão não quebrou nada. **Não validado ainda:** o build do próprio
-`opennextjs-cloudflare` (roda em Linux; não testado localmente no Windows de propósito,
-pra não repetir os bugs da tentativa anterior) — só vai ser exercitado de verdade quando o
-Cloudflare buildar via Git integration.
+**Validado:** `tsc --noEmit` limpo e rebuild completo da imagem Docker do `web`
+(`next build` normal, não o transform do OpenNext) com `next@14.2.35` — confirma que o
+bump de versão não quebrou nada. O build do `opennextjs-cloudflare` em si já rodou de
+verdade (2026-08-15, manual) e o site responde em produção (`x-opennext: 1`,
+`x-powered-by: Next.js`, `server: cloudflare` no header de `nutrihub.isdev.online`).
 
-**Falta para ir ao ar** (depende de ação manual do Ismael no dashboard, não automatizável
-por API/CLI num repo privado):
-1. Autorizar o GitHub App do Cloudflare no repo privado `Ismael042/nutrihub`.
-2. Conectar o Worker ao repo (Workers & Pages → Create → Connect to Git), root directory
-   `apps/web`, build command `pnpm deploy:cf` (ou equivalente configurado no wizard).
-3. Configurar as build variables `NEXT_PUBLIC_API_URL=https://api-nutrihub.isdev.online` e
-   `NEXT_PUBLIC_SITE_URL=https://nutrihub.isdev.online` (são inlined em build-time, sem
-   isso o Worker builda com o fallback `localhost:8000`).
-4. Remover o CNAME atual de `nutrihub.isdev.online` (túnel) antes do primeiro
-   deploy/Custom Domain do Worker.
+**Concluído (2026-08-16):**
+1. GitHub App do Cloudflare autorizado no repo privado `Ismael042/nutrihub`.
+2. Worker `nutrihub-web` (já existente, criado no deploy manual do dia anterior) conectado
+   ao repo via Settings → Build → Connect — não passou pelo wizard "Create → Connect to
+   Git" porque o Worker já existia.
+3. Build variables `NEXT_PUBLIC_API_URL=https://api-nutrihub.isdev.online` e
+   `NEXT_PUBLIC_SITE_URL=https://nutrihub.isdev.online` configuradas.
+4. CNAME do túnel antigo em `nutrihub.isdev.online` — já não existia mais (removido junto
+   do deploy manual do dia 15, o Custom Domain do Worker já tinha assumido o hostname).
 
-**How to apply:** próxima sessão que mexer nisso deve confirmar se os 4 passos acima já
-foram feitos antes de assumir que o front já saiu do desktop. `api-nutrihub.isdev.online`
-não muda nesta migração — continua no túnel/Docker local.
+**How to apply:** o front não depende mais de nenhum passo manual do Ismael para
+atualizar em produção — todo push em `main` que toque `apps/web` builda e publica
+sozinho via Cloudflare Workers Builds. `api-nutrihub.isdev.online` não muda nesta
+migração — continua no túnel/Docker local.
 
 ## Módulos implementados (atualizado 2026-08-13)
 
