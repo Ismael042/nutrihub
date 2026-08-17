@@ -222,6 +222,52 @@ criação de tenant no signup vira um trigger Postgres em `auth.users` (padrão
 de arquitetura acima) — Supabase Auth trocaria só quem emite/valida o JWT, não abriria
 acesso direto do browser ao banco.
 
+### Cadastro: Google, verificação de e-mail por código, CPF obrigatório (2026-08-16)
+
+Redesenho do `/cadastro`/`/auth/signup` sobre o shim acima (continua não sendo Supabase
+Auth — só ganhou mais funcionalidade em cima do mesmo modelo):
+
+- **`POST /auth/signup` não loga mais na hora.** Cria o `professional` com
+  `email_verified = false`, gera um código de 6 dígitos (hash bcrypt em
+  `email_verification_codes`, TTL 10min), envia por e-mail via **Resend**
+  (`app/core/email.py`, HTTP direto via `httpx` — sem SDK) e devolve só
+  `{professional_id, email}`. O token só sai de `POST /auth/verify-email` com o código
+  certo (lockout depois de 5 tentativas erradas; `POST /auth/resend-code` com cooldown de
+  60s). `POST /auth/login` passou a checar `email_verified` (403 se ainda não confirmou).
+- **`POST /auth/google`** — login/cadastro com Google Identity Services (script
+  `accounts.google.com/gsi/client` no front, sem lib npm). Verificação do ID token no
+  backend com `google-auth` (`google.oauth2.id_token.verify_oauth2_token`), settings
+  `GOOGLE_CLIENT_ID`/`NEXT_PUBLIC_GOOGLE_CLIENT_ID` (mesmo valor, o segundo só entra no
+  bundle do client via **build variable no Cloudflare Workers Builds**, não runtime — GIS
+  roda inteiramente no browser). Contas via Google pulam a verificação por código (o
+  Google já verificou o e-mail) mas exigem CPF no primeiro login, porque o Google não
+  fornece esse dado — endpoint único serve tanto cadastro (`cpf` obrigatório se a conta
+  não existir ainda) quanto login (conta existente, `cpf` ignorado).
+- **CPF obrigatório e único** (`professionals.cpf`, dígitos-only, `professionals_cpf_unique`
+  + check de formato). Validação de dígito verificador duplicada propositalmente em Python
+  (`app/core/cpf.py`) e TS (`apps/web/lib/masks.ts`) — `packages/shared` é TS-only, não dá
+  pra compartilhar com o backend por um algoritmo de ~15 linhas.
+- **`password_hash` virou nullable** — contas só-Google não têm senha; `/auth/login`
+  checa isso explicitamente antes de `verify_password` (mesmo padrão de
+  `patient_auth.py`). `team.py` (convite de teammate pelo admin) ganhou
+  `email_verified = true` direto no insert — quem convida já define a senha na hora, não
+  é self-signup anônimo, não faz sentido pedir confirmação de e-mail aí.
+- **Migration `0016_signup_verification.sql`** tem um `update professionals set
+  email_verified = true` logo depois de criar a coluna — backfill obrigatório, senão todo
+  profissional que já existia (inclusive a conta principal usada nesta instância) fica
+  trancado fora no primeiro deploy, já que a coluna nasce `false` pra todo mundo.
+- **Pré-requisitos manuais** (fora do repo, só quem tem acesso às contas externas
+  configura): Client ID OAuth no Google Cloud Console (Authorized JavaScript origins:
+  `https://nutrihub.isdev.online` + `http://localhost:3000`; a OAuth consent screen
+  precisa estar **Published**, não só "Testing", senão usuários fora de uma lista de até
+  100 e-mails de teste não conseguem logar) e conta Resend com o domínio `isdev.online`
+  verificado (registros SPF/DKIM no Cloudflare DNS da mesma zona do túnel) — ambos já
+  configurados e validados nesta instância.
+- Testado: `services/api/tests/test_auth_signup_verification.py`, 49/49 testes do backend
+  passando de forma estável em execuções repetidas (o `fake_cpf` de teste usa hash sha256
+  do seed, não os primeiros N caracteres — um seed com rótulo longo o suficiente fazia o
+  CPF sair sempre igual entre execuções e colidir com dados da rodada anterior).
+
 ### Duas roles de Postgres: `nutrihub` (dono) e `nutrihub_app` (RLS de verdade)
 
 Desde `0003_app_role_rls.sql` (2026-08-13) a API usa **duas conexões distintas**
