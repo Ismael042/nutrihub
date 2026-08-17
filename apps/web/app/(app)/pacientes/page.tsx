@@ -70,43 +70,27 @@ export default function PacientesPage() {
         </a>
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "var(--space-3)",
-          borderBottom: "1px solid var(--color-border)",
-          paddingBottom: 2
-        }}
-      >
-        <div
-          className="tabs"
-          role="tablist"
-          aria-label="Filtrar por status"
-          style={{ flex: "0 1 auto", border: "none" }}
-        >
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              role="tab"
-              aria-selected={tab === t.key}
-              className={`tab${tab === t.key ? " active" : ""}`}
-              onClick={() => setTab(t.key)}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        <input
-          placeholder="Buscar por nome..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          aria-label="Buscar paciente por nome"
-          style={{ flex: "1 1 240px" }}
-        />
+      <div className="tabs" role="tablist" aria-label="Filtrar por status">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            role="tab"
+            aria-selected={tab === t.key}
+            className={`tab${tab === t.key ? " active" : ""}`}
+            onClick={() => setTab(t.key)}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
+
+      <input
+        placeholder="Buscar por nome..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        aria-label="Buscar paciente por nome"
+        style={{ width: "100%", marginTop: "var(--space-4)" }}
+      />
 
       <div style={{ marginTop: "var(--space-4)" }}>
         {loading && <SkeletonRows count={5} />}
