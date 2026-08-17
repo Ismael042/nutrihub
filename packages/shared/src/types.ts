@@ -27,6 +27,7 @@ export interface Patient {
   email: string | null;
   phone: string | null;
   birth_date: string | null;
+  cpf: string | null;
   status: PatientStatus;
 }
 

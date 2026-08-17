@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { authFetch, useRequireAuth } from "@/lib/auth";
-import { formatPhone } from "@/lib/masks";
+import { formatCPF, formatPhone, isValidCPF, onlyDigits } from "@/lib/masks";
 import { useToast } from "@/components/Toast";
 
 export default function NovoPacientePage() {
@@ -14,6 +14,7 @@ export default function NovoPacientePage() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [birthDate, setBirthDate] = useState("");
+  const [cpf, setCpf] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -22,6 +23,10 @@ export default function NovoPacientePage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    if (cpf && !isValidCPF(cpf)) {
+      setError("CPF inválido");
+      return;
+    }
     setLoading(true);
     try {
       const res = await authFetch("/patients", {
@@ -30,7 +35,8 @@ export default function NovoPacientePage() {
           name,
           email: email || null,
           phone: phone || null,
-          birth_date: birthDate || null
+          birth_date: birthDate || null,
+          cpf: cpf ? onlyDigits(cpf) : null
         })
       });
       const data = await res.json();
@@ -85,6 +91,21 @@ export default function NovoPacientePage() {
               Nascimento
             </label>
             <input id="birthDate" type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
+          </div>
+
+          <div className="field field-sm">
+            <label className="field-label" htmlFor="cpf">
+              CPF
+            </label>
+            <input
+              id="cpf"
+              inputMode="numeric"
+              autoComplete="off"
+              placeholder="000.000.000-00"
+              maxLength={14}
+              value={cpf}
+              onChange={(e) => setCpf(formatCPF(e.target.value))}
+            />
           </div>
         </div>
 

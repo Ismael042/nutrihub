@@ -8,6 +8,7 @@ import { useToast } from "@/components/Toast";
 import EmptyState from "@/components/EmptyState";
 import { SkeletonRows } from "@/components/Skeleton";
 import { IconTeam } from "@/components/icons";
+import PasswordInput from "@/components/PasswordInput";
 
 const ROLE_LABELS: Record<string, string> = {
   admin: "Administrador",
@@ -103,9 +104,8 @@ export default function EquipePage() {
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
             <input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} required />
             <input placeholder="E-mail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            <input
+            <PasswordInput
               placeholder="Senha temporária (mín. 8 caracteres)"
-              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

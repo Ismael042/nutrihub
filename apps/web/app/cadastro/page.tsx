@@ -5,6 +5,7 @@ import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { resendCode, setSession, signInWithGoogle, signup, verifyEmailCode } from "@/lib/auth";
 import { formatCPF, isValidCPF, onlyDigits } from "@/lib/masks";
+import PasswordInput from "@/components/PasswordInput";
 
 declare global {
   interface Window {
@@ -157,9 +158,8 @@ export default function CadastroPage() {
               <label className="field-label field-required" htmlFor="password">
                 Senha
               </label>
-              <input
+              <PasswordInput
                 id="password"
-                type="password"
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

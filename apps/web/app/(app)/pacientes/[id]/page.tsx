@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { authFetch, useRequireAuth } from "@/lib/auth";
-import { formatPhone } from "@/lib/masks";
+import { formatCPF, formatPhone, isValidCPF, onlyDigits } from "@/lib/masks";
 import { useToast } from "@/components/Toast";
 import { useConfirm } from "@/components/ConfirmDialog";
 import EmptyState from "@/components/EmptyState";
 import { SkeletonRows, SkeletonText } from "@/components/Skeleton";
 import { IconUsers } from "@/components/icons";
+import PasswordInput from "@/components/PasswordInput";
 import type { Patient, Tag } from "@nutrihub/shared";
 
 export default function PacienteDetalhePage() {
@@ -103,6 +104,10 @@ export default function PacienteDetalhePage() {
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (!patient) return;
+    if (patient.cpf && !isValidCPF(patient.cpf)) {
+      setError("CPF inválido");
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -112,7 +117,8 @@ export default function PacienteDetalhePage() {
           name: patient.name,
           email: patient.email,
           phone: patient.phone,
-          birth_date: patient.birth_date
+          birth_date: patient.birth_date,
+          cpf: patient.cpf ? onlyDigits(patient.cpf) : null
         })
       });
       if (!res.ok) throw new Error("Não foi possível salvar");
@@ -219,6 +225,20 @@ export default function PacienteDetalhePage() {
                 onChange={(e) => setPatient({ ...patient, birth_date: e.target.value })}
               />
             </div>
+            <div className="field field-sm">
+              <label className="field-label" htmlFor="p-cpf">
+                CPF
+              </label>
+              <input
+                id="p-cpf"
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="000.000.000-00"
+                maxLength={14}
+                value={patient.cpf ? formatCPF(patient.cpf) : ""}
+                onChange={(e) => setPatient({ ...patient, cpf: onlyDigits(e.target.value) })}
+              />
+            </div>
           </div>
           <div className="field-row">
             <div className="field">
@@ -316,8 +336,7 @@ export default function PacienteDetalhePage() {
           Defina uma senha para o paciente acessar o plano alimentar, chat e diário pelo app.
         </p>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <input
-            type="password"
+          <PasswordInput
             placeholder="Senha (mín. 8 caracteres)"
             value={portalPassword}
             onChange={(e) => setPortalPassword(e.target.value)}

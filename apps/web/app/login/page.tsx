@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { API_URL, setSession, signInWithGoogle } from "@/lib/auth";
+import PasswordInput from "@/components/PasswordInput";
 
 declare global {
   interface Window {
@@ -99,9 +100,8 @@ export default function LoginPage() {
           <label className="field-label field-required" htmlFor="password">
             Senha
           </label>
-          <input
+          <PasswordInput
             id="password"
-            type="password"
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

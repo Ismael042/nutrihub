@@ -254,3 +254,22 @@ export function IconTrendUp(props: SVGProps<SVGSVGElement>) {
     </Icon>
   );
 }
+
+export function IconEye(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <path d="M1.5 10c1.8-3.6 5-5.5 8.5-5.5s6.7 1.9 8.5 5.5c-1.8 3.6-5 5.5-8.5 5.5S3.3 13.6 1.5 10Z" />
+      <circle cx="10" cy="10" r="2.5" />
+    </Icon>
+  );
+}
+
+export function IconEyeOff(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <path d="M2.5 3.5l15 13" />
+      <path d="M8.3 5.1c.55-.13 1.12-.2 1.7-.2 3.5 0 6.7 1.9 8.5 5.5-.6 1.2-1.35 2.24-2.24 3.08M5.4 6.15C3.9 7.1 2.6 8.4 1.5 10c1.02 2.05 2.55 3.6 4.35 4.6.98.55 2.05.9 3.15.9.86 0 1.7-.15 2.5-.44" />
+      <path d="M8.15 8.15A2.5 2.5 0 0 0 10 12.5c.55 0 1.06-.17 1.48-.46" />
+    </Icon>
+  );
+}

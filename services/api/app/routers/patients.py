@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from app.core import db
+from app.core.cpf import is_valid_cpf, only_digits
 from app.core.deps import CurrentProfessional, get_current_professional
 
 router = APIRouter(prefix="/patients", tags=["patients"])
@@ -13,11 +14,23 @@ router = APIRouter(prefix="/patients", tags=["patients"])
 StatusFilter = Literal["active", "inactive", "all"]
 
 
+def _normalize_cpf(cpf: str | None) -> str | None:
+    # CPF do paciente é opcional — só valida se algo foi informado, ao contrário do
+    # signup do profissional onde é obrigatório (app/routers/auth.py).
+    if not cpf:
+        return None
+    digits = only_digits(cpf)
+    if not is_valid_cpf(digits):
+        raise HTTPException(status_code=422, detail="CPF inválido")
+    return digits
+
+
 class PatientCreate(BaseModel):
     name: str
     email: str | None = None
     phone: str | None = None
     birth_date: date | None = None
+    cpf: str | None = None
 
 
 class PatientUpdate(BaseModel):
@@ -25,6 +38,7 @@ class PatientUpdate(BaseModel):
     email: str | None = None
     phone: str | None = None
     birth_date: date | None = None
+    cpf: str | None = None
     status: Literal["active", "inactive"] | None = None
 
 
@@ -34,6 +48,7 @@ class PatientOut(BaseModel):
     email: str | None
     phone: str | None
     birth_date: date | None
+    cpf: str | None
     status: str
 
 
@@ -70,7 +85,7 @@ async def list_patients(
 
     params.extend([limit, offset])
     query = f"""
-        select id, name, email, phone, birth_date, status
+        select id, name, email, phone, birth_date, cpf, status
         from patients
         where {' and '.join(conditions)}
         order by name
@@ -88,18 +103,20 @@ async def create_patient(
     payload: PatientCreate,
     current: CurrentProfessional = Depends(get_current_professional),
 ) -> PatientOut:
+    cpf = _normalize_cpf(payload.cpf)
     async with db.tenant_connection(current.tenant_id) as conn:
         row = await conn.fetchrow(
             """
-            insert into patients (tenant_id, name, email, phone, birth_date)
-            values ($1, $2, $3, $4, $5)
-            returning id, name, email, phone, birth_date, status
+            insert into patients (tenant_id, name, email, phone, birth_date, cpf)
+            values ($1, $2, $3, $4, $5, $6)
+            returning id, name, email, phone, birth_date, cpf, status
             """,
             current.tenant_id,
             payload.name,
             payload.email,
             payload.phone,
             payload.birth_date,
+            cpf,
         )
     return PatientOut(**dict(row))
 
@@ -111,7 +128,7 @@ async def get_patient(
 ) -> PatientOut:
     async with db.tenant_connection(current.tenant_id) as conn:
         row = await conn.fetchrow(
-            "select id, name, email, phone, birth_date, status from patients where id = $1 and tenant_id = $2",
+            "select id, name, email, phone, birth_date, cpf, status from patients where id = $1 and tenant_id = $2",
             patient_id,
             current.tenant_id,
         )
@@ -129,6 +146,8 @@ async def update_patient(
     fields = payload.model_dump(exclude_unset=True)
     if not fields:
         raise HTTPException(status_code=422, detail="Nenhum campo para atualizar")
+    if "cpf" in fields:
+        fields["cpf"] = _normalize_cpf(fields["cpf"])
 
     set_clauses = []
     params: list = [patient_id, current.tenant_id]
@@ -139,7 +158,7 @@ async def update_patient(
     query = f"""
         update patients set {', '.join(set_clauses)}
         where id = $1 and tenant_id = $2
-        returning id, name, email, phone, birth_date, status
+        returning id, name, email, phone, birth_date, cpf, status
     """
 
     async with db.tenant_connection(current.tenant_id) as conn:

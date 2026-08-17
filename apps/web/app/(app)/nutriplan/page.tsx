@@ -70,7 +70,11 @@ export default function NutriPlanPage() {
       <p style={{ color: "var(--color-text-muted)" }}>Tarefas e notas rápidas.</p>
 
       <form onSubmit={handleSubmit} style={{ display: "flex", gap: 8, marginTop: 12 }}>
-        <select value={kind} onChange={(e) => setKind(e.target.value as "task" | "note")}>
+        <select
+          value={kind}
+          onChange={(e) => setKind(e.target.value as "task" | "note")}
+          style={{ width: "auto", flex: "0 0 auto" }}
+        >
           <option value="task">Tarefa</option>
           <option value="note">Nota</option>
         </select>
@@ -79,7 +83,7 @@ export default function NutriPlanPage() {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           required
-          style={{ flex: 1 }}
+          style={{ flex: 1, minWidth: 0 }}
         />
         <button type="submit" className="btn-primary">
           Adicionar
