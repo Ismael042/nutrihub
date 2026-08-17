@@ -1,17 +1,22 @@
-import io
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import cm
-from reportlab.pdfgen import canvas
 
-from app.core import db
+from app.core import db, storage
 from app.core.deps import CurrentProfessional, get_current_professional
+from app.core.plan_pdf import render_plan_pdf
 
 router = APIRouter(prefix="/diet-plans", tags=["diet-plans"])
+
+
+async def _load_logo_bytes(tenant_id) -> bytes | None:
+    """Logo do consultório pro cabeçalho do PDF. None em qualquer falha — o PDF sai
+    sem logo em vez de quebrar."""
+    async with db.tenant_connection(tenant_id) as conn:
+        logo_key = await conn.fetchval("select logo_key from tenants where id = $1", tenant_id)
+    return await storage.get_private_bytes(logo_key)
 
 
 class DietPlanCreate(BaseModel):
@@ -283,37 +288,8 @@ async def generate_pdf(plan_id: UUID, current: CurrentProfessional = Depends(get
     if detail is None:
         raise HTTPException(status_code=404, detail="Plano alimentar não encontrado")
 
-    buffer = io.BytesIO()
-    pdf = canvas.Canvas(buffer, pagesize=A4)
-    width, height = A4
-    y = height - 2 * cm
-
-    pdf.setFont("Helvetica-Bold", 16)
-    pdf.drawString(2 * cm, y, detail.name)
-    y -= 0.8 * cm
-    pdf.setFont("Helvetica", 11)
-    pdf.drawString(2 * cm, y, f"Paciente: {detail.patient_name}")
-    y -= 1 * cm
-
-    for meal in detail.meals:
-        if y < 3 * cm:
-            pdf.showPage()
-            y = height - 2 * cm
-        pdf.setFont("Helvetica-Bold", 13)
-        pdf.drawString(2 * cm, y, meal.name)
-        y -= 0.6 * cm
-        pdf.setFont("Helvetica", 10)
-        for item in meal.items:
-            if y < 2 * cm:
-                pdf.showPage()
-                y = height - 2 * cm
-            pdf.drawString(2.5 * cm, y, f"- {item.food_name}: {item.quantity} {item.unit}")
-            y -= 0.5 * cm
-        y -= 0.4 * cm
-
-    pdf.showPage()
-    pdf.save()
-    buffer.seek(0)
+    logo_bytes = await _load_logo_bytes(current.tenant_id)
+    buffer = render_plan_pdf(detail, logo_bytes=logo_bytes)
 
     return StreamingResponse(
         buffer,

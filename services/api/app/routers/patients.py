@@ -2,16 +2,28 @@ from datetime import date
 from typing import Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel
 
-from app.core import db
+from app.core import db, storage
 from app.core.cpf import is_valid_cpf, only_digits
 from app.core.deps import CurrentProfessional, get_current_professional
+from app.core.photos import read_upload, replace_photo
 
 router = APIRouter(prefix="/patients", tags=["patients"])
 
 StatusFilter = Literal["active", "inactive", "all"]
+
+# A lista de colunas aparece nos 4 SQL abaixo; photo_key é traduzida em photo_url
+# (assinada) na serialização, ver _out().
+COLUMNS = "id, name, email, phone, birth_date, cpf, status, photo_key"
+
+
+def _out(row) -> "PatientOut":
+    data = dict(row)
+    # Bucket privado: o banco guarda a chave, a URL é assinada na leitura e expira.
+    data["photo_url"] = storage.presigned_get_url(data.pop("photo_key", None))
+    return PatientOut(**data)
 
 
 def _normalize_cpf(cpf: str | None) -> str | None:
@@ -40,6 +52,10 @@ class PatientUpdate(BaseModel):
     birth_date: date | None = None
     cpf: str | None = None
     status: Literal["active", "inactive"] | None = None
+    # photo_key NÃO entra aqui de propósito: o SET do PATCH é montado dinamicamente a
+    # partir das chaves deste modelo, então incluí-la deixaria qualquer cliente
+    # autenticado apontar a foto pra objeto arbitrário. Foto só muda por
+    # POST/DELETE /patients/{id}/photo.
 
 
 class PatientOut(BaseModel):
@@ -50,6 +66,7 @@ class PatientOut(BaseModel):
     birth_date: date | None
     cpf: str | None
     status: str
+    photo_url: str | None = None
 
 
 class TagOut(BaseModel):
@@ -85,7 +102,7 @@ async def list_patients(
 
     params.extend([limit, offset])
     query = f"""
-        select id, name, email, phone, birth_date, cpf, status
+        select {COLUMNS}
         from patients
         where {' and '.join(conditions)}
         order by name
@@ -95,7 +112,7 @@ async def list_patients(
     async with db.tenant_connection(current.tenant_id) as conn:
         rows = await conn.fetch(query, *params)
 
-    return [PatientOut(**dict(row)) for row in rows]
+    return [_out(row) for row in rows]
 
 
 @router.post("", response_model=PatientOut, status_code=201)
@@ -106,10 +123,10 @@ async def create_patient(
     cpf = _normalize_cpf(payload.cpf)
     async with db.tenant_connection(current.tenant_id) as conn:
         row = await conn.fetchrow(
-            """
+            f"""
             insert into patients (tenant_id, name, email, phone, birth_date, cpf)
             values ($1, $2, $3, $4, $5, $6)
-            returning id, name, email, phone, birth_date, cpf, status
+            returning {COLUMNS}
             """,
             current.tenant_id,
             payload.name,
@@ -118,7 +135,7 @@ async def create_patient(
             payload.birth_date,
             cpf,
         )
-    return PatientOut(**dict(row))
+    return _out(row)
 
 
 @router.get("/{patient_id}", response_model=PatientOut)
@@ -128,13 +145,13 @@ async def get_patient(
 ) -> PatientOut:
     async with db.tenant_connection(current.tenant_id) as conn:
         row = await conn.fetchrow(
-            "select id, name, email, phone, birth_date, cpf, status from patients where id = $1 and tenant_id = $2",
+            f"select {COLUMNS} from patients where id = $1 and tenant_id = $2",
             patient_id,
             current.tenant_id,
         )
     if row is None:
         raise HTTPException(status_code=404, detail="Paciente não encontrado")
-    return PatientOut(**dict(row))
+    return _out(row)
 
 
 @router.patch("/{patient_id}", response_model=PatientOut)
@@ -158,7 +175,7 @@ async def update_patient(
     query = f"""
         update patients set {', '.join(set_clauses)}
         where id = $1 and tenant_id = $2
-        returning id, name, email, phone, birth_date, cpf, status
+        returning {COLUMNS}
     """
 
     async with db.tenant_connection(current.tenant_id) as conn:
@@ -166,7 +183,65 @@ async def update_patient(
 
     if row is None:
         raise HTTPException(status_code=404, detail="Paciente não encontrado")
-    return PatientOut(**dict(row))
+    return _out(row)
+
+
+@router.post("/{patient_id}/photo", response_model=PatientOut)
+async def upload_patient_photo(
+    patient_id: UUID,
+    file: UploadFile = File(...),
+    current: CurrentProfessional = Depends(get_current_professional),
+) -> PatientOut:
+    raw = await read_upload(file)
+
+    async def swap_key(new_key: str):
+        async with db.tenant_connection(current.tenant_id) as conn:
+            old_key = await conn.fetchval(
+                "select photo_key from patients where id = $1 and tenant_id = $2",
+                patient_id,
+                current.tenant_id,
+            )
+            row = await conn.fetchrow(
+                f"""
+                update patients set photo_key = $3 where id = $1 and tenant_id = $2
+                returning {COLUMNS}
+                """,
+                patient_id,
+                current.tenant_id,
+                new_key,
+            )
+        if row is None:
+            raise HTTPException(status_code=404, detail="Paciente não encontrado")
+        return row, old_key
+
+    row = await replace_photo(raw, prefix="patients", owner_id=patient_id, swap_key=swap_key)
+    return _out(row)
+
+
+@router.delete("/{patient_id}/photo", response_model=PatientOut)
+async def delete_patient_photo(
+    patient_id: UUID,
+    current: CurrentProfessional = Depends(get_current_professional),
+) -> PatientOut:
+    async with db.tenant_connection(current.tenant_id) as conn:
+        old_key = await conn.fetchval(
+            "select photo_key from patients where id = $1 and tenant_id = $2",
+            patient_id,
+            current.tenant_id,
+        )
+        row = await conn.fetchrow(
+            f"""
+            update patients set photo_key = null where id = $1 and tenant_id = $2
+            returning {COLUMNS}
+            """,
+            patient_id,
+            current.tenant_id,
+        )
+    if row is None:
+        raise HTTPException(status_code=404, detail="Paciente não encontrado")
+
+    await storage.delete_private(old_key)
+    return _out(row)
 
 
 @router.delete("/{patient_id}", status_code=204)

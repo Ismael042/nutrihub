@@ -1,30 +1,25 @@
 "use client";
 
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
 import { initials } from "@/lib/initials";
 import { BIO_TEMPLATES } from "@/lib/bioTemplates";
 import { useConfirm } from "@/components/ConfirmDialog";
-import { useToast } from "@/components/Toast";
+import PhotoUpload from "@/components/PhotoUpload";
 
 const BIO_MAX_LENGTH = 800;
-const MAX_PHOTO_BYTES = 3 * 1024 * 1024;
-const ACCEPTED_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export default function PaginaPublicaConfigPage() {
   const professional = useRequireAuth();
   const confirm = useConfirm();
-  const toast = useToast();
   const [slug, setSlug] = useState("");
   const [bio, setBio] = useState("");
   const [enabled, setEnabled] = useState(false);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [templateId, setTemplateId] = useState("");
-  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
   const bioRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -43,60 +38,6 @@ export default function PaginaPublicaConfigPage() {
 
   const webOrigin = typeof window !== "undefined" ? window.location.origin : "";
   const publicUrl = slug ? `${webOrigin}/p/${slug}` : null;
-
-  async function handlePhotoChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    // Reseta o input já: sem isso, escolher o mesmo arquivo de novo não dispara change.
-    e.target.value = "";
-    if (!file) return;
-
-    // Pré-checagem no cliente pra falhar rápido, sem gastar round-trip. A validação
-    // que vale é a do servidor (que também re-encoda a imagem).
-    if (!ACCEPTED_PHOTO_TYPES.includes(file.type)) {
-      toast.error("Envie uma imagem JPG, PNG ou WebP.");
-      return;
-    }
-    if (file.size > MAX_PHOTO_BYTES) {
-      toast.error("Imagem muito grande — envie um arquivo de até 3 MB.");
-      return;
-    }
-
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await authFetch("/me/public-profile/photo", { method: "POST", body: formData });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail ?? "Não foi possível enviar a foto");
-      setPhotoUrl(data.photo_url);
-      toast.success("Foto atualizada.");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro inesperado");
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  async function handleRemovePhoto() {
-    const ok = await confirm({
-      title: "Remover sua foto?",
-      description: "Sua página pública volta a mostrar só suas iniciais.",
-      confirmLabel: "Remover",
-      danger: true
-    });
-    if (!ok) return;
-    setUploading(true);
-    try {
-      const res = await authFetch("/me/public-profile/photo", { method: "DELETE" });
-      if (!res.ok) throw new Error("Não foi possível remover a foto");
-      setPhotoUrl(null);
-      toast.success("Foto removida.");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro inesperado");
-    } finally {
-      setUploading(false);
-    }
-  }
 
   async function handleApplyTemplate() {
     const template = BIO_TEMPLATES.find((t) => t.id === templateId);
@@ -147,37 +88,15 @@ export default function PaginaPublicaConfigPage() {
           "escolhi a foto mas esqueci de salvar" seria um estado ruim. Envia na hora. */}
       <div className="field" style={{ marginTop: 16 }}>
         <span className="field-label">Foto</span>
-        <div className="avatar-upload">
-          {photoUrl ? (
-            <img className="avatar-upload-preview" src={photoUrl} alt="Sua foto de perfil" />
-          ) : (
-            <span className="avatar-upload-preview avatar-upload-fallback" aria-hidden="true">
-              {initials(professional.name)}
-            </span>
-          )}
-          <div className="avatar-upload-actions">
-            <button
-              type="button"
-              className="btn-secondary btn-sm"
-              onClick={() => fileRef.current?.click()}
-              disabled={uploading}
-            >
-              {uploading ? "Enviando..." : photoUrl ? "Trocar foto" : "Enviar foto"}
-            </button>
-            {photoUrl && (
-              <button type="button" className="btn-ghost btn-sm" onClick={handleRemovePhoto} disabled={uploading}>
-                Remover
-              </button>
-            )}
-            <span className="avatar-upload-hint">JPG, PNG ou WebP, até 3 MB. Aparece na sua página pública.</span>
-          </div>
-        </div>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          hidden
-          onChange={handlePhotoChange}
+        <PhotoUpload
+          endpoint="/me/public-profile/photo"
+          photoUrl={photoUrl}
+          onChange={(data) => setPhotoUrl((data.photo_url as string | null) ?? null)}
+          fallback={initials(professional.name)}
+          hint="JPG, PNG ou WebP, até 3 MB. Aparece na sua página pública."
+          alt="Sua foto de perfil"
+          confirmTitle="Remover sua foto?"
+          confirmDescription="Sua página pública volta a mostrar só suas iniciais."
         />
       </div>
 

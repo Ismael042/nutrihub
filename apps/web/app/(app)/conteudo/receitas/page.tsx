@@ -6,11 +6,13 @@ import { useConfirm } from "@/components/ConfirmDialog";
 import EmptyState from "@/components/EmptyState";
 import { SkeletonRows } from "@/components/Skeleton";
 import { IconBook } from "@/components/icons";
+import PhotoUpload from "@/components/PhotoUpload";
 
 interface Recipe {
   id: string;
   name: string;
   instructions: string | null;
+  photo_url: string | null;
 }
 
 export default function ReceitasPage() {
@@ -98,7 +100,7 @@ export default function ReceitasPage() {
       {!loading && recipes.length > 0 && (
         <ul style={{ listStyle: "none", padding: 0, marginTop: 20 }}>
           {recipes.map((r) => (
-            <li key={r.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--color-border)" }}>
+            <li key={r.id} style={{ padding: "12px 0", borderBottom: "1px solid var(--color-border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <strong>{r.name}</strong>
                 <button onClick={() => remove(r.id)} style={{ color: "var(--color-error)" }}>
@@ -106,6 +108,23 @@ export default function ReceitasPage() {
                 </button>
               </div>
               {r.instructions && <div style={{ color: "var(--color-text-muted)" }}>{r.instructions}</div>}
+              {/* Upload por item: não existe página de detalhe de receita, e a chave do
+                  objeto usa o id — então a receita precisa existir antes da foto. */}
+              <div style={{ marginTop: 8 }}>
+                <PhotoUpload
+                  endpoint={`/recipes/${r.id}/photo`}
+                  photoUrl={r.photo_url}
+                  onChange={(data) =>
+                    setRecipes((prev) => prev.map((x) => (x.id === r.id ? (data as unknown as Recipe) : x)))
+                  }
+                  fallback="Sem foto"
+                  emptyLabel="Enviar foto"
+                  hint=""
+                  alt={`Foto de ${r.name}`}
+                  shape="rect"
+                  confirmTitle="Remover a foto da receita?"
+                />
+              </div>
             </li>
           ))}
         </ul>

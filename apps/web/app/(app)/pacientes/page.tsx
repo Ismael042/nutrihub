@@ -5,6 +5,7 @@ import { authFetch, useRequireAuth } from "@/lib/auth";
 import EmptyState from "@/components/EmptyState";
 import { SkeletonRows } from "@/components/Skeleton";
 import { IconSearch, IconUsers } from "@/components/icons";
+import { initials } from "@/lib/initials";
 
 interface Patient {
   id: string;
@@ -13,6 +14,7 @@ interface Patient {
   phone: string | null;
   birth_date: string | null;
   status: "active" | "inactive";
+  photo_url: string | null;
 }
 
 type TabKey = "active" | "inactive" | "all";
@@ -130,9 +132,20 @@ export default function PacientesPage() {
                 {patients.map((p) => (
                   <tr key={p.id}>
                     <td>
-                      <a href={`/pacientes/${p.id}`} style={{ fontWeight: 600, color: "var(--color-text-primary)" }}>
-                        {p.name}
-                      </a>
+                      {/* Avatar dentro da célula do nome em vez de coluna própria:
+                          coluna nova só pra imagem decorativa gasta largura à toa. */}
+                      <div className="avatar-inline-row">
+                        {p.photo_url ? (
+                          <img className="avatar-inline" src={p.photo_url} alt="" />
+                        ) : (
+                          <span className="avatar-inline" aria-hidden="true">
+                            {initials(p.name)}
+                          </span>
+                        )}
+                        <a href={`/pacientes/${p.id}`} style={{ fontWeight: 600, color: "var(--color-text-primary)" }}>
+                          {p.name}
+                        </a>
+                      </div>
                     </td>
                     <td style={{ color: "var(--color-text-muted)" }}>{p.email ?? p.phone ?? "—"}</td>
                     <td>

@@ -32,6 +32,7 @@ from app.routers import (
     substitution_lists,
     tags,
     team,
+    tenant_settings,
 )
 
 
@@ -76,4 +77,5 @@ app.include_router(recurring_charges.router)
 app.include_router(inventory.router)
 app.include_router(team.router)
 app.include_router(public_profile.router)
+app.include_router(tenant_settings.router)
 app.include_router(booking_requests.router)

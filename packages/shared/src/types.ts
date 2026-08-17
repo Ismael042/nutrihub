@@ -29,6 +29,8 @@ export interface Patient {
   birth_date: string | null;
   cpf: string | null;
   status: PatientStatus;
+  /** URL assinada com expiração (bucket privado) — não é link permanente. */
+  photo_url?: string | null;
 }
 
 export type LocationKind = "in_person" | "video";
@@ -91,6 +93,8 @@ export interface Recipe {
   id: string;
   name: string;
   instructions: string | null;
+  /** URL assinada com expiração (bucket privado) — não é link permanente. */
+  photo_url?: string | null;
 }
 
 export interface MealItem {

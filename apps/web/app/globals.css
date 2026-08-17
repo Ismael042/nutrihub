@@ -2000,6 +2000,16 @@ table {
   flex-shrink: 0;
 }
 
+/* Logo é retangular, não redondo — e precisa caber inteiro (contain), não ser
+   cortado como uma foto de rosto. */
+.avatar-upload-preview-rect {
+  width: 140px;
+  height: 72px;
+  border-radius: var(--radius-md);
+  object-fit: contain;
+  background: var(--color-bg-subtle);
+}
+
 .avatar-upload-fallback {
   display: flex;
   align-items: center;
@@ -2008,6 +2018,35 @@ table {
   font-weight: 700;
   color: var(--color-primary-hover);
   user-select: none;
+}
+
+.avatar-upload-preview-rect.avatar-upload-fallback {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+/* Avatar pequeno pra listagem (célula da tabela) — só leitura, sem upload. */
+.avatar-inline {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  background: var(--color-primary-subtle);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-primary-hover);
+  user-select: none;
+}
+
+.avatar-inline-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 }
 
 .avatar-upload-actions {

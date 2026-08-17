@@ -10,6 +10,8 @@ import EmptyState from "@/components/EmptyState";
 import { SkeletonRows, SkeletonText } from "@/components/Skeleton";
 import { IconUsers } from "@/components/icons";
 import PasswordInput from "@/components/PasswordInput";
+import PhotoUpload from "@/components/PhotoUpload";
+import { initials } from "@/lib/initials";
 import type { Patient, Tag } from "@nutrihub/shared";
 
 export default function PacienteDetalhePage() {
@@ -188,6 +190,21 @@ export default function PacienteDetalhePage() {
         <span className={`badge ${patient.status === "active" ? "badge-success" : "badge-neutral"}`}>
           {patient.status === "active" ? "Ativo" : "Inativo"}
         </span>
+      </div>
+
+      {/* Fora do form de salvar de propósito: arquivo não cabe num PATCH JSON, e
+          "escolhi a foto mas esqueci de salvar" seria um estado ruim. Envia na hora. */}
+      <div className="field">
+        <span className="field-label">Foto</span>
+        <PhotoUpload
+          endpoint={`/patients/${patient.id}/photo`}
+          photoUrl={patient.photo_url ?? null}
+          onChange={(data) => setPatient(data as unknown as Patient)}
+          fallback={initials(patient.name)}
+          hint="JPG, PNG ou WebP, até 3 MB. Visível só pra você e sua equipe."
+          alt={`Foto de ${patient.name}`}
+          confirmTitle="Remover a foto do paciente?"
+        />
       </div>
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: "var(--space-6)" }}>

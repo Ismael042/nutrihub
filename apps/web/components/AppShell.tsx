@@ -73,7 +73,8 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/nutriplan", label: "NutriPlan", icon: IconCheckSquare },
       { href: "/equipe", label: "Equipe", icon: IconTeam },
-      { href: "/configuracoes/pagina-publica", label: "Página pública", icon: IconGlobe }
+      { href: "/configuracoes/pagina-publica", label: "Página pública", icon: IconGlobe },
+      { href: "/configuracoes/consultorio", label: "Consultório", icon: IconStore }
     ]
   }
 ];

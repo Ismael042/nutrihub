@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     # (ex: https://cdn.isdev.online) — a Cloudflare rate-limita o *.r2.dev e diz
     # explicitamente pra não usar em produção.
     r2_public_base_url: str = ""
+    # Bucket privado (foto de paciente/receita, logo do consultório): sem domínio
+    # público, leitura só por URL assinada com expiração. Dado sensível de saúde não
+    # pode ficar acessível por link permanente.
+    r2_private_bucket: str = ""
     # Lista separada por vírgula; sem default de produção proposital (só localhost
     # pra dev) — cada ambiente novo declara suas próprias origens via env.
     cors_allow_origins: str = "http://localhost:3000"
