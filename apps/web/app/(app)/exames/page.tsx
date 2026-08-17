@@ -1,9 +1,18 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
 import { formatDate, type LabExamRequest } from "@nutrihub/shared";
 import { useConfirm } from "@/components/ConfirmDialog";
+import { useToast } from "@/components/Toast";
+
+const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 import EmptyState from "@/components/EmptyState";
 import { SkeletonRows } from "@/components/Skeleton";
 import { IconFlask } from "@/components/icons";
@@ -16,6 +25,7 @@ interface Patient {
 export default function ExamesPage() {
   const professional = useRequireAuth();
   const confirm = useConfirm();
+  const toast = useToast();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [requests, setRequests] = useState<LabExamRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,6 +33,10 @@ export default function ExamesPage() {
   const [examNames, setExamNames] = useState<string[]>([""]);
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
+  // Um input de arquivo só, reaproveitado por item da lista.
+  const [attachTarget, setAttachTarget] = useState<string | null>(null);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const attachRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     setLoading(true);
@@ -72,6 +86,46 @@ export default function ExamesPage() {
     if (!(await confirm({ title: "Excluir esta solicitação?", danger: true, confirmLabel: "Excluir" }))) return;
     await authFetch(`/lab-exam-requests/${id}`, { method: "DELETE" });
     load();
+  }
+
+  async function handleAttachmentSelected(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    const requestId = attachTarget;
+    setAttachTarget(null);
+    if (!file || !requestId) return;
+
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      toast.error("Arquivo muito grande — envie até 10 MB.");
+      return;
+    }
+
+    setUploadingAttachment(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await authFetch(`/lab-exam-requests/${requestId}/attachments`, {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail ?? "Não foi possível anexar o arquivo");
+      toast.success("Resultado anexado.");
+      load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro inesperado");
+    } finally {
+      setUploadingAttachment(false);
+    }
+  }
+
+  async function removeAttachment(requestId: string, attachmentId: string) {
+    if (!(await confirm({ title: "Remover este anexo?", danger: true, confirmLabel: "Remover" }))) return;
+    const res = await authFetch(`/lab-exam-requests/${requestId}/attachments/${attachmentId}`, {
+      method: "DELETE"
+    });
+    if (res.ok) load();
+    else toast.error("Não foi possível remover o anexo");
   }
 
   if (!professional) return null;
@@ -166,10 +220,54 @@ export default function ExamesPage() {
                 {formatDate(r.requested_at)}
                 {r.notes && ` · ${r.notes}`}
               </div>
+
+              {(r.attachments ?? []).length > 0 && (
+                <ul className="attachment-list">
+                  {(r.attachments ?? []).map((a) => (
+                    <li className="attachment-item" key={a.id}>
+                      {a.url ? (
+                        <a href={a.url} target="_blank" rel="noreferrer">
+                          {a.filename}
+                        </a>
+                      ) : (
+                        <span>{a.filename}</span>
+                      )}
+                      <span className="attachment-meta">{formatSize(a.size_bytes)}</span>
+                      <button
+                        className="btn-sm"
+                        style={{ color: "var(--color-error)" }}
+                        onClick={() => removeAttachment(r.id, a.id)}
+                      >
+                        Remover
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <button
+                className="btn-sm"
+                style={{ marginTop: 8 }}
+                disabled={uploadingAttachment}
+                onClick={() => {
+                  setAttachTarget(r.id);
+                  attachRef.current?.click();
+                }}
+              >
+                {uploadingAttachment ? "Enviando..." : "+ Anexar resultado"}
+              </button>
             </li>
           ))}
         </ul>
       )}
+
+      <input
+        ref={attachRef}
+        type="file"
+        accept="application/pdf,image/jpeg,image/png,image/webp"
+        hidden
+        onChange={handleAttachmentSelected}
+      />
     </main>
   );
 }

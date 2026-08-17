@@ -33,6 +33,48 @@ async def read_upload(file: UploadFile) -> bytes:
     return b"".join(chunks)
 
 
+async def read_attachment(file: UploadFile) -> bytes:
+    """Igual ao read_upload, mas aceita PDF e tem teto maior (laudo escaneado).
+
+    PDF não passa pelo re-encode do Pillow, então não ganha a garantia de "re-encodar
+    prova que é imagem". Por isso o tipo é conferido pelos magic bytes, e não pelo
+    header que o cliente mandou — e o objeto é gravado com o content_type que a API
+    determinou, não com o alegado.
+    """
+    if not storage.is_private_configured():
+        raise HTTPException(status_code=503, detail="Upload de arquivo não está configurado neste ambiente")
+    if file.content_type not in storage.ACCEPTED_ATTACHMENT_TYPES:
+        raise HTTPException(status_code=415, detail="Envie um PDF ou uma imagem JPG, PNG ou WebP")
+
+    chunks: list[bytes] = []
+    total = 0
+    while chunk := await file.read(64 * 1024):
+        total += len(chunk)
+        if total > storage.MAX_ATTACHMENT_BYTES:
+            raise HTTPException(status_code=413, detail="Arquivo muito grande — envie até 10 MB")
+        chunks.append(chunk)
+    if total == 0:
+        raise HTTPException(status_code=415, detail="Arquivo vazio")
+    return b"".join(chunks)
+
+
+def sniff_attachment_type(data: bytes, claimed: str | None) -> str:
+    """Determina o content_type pelos primeiros bytes. Levanta 415 se não bater.
+
+    Nunca confia no header do cliente: é ele que define com que tipo o objeto vai ser
+    servido depois pela URL assinada.
+    """
+    if data.startswith(b"%PDF-"):
+        return "application/pdf"
+    if data.startswith(b"\xff\xd8\xff"):
+        return "image/jpeg"
+    if data.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png"
+    if data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        return "image/webp"
+    raise HTTPException(status_code=415, detail="Arquivo não parece ser um PDF nem uma imagem válida")
+
+
 async def replace_photo(
     raw: bytes,
     *,

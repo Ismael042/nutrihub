@@ -250,6 +250,12 @@ async def delete_patient(
     current: CurrentProfessional = Depends(get_current_professional),
 ) -> None:
     async with db.tenant_connection(current.tenant_id) as conn:
+        # Colhe a chave antes: apagar a linha não apaga o objeto no R2.
+        photo_key = await conn.fetchval(
+            "select photo_key from patients where id = $1 and tenant_id = $2",
+            patient_id,
+            current.tenant_id,
+        )
         result = await conn.execute(
             "delete from patients where id = $1 and tenant_id = $2",
             patient_id,
@@ -257,6 +263,8 @@ async def delete_patient(
         )
     if result == "DELETE 0":
         raise HTTPException(status_code=404, detail="Paciente não encontrado")
+
+    await storage.delete_private(photo_key)
 
 
 @router.get("/{patient_id}/tags", response_model=list[TagOut])

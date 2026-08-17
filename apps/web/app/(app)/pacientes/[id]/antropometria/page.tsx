@@ -1,10 +1,14 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useParams } from "next/navigation";
 import { authFetch, useRequireAuth } from "@/lib/auth";
 import { formatDate, type AnthropometricMeasurement, type Patient } from "@nutrihub/shared";
 import { useConfirm } from "@/components/ConfirmDialog";
+import { useToast } from "@/components/Toast";
+
+const KIND_LABEL: Record<string, string> = { front: "Frente", side: "Lado", back: "Costas" };
+const MAX_PHOTO_BYTES = 3 * 1024 * 1024;
 
 const FIELDS: { key: keyof AnthropometricMeasurement; label: string; unit: string }[] = [
   { key: "weight_kg", label: "Peso", unit: "kg" },
@@ -58,12 +62,64 @@ function Sparkline({ points }: { points: { x: number; y: number }[] }) {
 export default function AntropometriaPage() {
   const professional = useRequireAuth();
   const confirm = useConfirm();
+  const toast = useToast();
   const params = useParams<{ id: string }>();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [measurements, setMeasurements] = useState<AnthropometricMeasurement[]>([]);
   const [form, setForm] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  // Qual medição está recebendo foto agora — o input de arquivo é um só, reaproveitado
+  // por linha da tabela em vez de um por medição.
+  const [photoTarget, setPhotoTarget] = useState<{ id: string; kind: string } | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const photoRef = useRef<HTMLInputElement>(null);
+
+  function pickPhoto(measurementId: string, kind: string) {
+    setPhotoTarget({ id: measurementId, kind });
+    photoRef.current?.click();
+  }
+
+  async function handlePhotoSelected(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    const target = photoTarget;
+    setPhotoTarget(null);
+    if (!file || !target) return;
+
+    if (file.size > MAX_PHOTO_BYTES) {
+      toast.error("Imagem muito grande — envie um arquivo de até 3 MB.");
+      return;
+    }
+
+    setUploadingPhoto(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      if (target.kind) formData.append("kind", target.kind);
+      const res = await authFetch(`/anthropometric-measurements/${target.id}/photos`, {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail ?? "Não foi possível enviar a foto");
+      toast.success("Foto adicionada.");
+      load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro inesperado");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
+
+  async function removePhoto(measurementId: string, photoId: string) {
+    if (!(await confirm({ title: "Remover esta foto?", danger: true, confirmLabel: "Remover" }))) return;
+    const res = await authFetch(`/anthropometric-measurements/${measurementId}/photos/${photoId}`, {
+      method: "DELETE"
+    });
+    if (res.ok) load();
+    else toast.error("Não foi possível remover a foto");
+  }
 
   async function load() {
     const [patientRes, measurementsRes] = await Promise.all([
@@ -199,6 +255,9 @@ export default function AntropometriaPage() {
                 <th key={f.key}>{f.label}</th>
               ))}
               <th>IMC</th>
+              {/* Coluna própria: não dá pra entrar no array FIELDS, que renderiza
+                  as células com String(valor) e transformaria a lista em texto. */}
+              <th>Fotos</th>
               <th></th>
             </tr>
           </thead>
@@ -213,6 +272,39 @@ export default function AntropometriaPage() {
                   ))}
                   <td>{measurementBmi ? measurementBmi.toFixed(1) : "—"}</td>
                   <td>
+                    <div className="photo-grid">
+                      {(m.photos ?? []).map((photo) => (
+                        <div className="photo-thumb" key={photo.id}>
+                          {photo.url && (
+                            <a href={photo.url} target="_blank" rel="noreferrer">
+                              <img src={photo.url} alt={KIND_LABEL[photo.kind ?? ""] ?? "Foto de evolução"} />
+                            </a>
+                          )}
+                          {photo.kind && <span className="photo-thumb-kind">{KIND_LABEL[photo.kind]}</span>}
+                          <button
+                            className="photo-thumb-remove"
+                            onClick={() => removePhoto(m.id, photo.id)}
+                            aria-label="Remover foto"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
+                      {(["front", "side", "back"] as const).map((kind) => (
+                        <button
+                          key={kind}
+                          className="btn-sm"
+                          disabled={uploadingPhoto}
+                          onClick={() => pickPhoto(m.id, kind)}
+                        >
+                          + {KIND_LABEL[kind]}
+                        </button>
+                      ))}
+                    </div>
+                  </td>
+                  <td>
                     <button onClick={() => remove(m.id)} style={{ color: "var(--color-error)" }}>
                       Excluir
                     </button>
@@ -223,6 +315,15 @@ export default function AntropometriaPage() {
           </tbody>
         </table>
       </div>
+      {/* Um input só, reaproveitado por todas as linhas — qual medição recebe a foto
+          vem do photoTarget setado no clique. */}
+      <input
+        ref={photoRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        hidden
+        onChange={handlePhotoSelected}
+      />
       {measurements.length === 0 && <p style={{ marginTop: 12 }}>Nenhuma medição registrada ainda.</p>}
     </main>
   );

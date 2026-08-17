@@ -172,6 +172,16 @@ export interface LabExamRequest {
   exams: ExamItem[];
   notes: string | null;
   requested_at: string;
+  attachments?: LabExamAttachment[];
+}
+
+export interface LabExamAttachment {
+  id: string;
+  filename: string;
+  content_type: string;
+  size_bytes: number;
+  /** URL assinada com expiração (bucket privado) — não é link permanente. */
+  url: string | null;
 }
 
 export interface SubstitutionItem {
@@ -231,6 +241,14 @@ export interface AnthropometricMeasurement {
   hip_cm: number | null;
   neck_cm: number | null;
   notes: string | null;
+  photos?: MeasurementPhoto[];
+}
+
+export interface MeasurementPhoto {
+  id: string;
+  kind: "front" | "side" | "back" | null;
+  /** URL assinada com expiração (bucket privado) — não é link permanente. */
+  url: string | null;
 }
 
 export interface TeamMember {

@@ -23,6 +23,16 @@ from app.core.config import settings
 
 MAX_UPLOAD_BYTES = 3 * 1024 * 1024
 ACCEPTED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp"}
+# Anexo de exame aceita PDF além de imagem, e tem teto maior (laudo escaneado passa
+# fácil de 3 MB).
+MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024
+ACCEPTED_ATTACHMENT_TYPES = {"image/jpeg", "image/png", "image/webp", "application/pdf"}
+EXT_BY_CONTENT_TYPE = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "application/pdf": "pdf",
+}
 AVATAR_MAX_SIDE = 512
 LOGO_MAX_SIDE = 600
 JPEG_QUALITY = 85
@@ -187,7 +197,7 @@ async def put_private(prefix: str, owner_id: Any, data: bytes, *, content_type: 
     Sem CacheControl: o objeto é servido por URL assinada de vida curta, então cache
     de borda longo não faz sentido aqui.
     """
-    ext = "png" if content_type == "image/png" else "jpg"
+    ext = EXT_BY_CONTENT_TYPE.get(content_type, "bin")
     key = f"{prefix}/{owner_id}/{uuid.uuid4().hex}.{ext}"
     await _put(settings.r2_private_bucket, key, data, content_type, None)
     return key

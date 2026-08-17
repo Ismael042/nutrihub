@@ -153,8 +153,14 @@ async def delete_recipe_photo(
 @router.delete("/{recipe_id}", status_code=204)
 async def delete_recipe(recipe_id: UUID, current: CurrentProfessional = Depends(get_current_professional)) -> None:
     async with db.tenant_connection(current.tenant_id) as conn:
+        # Colhe a chave antes: apagar a linha não apaga o objeto no R2.
+        photo_key = await conn.fetchval(
+            "select photo_key from recipes where id = $1 and tenant_id = $2", recipe_id, current.tenant_id
+        )
         result = await conn.execute(
             "delete from recipes where id = $1 and tenant_id = $2", recipe_id, current.tenant_id
         )
     if result == "DELETE 0":
         raise HTTPException(status_code=404, detail="Receita não encontrada")
+
+    await storage.delete_private(photo_key)

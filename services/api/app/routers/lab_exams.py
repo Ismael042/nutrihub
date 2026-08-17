@@ -1,17 +1,26 @@
 from datetime import date
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel
 
-from app.core import db
+from app.core import db, storage
 from app.core.deps import CurrentProfessional, get_current_professional
+from app.core.photos import read_attachment, sniff_attachment_type
 
 router = APIRouter(prefix="/lab-exam-requests", tags=["lab-exams"])
 
 
 class ExamItem(BaseModel):
     name: str
+
+
+class AttachmentOut(BaseModel):
+    id: UUID
+    filename: str
+    content_type: str
+    size_bytes: int
+    url: str | None
 
 
 class LabExamCreate(BaseModel):
@@ -32,12 +41,41 @@ class LabExamOut(BaseModel):
     exams: list[dict]
     notes: str | None
     requested_at: date
+    attachments: list[AttachmentOut] = []
 
 
 SELECT = """
     select l.id, l.patient_id, p.name as patient_name, l.exams, l.notes, l.requested_at
     from lab_exam_requests l join patients p on p.id = l.patient_id
 """
+
+
+async def _attachments_by_request(conn, request_ids: list) -> dict:
+    """Carrega os anexos de vários pedidos numa query só (evita N+1 na listagem)."""
+    if not request_ids:
+        return {}
+    rows = await conn.fetch(
+        """
+        select id, request_id, filename, content_type, size_bytes, storage_key
+        from lab_exam_attachments where request_id = any($1::uuid[])
+        order by created_at
+        """,
+        request_ids,
+    )
+    grouped: dict = {}
+    for row in rows:
+        grouped.setdefault(row["request_id"], []).append(
+            AttachmentOut(
+                id=row["id"],
+                filename=row["filename"],
+                content_type=row["content_type"],
+                size_bytes=row["size_bytes"],
+                # Bucket privado: URL assinada, expira. Resultado de exame é dado de
+                # saúde — não pode ficar acessível por link permanente.
+                url=storage.presigned_get_url(row["storage_key"]),
+            )
+        )
+    return grouped
 
 
 @router.get("", response_model=list[LabExamOut])
@@ -59,7 +97,8 @@ async def list_lab_exams(
     )
     async with db.tenant_connection(current.tenant_id) as conn:
         rows = await conn.fetch(query, *params)
-    return [LabExamOut(**dict(row)) for row in rows]
+        attachments = await _attachments_by_request(conn, [row["id"] for row in rows])
+    return [LabExamOut(**dict(row), attachments=attachments.get(row["id"], [])) for row in rows]
 
 
 @router.post("", response_model=LabExamOut, status_code=201)
@@ -106,14 +145,101 @@ async def update_lab_exam(
         if updated_id is None:
             raise HTTPException(status_code=404, detail="Solicitação não encontrada")
         row = await conn.fetchrow(f"{SELECT} where l.id = $1", updated_id)
-    return LabExamOut(**dict(row))
+        attachments = await _attachments_by_request(conn, [row["id"]])
+    return LabExamOut(**dict(row), attachments=attachments.get(row["id"], []))
+
+
+@router.post("/{exam_id}/attachments", response_model=AttachmentOut, status_code=201)
+async def upload_attachment(
+    exam_id: UUID,
+    file: UploadFile = File(...),
+    current: CurrentProfessional = Depends(get_current_professional),
+) -> AttachmentOut:
+    raw = await read_attachment(file)
+    # Tipo determinado pelos magic bytes, não pelo header do cliente: é com esse tipo
+    # que o objeto vai ser servido depois pela URL assinada.
+    content_type = sniff_attachment_type(raw, file.content_type)
+
+    async with db.tenant_connection(current.tenant_id) as conn:
+        exists = await conn.fetchval(
+            "select id from lab_exam_requests where id = $1 and tenant_id = $2", exam_id, current.tenant_id
+        )
+    if exists is None:
+        raise HTTPException(status_code=404, detail="Solicitação não encontrada")
+
+    try:
+        key = await storage.put_private("exams", exam_id, raw, content_type=content_type)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[lab_exams] falha ao subir anexo: {exc}")  # noqa: T201
+        raise HTTPException(status_code=502, detail="Não foi possível salvar o arquivo agora. Tente de novo.")
+
+    # O nome original é só rótulo de exibição — a chave do objeto é uuid, então nome
+    # com "../" ou caractere estranho não vira caminho em lugar nenhum.
+    filename = (file.filename or "arquivo")[:200]
+
+    async with db.tenant_connection(current.tenant_id) as conn:
+        row = await conn.fetchrow(
+            """
+            insert into lab_exam_attachments
+                (tenant_id, request_id, storage_key, filename, content_type, size_bytes)
+            values ($1, $2, $3, $4, $5, $6)
+            returning id, filename, content_type, size_bytes, storage_key
+            """,
+            current.tenant_id,
+            exam_id,
+            key,
+            filename,
+            content_type,
+            len(raw),
+        )
+    return AttachmentOut(
+        id=row["id"],
+        filename=row["filename"],
+        content_type=row["content_type"],
+        size_bytes=row["size_bytes"],
+        url=storage.presigned_get_url(row["storage_key"]),
+    )
+
+
+@router.delete("/{exam_id}/attachments/{attachment_id}", status_code=204)
+async def delete_attachment(
+    exam_id: UUID,
+    attachment_id: UUID,
+    current: CurrentProfessional = Depends(get_current_professional),
+) -> None:
+    async with db.tenant_connection(current.tenant_id) as conn:
+        row = await conn.fetchrow(
+            """
+            delete from lab_exam_attachments
+            where id = $1 and request_id = $2 and tenant_id = $3
+            returning storage_key
+            """,
+            attachment_id,
+            exam_id,
+            current.tenant_id,
+        )
+    if row is None:
+        raise HTTPException(status_code=404, detail="Anexo não encontrado")
+    await storage.delete_private(row["storage_key"])
 
 
 @router.delete("/{exam_id}", status_code=204)
 async def delete_lab_exam(exam_id: UUID, current: CurrentProfessional = Depends(get_current_professional)) -> None:
     async with db.tenant_connection(current.tenant_id) as conn:
+        # Anexos somem em cascata no banco, mas os objetos no R2 não.
+        keys = [
+            r["storage_key"]
+            for r in await conn.fetch(
+                "select storage_key from lab_exam_attachments where request_id = $1 and tenant_id = $2",
+                exam_id,
+                current.tenant_id,
+            )
+        ]
         result = await conn.execute(
             "delete from lab_exam_requests where id = $1 and tenant_id = $2", exam_id, current.tenant_id
         )
     if result == "DELETE 0":
         raise HTTPException(status_code=404, detail="Solicitação não encontrada")
+
+    for key in keys:
+        await storage.delete_private(key)
