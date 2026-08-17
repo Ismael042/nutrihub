@@ -12,6 +12,14 @@ google-auth==2.34.0
 requests==2.32.3   # transporte usado por google.auth.transport.requests (verificação do ID token)
 # Usado em runtime por app/core/email.py (Resend) e por pytest/TestClient nos testes.
 httpx==0.27.2
+# Upload da foto de perfil (POST /me/public-profile/photo). O fastapi puro não puxa
+# python-multipart — sem ele, UploadFile/File() estouram RuntimeError já no import.
+python-multipart==0.0.9
+# R2 é S3-compatível; a Cloudflare não expõe API REST de objeto, só a S3.
+boto3==1.35.36
+# Re-encoda a imagem: normaliza formato/dimensão e, principalmente, descarta o EXIF
+# (foto de celular carrega GPS, e essa imagem vai pra uma página pública).
+Pillow==10.4.0
 
 # Dev/test only
 pytest==8.3.2

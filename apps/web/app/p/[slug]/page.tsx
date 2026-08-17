@@ -6,6 +6,7 @@ import BookingForm from "./BookingForm";
 interface PublicPage {
   name: string;
   bio: string | null;
+  photo_url: string | null;
 }
 
 async function fetchPage(slug: string): Promise<PublicPage | null> {
@@ -34,7 +35,17 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   return {
     title: `${page.name} — NutriHub`,
     description,
-    openGraph: { title: page.name, description, type: "profile" }
+    openGraph: {
+      title: page.name,
+      description,
+      type: "profile",
+      // Sem width/height: a imagem é redimensionada preservando proporção no servidor,
+      // então daqui não dá pra saber as dimensões finais sem reabrir o arquivo —
+      // declarar valor errado é pior que omitir.
+      ...(page.photo_url ? { images: [{ url: page.photo_url, alt: `Foto de ${page.name}` }] } : {})
+    },
+    // "summary" e não "summary_large_image": o avatar é quadrado.
+    ...(page.photo_url ? { twitter: { card: "summary" as const } } : {})
   };
 }
 
@@ -55,5 +66,5 @@ export default async function PublicProfessionalPage({ params }: { params: { slu
     );
   }
 
-  return <BookingForm slug={params.slug} name={page.name} bio={page.bio} />;
+  return <BookingForm slug={params.slug} name={page.name} bio={page.bio} photoUrl={page.photo_url} />;
 }

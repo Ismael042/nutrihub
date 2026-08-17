@@ -284,6 +284,7 @@ export interface PublicProfile {
   public_slug: string | null;
   bio: string | null;
   public_booking_enabled: boolean;
+  photo_url: string | null;
 }
 
 export type MealKind = "breakfast" | "lunch" | "dinner" | "snack";

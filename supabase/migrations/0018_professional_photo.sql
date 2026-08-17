@@ -1,0 +1,13 @@
+-- Foto de perfil do profissional, exibida na página pública (/p/{slug}).
+--
+-- Guarda a URL pública do objeto no Cloudflare R2, não os bytes: não existe bytea em
+-- lugar nenhum do schema, e Postgres self-hosted atrás de um túnel doméstico não é
+-- lugar de servir imagem pra internet. Mesma intenção do (hoje vestigial)
+-- diet_plans.pdf_url — a coluna guarda referência, o arquivo mora fora do banco.
+--
+-- Só a API escreve aqui, via POST /me/public-profile/photo, depois de validar e
+-- re-encodar os bytes. `photo_url` de propósito NÃO entra em PublicProfileUpdate
+-- (app/routers/public_profile.py) — se entrasse, o PATCH montaria o SET dinamicamente
+-- a partir dela e qualquer cliente autenticado poderia apontar a foto pública pra uma
+-- URL arbitrária de terceiros.
+alter table professionals add column photo_url text;

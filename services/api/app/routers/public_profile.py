@@ -1,32 +1,42 @@
 import re
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, EmailStr
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from pydantic import BaseModel, EmailStr, Field
 
-from app.core import db
+from app.core import db, storage
 from app.core.deps import CurrentProfessional, get_current_professional
 
 router = APIRouter(tags=["public-profile"])
 
 SLUG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+BIO_MAX_LENGTH = 800
 
 
 class PublicProfileUpdate(BaseModel):
     public_slug: str | None = None
-    bio: str | None = None
+    # 800 chars: os modelos prontos (apps/web/lib/bioTemplates.ts) ficam em ~460 e
+    # sobra folga pra personalizar. A coluna não tem limite; o limite é aqui e no
+    # maxLength do textarea, porque esse texto vai pro <p> de uma página pública.
+    bio: str | None = Field(default=None, max_length=BIO_MAX_LENGTH)
     public_booking_enabled: bool | None = None
+    # photo_url NÃO entra aqui de propósito: o SET do PATCH é montado dinamicamente a
+    # partir das chaves deste modelo, então incluí-la deixaria qualquer cliente
+    # autenticado apontar a foto pública pra URL arbitrária de terceiros. Foto só muda
+    # por POST/DELETE /me/public-profile/photo.
 
 
 class PublicProfileOut(BaseModel):
     public_slug: str | None
     bio: str | None
     public_booking_enabled: bool
+    photo_url: str | None
 
 
 class PublicPageOut(BaseModel):
     name: str
     bio: str | None
+    photo_url: str | None
 
 
 class BookingRequestCreate(BaseModel):
@@ -41,7 +51,7 @@ class BookingRequestCreate(BaseModel):
 async def get_my_public_profile(current: CurrentProfessional = Depends(get_current_professional)) -> PublicProfileOut:
     async with db.tenant_connection(current.tenant_id) as conn:
         row = await conn.fetchrow(
-            "select public_slug, bio, public_booking_enabled from professionals where id = $1",
+            "select public_slug, bio, public_booking_enabled, photo_url from professionals where id = $1",
             current.professional_id,
         )
     return PublicProfileOut(**dict(row))
@@ -70,7 +80,7 @@ async def update_my_public_profile(
                 f"""
                 update professionals set {', '.join(set_clauses)}
                 where id = $1
-                returning public_slug, bio, public_booking_enabled
+                returning public_slug, bio, public_booking_enabled, photo_url
                 """,
                 *params,
             )
@@ -85,12 +95,83 @@ async def update_my_public_profile(
 async def get_public_page(slug: str) -> PublicPageOut:
     async with db.pool().acquire() as conn:
         row = await conn.fetchrow(
-            "select name, bio from professionals where public_slug = $1 and public_booking_enabled = true",
+            """
+            select name, bio, photo_url from professionals
+            where public_slug = $1 and public_booking_enabled = true
+            """,
             slug,
         )
     if row is None:
         raise HTTPException(status_code=404, detail="Página não encontrada")
     return PublicPageOut(**dict(row))
+
+
+@router.post("/me/public-profile/photo", response_model=PublicProfileOut)
+async def upload_my_photo(
+    file: UploadFile = File(...),
+    current: CurrentProfessional = Depends(get_current_professional),
+) -> PublicProfileOut:
+    if not storage.is_configured():
+        raise HTTPException(status_code=503, detail="Upload de foto não está configurado neste ambiente")
+    if file.content_type not in storage.ACCEPTED_CONTENT_TYPES:
+        raise HTTPException(status_code=415, detail="Envie uma imagem JPG, PNG ou WebP")
+
+    # Lê em pedaços com teto: `await file.read()` sem limite deixaria o Starlette
+    # fazer spool pra disco acima de 1 MB, virando vetor de encher disco.
+    chunks: list[bytes] = []
+    total = 0
+    while chunk := await file.read(64 * 1024):
+        total += len(chunk)
+        if total > storage.MAX_UPLOAD_BYTES:
+            raise HTTPException(status_code=413, detail="Imagem muito grande — envie um arquivo de até 3 MB")
+        chunks.append(chunk)
+    if total == 0:
+        raise HTTPException(status_code=415, detail="Arquivo vazio")
+
+    try:
+        normalized = storage.normalize_avatar(b"".join(chunks))
+    except storage.InvalidImageError:
+        raise HTTPException(status_code=415, detail="Não consegui ler essa imagem. Tente um JPG ou PNG.")
+
+    try:
+        new_url = await storage.put_avatar(current.professional_id, normalized)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[public_profile] falha ao subir foto: {exc}")  # noqa: T201
+        raise HTTPException(status_code=502, detail="Não foi possível salvar a foto agora. Tente de novo.")
+
+    async with db.tenant_connection(current.tenant_id) as conn:
+        old_url = await conn.fetchval("select photo_url from professionals where id = $1", current.professional_id)
+        row = await conn.fetchrow(
+            """
+            update professionals set photo_url = $2 where id = $1
+            returning public_slug, bio, public_booking_enabled, photo_url
+            """,
+            current.professional_id,
+            new_url,
+        )
+
+    # Best-effort e depois do commit: se falhar, sobra objeto órfão (frações de
+    # centavo) em vez de a linha apontar pra objeto que não existe mais.
+    await storage.delete_by_public_url(old_url)
+    return PublicProfileOut(**dict(row))
+
+
+@router.delete("/me/public-profile/photo", response_model=PublicProfileOut)
+async def delete_my_photo(
+    current: CurrentProfessional = Depends(get_current_professional),
+) -> PublicProfileOut:
+    async with db.tenant_connection(current.tenant_id) as conn:
+        old_url = await conn.fetchval("select photo_url from professionals where id = $1", current.professional_id)
+        row = await conn.fetchrow(
+            """
+            update professionals set photo_url = null where id = $1
+            returning public_slug, bio, public_booking_enabled, photo_url
+            """,
+            current.professional_id,
+        )
+
+    await storage.delete_by_public_url(old_url)
+    return PublicProfileOut(**dict(row))
 
 
 @router.post("/public/{slug}/booking-requests", status_code=201)

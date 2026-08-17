@@ -22,6 +22,7 @@ async def test_public_page_hidden_until_enabled(client: AsyncClient, make_profes
     page_res = await client.get("/public/joice-nutri-test")
     assert page_res.status_code == 200
     assert page_res.json()["bio"] == "Nutricionista clínica"
+    assert page_res.json()["photo_url"] is None
 
 
 async def test_rejects_invalid_slug(client: AsyncClient, make_professional):

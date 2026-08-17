@@ -1898,3 +1898,128 @@ table {
   margin-top: var(--space-3);
   color: var(--color-text-secondary);
 }
+
+/* ============================================================================
+   PÁGINA PÚBLICA DO PROFISSIONAL (/p/[slug]) + UPLOAD DE FOTO
+   Hero centralizado: foto (ou iniciais) + nome + bio, acima do formulário de
+   solicitação. O estado SEM foto é o padrão, não a exceção — a maioria dos
+   profissionais nunca sobe uma —, então o fallback de iniciais usa a mesma
+   geometria do avatar real e o layout não muda de forma nos dois casos.
+   ============================================================================ */
+
+.public-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.public-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: var(--radius-full);
+  /* cover: foto fora do quadrado é cortada, não esticada. */
+  object-fit: cover;
+  background: var(--color-primary-subtle);
+  border: 3px solid var(--color-surface);
+  box-shadow: var(--shadow-md);
+  flex-shrink: 0;
+}
+
+.public-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-primary-hover);
+  border-color: transparent;
+  /* Sombra mais discreta: é placeholder, não conteúdo. */
+  box-shadow: var(--shadow-xs);
+  user-select: none;
+}
+
+.public-hero-name {
+  margin: 0;
+}
+
+.public-hero-bio {
+  font: var(--text-body);
+  color: var(--color-text-secondary);
+  /* pre-line: os modelos de bio podem ter quebra de linha e um <p> comum colapsaria
+     todas. Preserva \n, colapsa espaço repetido, quebra linha normalmente. */
+  white-space: pre-line;
+  /* Sobrevive a URL longa colada na bio sem estourar o container. */
+  overflow-wrap: anywhere;
+  max-width: 42ch;
+  margin: 0;
+}
+
+.public-booking-form {
+  margin-top: var(--space-5);
+}
+
+.public-booking-title {
+  font: var(--text-h3);
+  margin: 0 0 var(--space-3);
+}
+
+@media (max-width: 480px) {
+  .public-avatar {
+    width: 76px;
+    height: 76px;
+  }
+
+  .public-avatar-fallback {
+    font-size: 26px;
+  }
+
+  .public-hero {
+    gap: var(--space-2);
+    margin-bottom: var(--space-5);
+  }
+}
+
+/* ---- Upload de foto (configurações → página pública) ---- */
+
+.avatar-upload {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.avatar-upload-preview {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  background: var(--color-primary-subtle);
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.avatar-upload-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-primary-hover);
+  user-select: none;
+}
+
+.avatar-upload-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.avatar-upload-hint {
+  font: var(--text-caption);
+  color: var(--color-text-muted);
+  /* Empurra a dica pra linha de baixo dos botões. */
+  flex-basis: 100%;
+}

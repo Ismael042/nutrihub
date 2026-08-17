@@ -82,7 +82,9 @@ export function clearSession() {
 export async function authFetch(path: string, init: RequestInit = {}): Promise<Response> {
   const token = getToken();
   const headers = new Headers(init.headers);
-  headers.set("Content-Type", "application/json");
+  // FormData: o boundary do multipart só existe no Content-Type que o browser monta
+  // sozinho. Forçar application/json aqui faria o FastAPI recusar todo upload.
+  if (!(init.body instanceof FormData)) headers.set("Content-Type", "application/json");
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
   return fetch(`${API_URL}${path}`, { ...init, headers });

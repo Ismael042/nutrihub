@@ -19,6 +19,17 @@ class Settings(BaseSettings):
     # Resend — envio do código de verificação de e-mail no signup (app/core/email.py).
     resend_api_key: str = ""
     email_from: str = "NutriHub <no-reply@isdev.online>"
+    # Cloudflare R2 — foto de perfil da página pública (app/core/storage.py).
+    # Tudo vazio = upload desabilitado: a rota responde 503 e o resto da API sobe
+    # normal (dev e CI não têm credencial de bucket).
+    r2_account_id: str = ""
+    r2_access_key_id: str = ""
+    r2_secret_access_key: str = ""
+    r2_bucket: str = ""
+    # Base pública do bucket, sem barra no fim. Usar domínio próprio
+    # (ex: https://cdn.isdev.online) — a Cloudflare rate-limita o *.r2.dev e diz
+    # explicitamente pra não usar em produção.
+    r2_public_base_url: str = ""
     # Lista separada por vírgula; sem default de produção proposital (só localhost
     # pra dev) — cada ambiente novo declara suas próprias origens via env.
     cors_allow_origins: str = "http://localhost:3000"

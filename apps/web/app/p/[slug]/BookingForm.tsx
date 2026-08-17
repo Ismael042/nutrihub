@@ -3,8 +3,20 @@
 import { useState, type FormEvent } from "react";
 import { API_URL } from "@/lib/auth";
 import { formatPhone } from "@/lib/masks";
+import { initials } from "@/lib/initials";
 
-export default function BookingForm({ slug, name, bio }: { slug: string; name: string; bio: string | null }) {
+export default function BookingForm({
+  slug,
+  name,
+  bio,
+  photoUrl
+}: {
+  slug: string;
+  name: string;
+  bio: string | null;
+  photoUrl: string | null;
+}) {
+  const [imgFailed, setImgFailed] = useState(false);
   const [formName, setFormName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -13,6 +25,8 @@ export default function BookingForm({ slug, name, bio }: { slug: string; name: s
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
+
+  const showPhoto = Boolean(photoUrl) && !imgFailed;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -45,8 +59,29 @@ export default function BookingForm({ slug, name, bio }: { slug: string; name: s
 
   return (
     <main className="form-container">
-      <h1>{name}</h1>
-      {bio && <p style={{ color: "var(--color-text-secondary)" }}>{bio}</p>}
+      <header className="public-hero">
+        {showPhoto ? (
+          <img
+            className="public-avatar"
+            src={photoUrl!}
+            alt={`Foto de ${name}`}
+            width={96}
+            height={96}
+            decoding="async"
+            // Se o objeto sumir do bucket, cai pro fallback em vez de mostrar
+            // o ícone de imagem quebrada.
+            onError={() => setImgFailed(true)}
+          />
+        ) : (
+          // aria-hidden: o nome vem logo abaixo — sem isso o leitor de tela anuncia
+          // as iniciais antes do nome, que é ruído puro.
+          <span className="public-avatar public-avatar-fallback" aria-hidden="true">
+            {initials(name)}
+          </span>
+        )}
+        <h1 className="public-hero-name">{name}</h1>
+        {bio && <p className="public-hero-bio">{bio}</p>}
+      </header>
 
       {sent ? (
         <div className="alert alert-success" style={{ marginTop: 16 }}>
@@ -55,8 +90,8 @@ export default function BookingForm({ slug, name, bio }: { slug: string; name: s
           </p>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} style={{ marginTop: 20 }}>
-          <h2 style={{ fontSize: 16 }}>Solicitar horário</h2>
+        <form onSubmit={handleSubmit} className="public-booking-form">
+          <h2 className="public-booking-title">Solicitar horário</h2>
           <div className="field">
             <label className="field-label field-required" htmlFor="patient-name">
               Seu nome
