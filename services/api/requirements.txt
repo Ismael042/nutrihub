@@ -16,7 +16,10 @@ httpx==0.27.2
 # python-multipart — sem ele, UploadFile/File() estouram RuntimeError já no import.
 python-multipart==0.0.9
 # R2 é S3-compatível; a Cloudflare não expõe API REST de objeto, só a S3.
-boto3==1.35.36
+# >= 1.36 é obrigatório: as flags request_checksum_calculation/response_checksum_validation
+# passadas em app/core/storage.py só existem a partir dessa versão do botocore (em
+# versões antigas o Config levanta "unexpected keyword argument").
+boto3==1.40.76
 # Re-encoda a imagem: normaliza formato/dimensão e, principalmente, descarta o EXIF
 # (foto de celular carrega GPS, e essa imagem vai pra uma página pública).
 Pillow==10.4.0
