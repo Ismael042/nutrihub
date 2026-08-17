@@ -255,6 +255,15 @@ export function IconTrendUp(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function IconSearch(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <circle cx="8.5" cy="8.5" r="5.5" />
+      <path d="M16 16l-3.2-3.2" />
+    </Icon>
+  );
+}
+
 export function IconEye(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>

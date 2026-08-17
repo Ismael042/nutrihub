@@ -49,23 +49,38 @@ export default function NovoPlanoPage() {
     <main className="form-container">
       <a href="/conteudo/planos" className="back-link">← Planos alimentares</a>
       <h1>Novo plano alimentar</h1>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <select value={patientId} onChange={(e) => setPatientId(e.target.value)} required>
-          <option value="">Selecione o paciente...</option>
-          {patients.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
-        <input
-          placeholder="Nome do plano (ex: Plano Semana 1)"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
-        <button type="submit" className="btn-primary">
+      <form onSubmit={handleSubmit}>
+        <div className="field">
+          <label className="field-label field-required" htmlFor="plan-patient">
+            Paciente
+          </label>
+          <select id="plan-patient" value={patientId} onChange={(e) => setPatientId(e.target.value)} required>
+            <option value="">Selecione o paciente...</option>
+            {patients.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="field">
+          <label className="field-label field-required" htmlFor="plan-name">
+            Nome do plano
+          </label>
+          <input
+            id="plan-name"
+            placeholder="ex: Plano Semana 1"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+        {error && (
+          <div className="alert alert-error" style={{ marginBottom: "var(--space-4)" }}>
+            <p>{error}</p>
+          </div>
+        )}
+        <button type="submit" className="btn-primary btn-block">
           Criar plano
         </button>
       </form>

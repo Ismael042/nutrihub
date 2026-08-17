@@ -58,23 +58,28 @@ export default function PaginaPublicaConfigPage() {
       </p>
 
       <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 16 }}>
-        <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          Link (slug)
+        <div className="field">
+          <label className="field-label" htmlFor="public-slug">
+            Link (slug)
+          </label>
           <input
+            id="public-slug"
             placeholder="ex: joice-nutri"
             value={slug}
             onChange={(e) => setSlug(e.target.value.toLowerCase())}
           />
-        </label>
+        </div>
         {publicUrl && (
           <p style={{ fontSize: 13 }}>
             Sua página: <a href={publicUrl} target="_blank" rel="noreferrer">{publicUrl}</a>
           </p>
         )}
-        <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          Bio
-          <textarea rows={4} value={bio} onChange={(e) => setBio(e.target.value)} />
-        </label>
+        <div className="field">
+          <label className="field-label" htmlFor="public-bio">
+            Bio
+          </label>
+          <textarea id="public-bio" rows={4} value={bio} onChange={(e) => setBio(e.target.value)} />
+        </div>
         <div className="switch-field">
           <div className="switch-field-text">
             <span className="switch-field-label">
@@ -99,8 +104,12 @@ export default function PaginaPublicaConfigPage() {
             <span className="switch-track" />
           </label>
         </div>
-        {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
-        {message && <p style={{ color: "var(--color-primary, #0F9D74)" }}>{message}</p>}
+        {error && (
+          <div className="alert alert-error" style={{ marginBottom: "var(--space-4)" }}>
+            <p>{error}</p>
+          </div>
+        )}
+        {message && <p style={{ color: "var(--color-success)" }}>{message}</p>}
         <button type="submit" disabled={saving} className="btn-primary">
           {saving ? "Salvando..." : "Salvar"}
         </button>

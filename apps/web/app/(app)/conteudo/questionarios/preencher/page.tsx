@@ -59,40 +59,53 @@ export default function PreencherQuestionarioPage() {
       <a href="/conteudo/questionarios" className="back-link">← Modelos</a>
       <h1>Preencher questionário</h1>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <select value={patientId} onChange={(e) => setPatientId(e.target.value)}>
-          <option value="">Selecione o paciente...</option>
-          {patients.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
-        <select value={templateId} onChange={(e) => setTemplateId(e.target.value)}>
-          <option value="">Selecione o modelo...</option>
-          {templates.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.name}
-            </option>
-          ))}
-        </select>
+      <div className="field-row">
+        <div className="field">
+          <label className="field-label field-required" htmlFor="qp-patient">
+            Paciente
+          </label>
+          <select id="qp-patient" value={patientId} onChange={(e) => setPatientId(e.target.value)}>
+            <option value="">Selecione o paciente...</option>
+            {patients.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="field">
+          <label className="field-label field-required" htmlFor="qp-template">
+            Modelo
+          </label>
+          <select id="qp-template" value={templateId} onChange={(e) => setTemplateId(e.target.value)}>
+            <option value="">Selecione o modelo...</option>
+            {templates.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {template && (
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 16 }}>
+        <form onSubmit={handleSubmit} style={{ marginTop: 16 }}>
           {template.fields.map((f) => (
-            <label key={f.label} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              {f.label}
+            <div className="field" key={f.label}>
+              <label className="field-label" htmlFor={`qp-answer-${f.label}`}>
+                {f.label}
+              </label>
               <input
+                id={`qp-answer-${f.label}`}
                 value={answers[f.label] ?? ""}
                 onChange={(e) => setAnswers((prev) => ({ ...prev, [f.label]: e.target.value }))}
               />
-            </label>
+            </div>
           ))}
           <button type="submit" disabled={!patientId} className="btn-primary">
             Salvar respostas
           </button>
-          {saved && <p style={{ color: "green" }}>Respostas salvas.</p>}
+          {saved && <p style={{ color: "var(--color-success)" }}>Respostas salvas.</p>}
         </form>
       )}
     </main>

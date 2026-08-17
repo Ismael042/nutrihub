@@ -141,32 +141,49 @@ export default function AntropometriaPage() {
 
       <details style={{ marginTop: 20 }} open={measurements.length === 0}>
         <summary>+ Nova medição</summary>
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
-          <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            Data
+        <form onSubmit={handleSubmit} style={{ marginTop: 8 }}>
+          <div className="field field-sm">
+            <label className="field-label" htmlFor="measurement-date">
+              Data
+            </label>
             <input
+              id="measurement-date"
               type="date"
               value={form.measured_at ?? ""}
               onChange={(e) => setForm({ ...form, measured_at: e.target.value })}
             />
-          </label>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "var(--space-3)" }}>
             {FIELDS.map((field) => (
-              <input
-                key={field.key}
-                inputMode="decimal"
-                placeholder={`${field.label} (${field.unit})`}
-                value={form[field.key] ?? ""}
-                onChange={(e) => setForm({ ...form, [field.key]: e.target.value })}
-              />
+              <div className="field" key={field.key}>
+                <label className="field-label" htmlFor={`measurement-${field.key}`}>
+                  {field.label} ({field.unit})
+                </label>
+                <input
+                  id={`measurement-${field.key}`}
+                  inputMode="decimal"
+                  value={form[field.key] ?? ""}
+                  onChange={(e) => setForm({ ...form, [field.key]: e.target.value })}
+                />
+              </div>
             ))}
           </div>
-          <input
-            placeholder="Observações (opcional)"
-            value={form.notes ?? ""}
-            onChange={(e) => setForm({ ...form, notes: e.target.value })}
-          />
-          {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
+          <div className="field">
+            <label className="field-label" htmlFor="measurement-notes">
+              Observações
+            </label>
+            <input
+              id="measurement-notes"
+              placeholder="Opcional"
+              value={form.notes ?? ""}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            />
+          </div>
+          {error && (
+            <div className="alert alert-error" style={{ marginBottom: "var(--space-4)" }}>
+              <p>{error}</p>
+            </div>
+          )}
           <button type="submit" disabled={saving} className="btn-primary">
             {saving ? "Salvando..." : "Salvar medição"}
           </button>

@@ -103,17 +103,41 @@ export default function LocaisPage() {
           {locations.map((location) => (
             <div key={location.id} className="card">
               {editingId === location.id ? (
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Nome" />
-                  <select value={editKind} onChange={(e) => setEditKind(e.target.value as "in_person" | "video")}>
-                    <option value="in_person">Presencial</option>
-                    <option value="video">Videoconferência</option>
-                  </select>
-                  <input
-                    value={editAddress}
-                    onChange={(e) => setEditAddress(e.target.value)}
-                    placeholder="Endereço (opcional)"
-                  />
+                <div>
+                  <div className="field">
+                    <label className="field-label" htmlFor={`loc-name-${location.id}`}>
+                      Nome
+                    </label>
+                    <input
+                      id={`loc-name-${location.id}`}
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                    />
+                  </div>
+                  <div className="field">
+                    <label className="field-label" htmlFor={`loc-kind-${location.id}`}>
+                      Tipo
+                    </label>
+                    <select
+                      id={`loc-kind-${location.id}`}
+                      value={editKind}
+                      onChange={(e) => setEditKind(e.target.value as "in_person" | "video")}
+                    >
+                      <option value="in_person">Presencial</option>
+                      <option value="video">Videoconferência</option>
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label className="field-label" htmlFor={`loc-address-${location.id}`}>
+                      Endereço
+                    </label>
+                    <input
+                      id={`loc-address-${location.id}`}
+                      value={editAddress}
+                      onChange={(e) => setEditAddress(e.target.value)}
+                      placeholder="Opcional"
+                    />
+                  </div>
                   <div style={{ display: "flex", gap: 8 }}>
                     <button className="btn-primary" onClick={() => saveEdit(location.id)}>Salvar</button>
                     <button onClick={() => setEditingId(null)}>Cancelar</button>

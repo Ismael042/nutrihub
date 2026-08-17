@@ -116,13 +116,8 @@ export default function NovoLancamentoPage() {
           <input id="dueDate" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
         </div>
 
-        <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: "var(--space-4)" }}>
-          <input
-            type="checkbox"
-            checked={alreadyPaid}
-            onChange={(e) => setAlreadyPaid(e.target.checked)}
-            style={{ width: "auto" }}
-          />
+        <label className="checkbox-field" style={{ marginBottom: "var(--space-4)" }}>
+          <input type="checkbox" checked={alreadyPaid} onChange={(e) => setAlreadyPaid(e.target.checked)} />
           Já foi pago/recebido
         </label>
 

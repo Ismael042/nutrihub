@@ -39,18 +39,40 @@ function NovoLocalForm() {
     <main className="form-container">
       <a href={returnTo} className="back-link">← Voltar</a>
       <h1>Novo local de atendimento</h1>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <input placeholder="Nome (ex: Consultório Centro)" value={name} onChange={(e) => setName(e.target.value)} required />
-        <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          Tipo
-          <select value={kind} onChange={(e) => setKind(e.target.value as "in_person" | "video")}>
+      <form onSubmit={handleSubmit}>
+        <div className="field">
+          <label className="field-label field-required" htmlFor="local-name">
+            Nome
+          </label>
+          <input
+            id="local-name"
+            placeholder="ex: Consultório Centro"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+        <div className="field">
+          <label className="field-label" htmlFor="local-kind">
+            Tipo
+          </label>
+          <select id="local-kind" value={kind} onChange={(e) => setKind(e.target.value as "in_person" | "video")}>
             <option value="in_person">Presencial</option>
             <option value="video">Videoconferência</option>
           </select>
-        </label>
-        <input placeholder="Endereço (opcional)" value={address} onChange={(e) => setAddress(e.target.value)} />
-        {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
-        <button type="submit" disabled={loading} className="btn-primary">
+        </div>
+        <div className="field">
+          <label className="field-label" htmlFor="local-address">
+            Endereço
+          </label>
+          <input id="local-address" placeholder="Opcional" value={address} onChange={(e) => setAddress(e.target.value)} />
+        </div>
+        {error && (
+          <div className="alert alert-error" style={{ marginBottom: "var(--space-4)" }}>
+            <p>{error}</p>
+          </div>
+        )}
+        <button type="submit" disabled={loading} className="btn-primary btn-block">
           {loading ? "Salvando..." : "Salvar"}
         </button>
       </form>

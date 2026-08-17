@@ -62,14 +62,24 @@ export default function ReceitasPage() {
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Receitas</h1>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
-        <input placeholder="Nome da receita" value={name} onChange={(e) => setName(e.target.value)} required />
-        <textarea
-          placeholder="Modo de preparo"
-          value={instructions}
-          onChange={(e) => setInstructions(e.target.value)}
-          rows={3}
-        />
+      <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
+        <div className="field">
+          <label className="field-label field-required" htmlFor="recipe-name">
+            Nome da receita
+          </label>
+          <input id="recipe-name" value={name} onChange={(e) => setName(e.target.value)} required />
+        </div>
+        <div className="field">
+          <label className="field-label" htmlFor="recipe-instructions">
+            Modo de preparo
+          </label>
+          <textarea
+            id="recipe-instructions"
+            value={instructions}
+            onChange={(e) => setInstructions(e.target.value)}
+            rows={3}
+          />
+        </div>
         <button type="submit" className="btn-primary">
           Salvar receita
         </button>

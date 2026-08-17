@@ -101,21 +101,60 @@ export default function EquipePage() {
       {isAdmin && (
         <details style={{ marginTop: 16 }}>
           <summary>+ Convidar profissional</summary>
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
-            <input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} required />
-            <input placeholder="E-mail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            <PasswordInput
-              placeholder="Senha temporária (mín. 8 caracteres)"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <select value={role} onChange={(e) => setRole(e.target.value as "nutritionist" | "assistant" | "admin")}>
-              <option value="nutritionist">Nutricionista</option>
-              <option value="assistant">Assistente</option>
-              <option value="admin">Administrador</option>
-            </select>
-            {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
+          <form onSubmit={handleSubmit} style={{ marginTop: 8 }}>
+            <div className="field">
+              <label className="field-label field-required" htmlFor="invite-name">
+                Nome
+              </label>
+              <input id="invite-name" value={name} onChange={(e) => setName(e.target.value)} required />
+            </div>
+            <div className="field-row">
+              <div className="field">
+                <label className="field-label field-required" htmlFor="invite-email">
+                  E-mail
+                </label>
+                <input
+                  id="invite-email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="field">
+                <label className="field-label field-required" htmlFor="invite-password">
+                  Senha temporária
+                </label>
+                <PasswordInput
+                  id="invite-password"
+                  autoComplete="new-password"
+                  placeholder="Mín. 8 caracteres"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <div className="field field-md">
+              <label className="field-label" htmlFor="invite-role">
+                Papel
+              </label>
+              <select
+                id="invite-role"
+                value={role}
+                onChange={(e) => setRole(e.target.value as "nutritionist" | "assistant" | "admin")}
+              >
+                <option value="nutritionist">Nutricionista</option>
+                <option value="assistant">Assistente</option>
+                <option value="admin">Administrador</option>
+              </select>
+            </div>
+            {error && (
+              <div className="alert alert-error" style={{ marginBottom: "var(--space-4)" }}>
+                <p>{error}</p>
+              </div>
+            )}
             <button type="submit" disabled={saving} className="btn-primary">
               {saving ? "Convidando..." : "Convidar"}
             </button>

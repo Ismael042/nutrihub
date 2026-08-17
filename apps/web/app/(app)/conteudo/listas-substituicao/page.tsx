@@ -118,29 +118,57 @@ export default function ListasSubstituicaoPage() {
 
       <details style={{ marginTop: 16 }}>
         <summary>+ Criar lista de substituição</summary>
-        <form onSubmit={handleCreate} style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
-          <input placeholder="Categoria (ex: fibra, proteinas)" value={category} onChange={(e) => setCategory(e.target.value)} />
-          <input placeholder="Nome da lista" value={name} onChange={(e) => setName(e.target.value)} />
-          {items.map((item, i) => (
-            <div key={i} style={{ display: "flex", gap: 8 }}>
+        <form onSubmit={handleCreate} style={{ marginTop: 8 }}>
+          <div className="field-row">
+            <div className="field field-md">
+              <label className="field-label" htmlFor="sub-category">
+                Categoria
+              </label>
               <input
-                placeholder="Alimento"
-                value={item.name}
-                onChange={(e) => updateItem(items, setItems, i, "name", e.target.value)}
-                style={{ flex: 2 }}
-              />
-              <input
-                placeholder="Porção (ex: 1 unidade média)"
-                value={item.portion}
-                onChange={(e) => updateItem(items, setItems, i, "portion", e.target.value)}
-                style={{ flex: 2 }}
+                id="sub-category"
+                placeholder="ex: fibra, proteinas"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
               />
             </div>
-          ))}
-          <button type="button" onClick={() => setItems([...items, { ...EMPTY_ITEM }])}>
-            + Adicionar item
-          </button>
-          {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
+            <div className="field">
+              <label className="field-label" htmlFor="sub-name">
+                Nome da lista
+              </label>
+              <input id="sub-name" value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+          </div>
+          <div className="field">
+            <label className="field-label">Itens</label>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {items.map((item, i) => (
+                <div key={i} style={{ display: "flex", gap: 8 }}>
+                  <input
+                    aria-label={`Alimento ${i + 1}`}
+                    placeholder="Alimento"
+                    value={item.name}
+                    onChange={(e) => updateItem(items, setItems, i, "name", e.target.value)}
+                    style={{ flex: 2 }}
+                  />
+                  <input
+                    aria-label={`Porção ${i + 1}`}
+                    placeholder="Porção (ex: 1 unidade média)"
+                    value={item.portion}
+                    onChange={(e) => updateItem(items, setItems, i, "portion", e.target.value)}
+                    style={{ flex: 2 }}
+                  />
+                </div>
+              ))}
+              <button type="button" onClick={() => setItems([...items, { ...EMPTY_ITEM }])}>
+                + Adicionar item
+              </button>
+            </div>
+          </div>
+          {error && (
+            <div className="alert alert-error" style={{ marginBottom: "var(--space-4)" }}>
+              <p>{error}</p>
+            </div>
+          )}
           <button type="submit" disabled={saving} className="btn-primary">
             {saving ? "Salvando..." : "Salvar lista"}
           </button>
@@ -166,25 +194,41 @@ export default function ListasSubstituicaoPage() {
                 .map((list) => (
                   <div key={list.id} className="card">
                     {editingId === list.id ? (
-                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                        <input value={editName} onChange={(e) => setEditName(e.target.value)} />
-                        {editItems.map((item, i) => (
-                          <div key={i} style={{ display: "flex", gap: 8 }}>
-                            <input
-                              value={item.name}
-                              onChange={(e) => updateItem(editItems, setEditItems, i, "name", e.target.value)}
-                              style={{ flex: 2 }}
-                            />
-                            <input
-                              value={item.portion}
-                              onChange={(e) => updateItem(editItems, setEditItems, i, "portion", e.target.value)}
-                              style={{ flex: 2 }}
-                            />
+                      <div>
+                        <div className="field">
+                          <label className="field-label" htmlFor={`sub-edit-name-${list.id}`}>
+                            Nome
+                          </label>
+                          <input
+                            id={`sub-edit-name-${list.id}`}
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                          />
+                        </div>
+                        <div className="field">
+                          <label className="field-label">Itens</label>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                            {editItems.map((item, i) => (
+                              <div key={i} style={{ display: "flex", gap: 8 }}>
+                                <input
+                                  aria-label={`Alimento ${i + 1}`}
+                                  value={item.name}
+                                  onChange={(e) => updateItem(editItems, setEditItems, i, "name", e.target.value)}
+                                  style={{ flex: 2 }}
+                                />
+                                <input
+                                  aria-label={`Porção ${i + 1}`}
+                                  value={item.portion}
+                                  onChange={(e) => updateItem(editItems, setEditItems, i, "portion", e.target.value)}
+                                  style={{ flex: 2 }}
+                                />
+                              </div>
+                            ))}
+                            <button type="button" onClick={() => setEditItems([...editItems, { ...EMPTY_ITEM }])}>
+                              + Item
+                            </button>
                           </div>
-                        ))}
-                        <button type="button" onClick={() => setEditItems([...editItems, { ...EMPTY_ITEM }])}>
-                          + Item
-                        </button>
+                        </div>
                         <div style={{ display: "flex", gap: 8 }}>
                           <button className="btn-primary" onClick={() => saveEdit(list.id)}>Salvar</button>
                           <button onClick={() => setEditingId(null)}>Cancelar</button>

@@ -81,39 +81,57 @@ export default function ExamesPage() {
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Solicitações de exames</h1>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
-        <select value={patientId} onChange={(e) => setPatientId(e.target.value)} required>
-          <option value="">Selecione o paciente...</option>
-          {patients.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {examNames.map((name, i) => (
-            <div key={i} style={{ display: "flex", gap: 8 }}>
-              <input
-                placeholder={`Exame ${i + 1} (ex: Hemograma completo)`}
-                value={name}
-                onChange={(e) => setExamNames(examNames.map((n, idx) => (idx === i ? e.target.value : n)))}
-                style={{ flex: 1 }}
-              />
-              {examNames.length > 1 && (
-                <button type="button" onClick={() => setExamNames(examNames.filter((_, idx) => idx !== i))}>
-                  ×
-                </button>
-              )}
-            </div>
-          ))}
-          <button type="button" onClick={() => setExamNames([...examNames, ""])}>
-            + Adicionar exame
-          </button>
+      <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
+        <div className="field">
+          <label className="field-label field-required" htmlFor="exam-patient">
+            Paciente
+          </label>
+          <select id="exam-patient" value={patientId} onChange={(e) => setPatientId(e.target.value)} required>
+            <option value="">Selecione o paciente...</option>
+            {patients.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
         </div>
 
-        <input placeholder="Observações (opcional)" value={notes} onChange={(e) => setNotes(e.target.value)} />
-        {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
+        <div className="field">
+          <label className="field-label">Exames</label>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {examNames.map((name, i) => (
+              <div key={i} style={{ display: "flex", gap: 8 }}>
+                <input
+                  aria-label={`Exame ${i + 1}`}
+                  placeholder={`Exame ${i + 1} (ex: Hemograma completo)`}
+                  value={name}
+                  onChange={(e) => setExamNames(examNames.map((n, idx) => (idx === i ? e.target.value : n)))}
+                  style={{ flex: 1 }}
+                />
+                {examNames.length > 1 && (
+                  <button type="button" onClick={() => setExamNames(examNames.filter((_, idx) => idx !== i))} className="btn-icon">
+                    ×
+                  </button>
+                )}
+              </div>
+            ))}
+            <button type="button" onClick={() => setExamNames([...examNames, ""])}>
+              + Adicionar exame
+            </button>
+          </div>
+        </div>
+
+        <div className="field">
+          <label className="field-label" htmlFor="exam-notes">
+            Observações
+          </label>
+          <input id="exam-notes" placeholder="Opcional" value={notes} onChange={(e) => setNotes(e.target.value)} />
+        </div>
+        {error && (
+          <div className="alert alert-error" style={{ marginBottom: "var(--space-4)" }}>
+            <p>{error}</p>
+          </div>
+        )}
         <button type="submit" className="btn-primary">
           Solicitar
         </button>

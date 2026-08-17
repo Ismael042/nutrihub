@@ -90,23 +90,45 @@ export default function MetasPage() {
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Metas</h1>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
-        <select value={patientId} onChange={(e) => setPatientId(e.target.value)} required>
-          <option value="">Selecione o paciente...</option>
-          {patients.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
-        <input
-          placeholder="Descrição da meta (ex: Perder 5kg)"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-        />
-        <input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} />
-        {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
+      <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
+        <div className="field">
+          <label className="field-label field-required" htmlFor="goal-patient">
+            Paciente
+          </label>
+          <select id="goal-patient" value={patientId} onChange={(e) => setPatientId(e.target.value)} required>
+            <option value="">Selecione o paciente...</option>
+            {patients.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="field-row">
+          <div className="field">
+            <label className="field-label field-required" htmlFor="goal-description">
+              Descrição da meta
+            </label>
+            <input
+              id="goal-description"
+              placeholder="ex: Perder 5kg"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+            />
+          </div>
+          <div className="field field-sm">
+            <label className="field-label" htmlFor="goal-target-date">
+              Prazo
+            </label>
+            <input id="goal-target-date" type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} />
+          </div>
+        </div>
+        {error && (
+          <div className="alert alert-error" style={{ marginBottom: "var(--space-4)" }}>
+            <p>{error}</p>
+          </div>
+        )}
         <button type="submit" className="btn-primary">
           Adicionar meta
         </button>

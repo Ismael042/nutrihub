@@ -86,50 +86,83 @@ export default function PrescricoesPage() {
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Prescrições</h1>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
-        <select value={patientId} onChange={(e) => setPatientId(e.target.value)} required>
-          <option value="">Selecione o paciente...</option>
-          {patients.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
-        <select value={kind} onChange={(e) => setKind(e.target.value as "supplement" | "phytotherapic")}>
-          <option value="supplement">Suplemento</option>
-          <option value="phytotherapic">Fitoterápico</option>
-        </select>
+      <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
+        <div className="field-row">
+          <div className="field">
+            <label className="field-label field-required" htmlFor="rx-patient">
+              Paciente
+            </label>
+            <select id="rx-patient" value={patientId} onChange={(e) => setPatientId(e.target.value)} required>
+              <option value="">Selecione o paciente...</option>
+              {patients.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="field field-md">
+            <label className="field-label" htmlFor="rx-kind">
+              Tipo
+            </label>
+            <select id="rx-kind" value={kind} onChange={(e) => setKind(e.target.value as "supplement" | "phytotherapic")}>
+              <option value="supplement">Suplemento</option>
+              <option value="phytotherapic">Fitoterápico</option>
+            </select>
+          </div>
+        </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {items.map((item, i) => (
-            <div key={i} style={{ display: "flex", flexDirection: "column", gap: 6, border: "1px solid var(--color-border)", borderRadius: 8, padding: 10 }}>
-              <input
-                placeholder="Descrição (ex: Whey protein isolado)"
-                value={item.description}
-                onChange={(e) => updateItem(i, "description", e.target.value)}
-              />
-              <div style={{ display: "flex", gap: 8 }}>
+            <div key={i} style={{ border: "1px solid var(--color-border)", borderRadius: 8, padding: 10 }}>
+              <div className="field">
+                <label className="field-label" htmlFor={`rx-desc-${i}`}>
+                  Descrição
+                </label>
                 <input
-                  placeholder="Dosagem (ex: 30g)"
-                  value={item.dosage ?? ""}
-                  onChange={(e) => updateItem(i, "dosage", e.target.value)}
-                  style={{ flex: 1 }}
-                />
-                <input
-                  placeholder="Frequência (ex: 2x ao dia)"
-                  value={item.frequency ?? ""}
-                  onChange={(e) => updateItem(i, "frequency", e.target.value)}
-                  style={{ flex: 1 }}
-                />
-                <input
-                  placeholder="Duração (ex: 30 dias)"
-                  value={item.duration ?? ""}
-                  onChange={(e) => updateItem(i, "duration", e.target.value)}
-                  style={{ flex: 1 }}
+                  id={`rx-desc-${i}`}
+                  placeholder="ex: Whey protein isolado"
+                  value={item.description}
+                  onChange={(e) => updateItem(i, "description", e.target.value)}
                 />
               </div>
+              <div className="field-row" style={{ marginBottom: items.length > 1 ? "var(--space-2)" : 0 }}>
+                <div className="field">
+                  <label className="field-label" htmlFor={`rx-dosage-${i}`}>
+                    Dosagem
+                  </label>
+                  <input
+                    id={`rx-dosage-${i}`}
+                    placeholder="ex: 30g"
+                    value={item.dosage ?? ""}
+                    onChange={(e) => updateItem(i, "dosage", e.target.value)}
+                  />
+                </div>
+                <div className="field">
+                  <label className="field-label" htmlFor={`rx-freq-${i}`}>
+                    Frequência
+                  </label>
+                  <input
+                    id={`rx-freq-${i}`}
+                    placeholder="ex: 2x ao dia"
+                    value={item.frequency ?? ""}
+                    onChange={(e) => updateItem(i, "frequency", e.target.value)}
+                  />
+                </div>
+                <div className="field">
+                  <label className="field-label" htmlFor={`rx-duration-${i}`}>
+                    Duração
+                  </label>
+                  <input
+                    id={`rx-duration-${i}`}
+                    placeholder="ex: 30 dias"
+                    value={item.duration ?? ""}
+                    onChange={(e) => updateItem(i, "duration", e.target.value)}
+                  />
+                </div>
+              </div>
               {items.length > 1 && (
-                <button type="button" onClick={() => setItems(items.filter((_, idx) => idx !== i))} style={{ alignSelf: "flex-start" }}>
+                <button type="button" onClick={() => setItems(items.filter((_, idx) => idx !== i))} className="btn-sm">
                   Remover item
                 </button>
               )}
@@ -140,7 +173,11 @@ export default function PrescricoesPage() {
           </button>
         </div>
 
-        {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
+        {error && (
+          <div className="alert alert-error" style={{ margin: "var(--space-4) 0" }}>
+            <p>{error}</p>
+          </div>
+        )}
         <button type="submit" className="btn-primary">
           Adicionar prescrição
         </button>

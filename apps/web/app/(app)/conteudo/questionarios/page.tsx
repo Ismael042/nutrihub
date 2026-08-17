@@ -80,25 +80,42 @@ export default function QuestionariosPage() {
         </a>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
-        <select value={kind} onChange={(e) => setKind(e.target.value as "anamnesis" | "pre_consultation")}>
-          <option value="anamnesis">Anamnese</option>
-          <option value="pre_consultation">Questionário pré-consulta</option>
-        </select>
-        <input placeholder="Nome do modelo" value={name} onChange={(e) => setName(e.target.value)} required />
+      <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
+        <div className="field-row">
+          <div className="field field-md">
+            <label className="field-label" htmlFor="tpl-kind">
+              Tipo
+            </label>
+            <select id="tpl-kind" value={kind} onChange={(e) => setKind(e.target.value as "anamnesis" | "pre_consultation")}>
+              <option value="anamnesis">Anamnese</option>
+              <option value="pre_consultation">Questionário pré-consulta</option>
+            </select>
+          </div>
+          <div className="field">
+            <label className="field-label field-required" htmlFor="tpl-name">
+              Nome do modelo
+            </label>
+            <input id="tpl-name" value={name} onChange={(e) => setName(e.target.value)} required />
+          </div>
+        </div>
 
-        <div>Perguntas:</div>
-        {fields.map((f, i) => (
-          <input
-            key={i}
-            placeholder={`Pergunta ${i + 1}`}
-            value={f.label}
-            onChange={(e) => updateField(i, e.target.value)}
-          />
-        ))}
-        <button type="button" onClick={() => setFields((prev) => [...prev, { label: "", type: "text" }])}>
-          + Adicionar pergunta
-        </button>
+        <div className="field">
+          <label className="field-label">Perguntas</label>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {fields.map((f, i) => (
+              <input
+                key={i}
+                aria-label={`Pergunta ${i + 1}`}
+                placeholder={`Pergunta ${i + 1}`}
+                value={f.label}
+                onChange={(e) => updateField(i, e.target.value)}
+              />
+            ))}
+            <button type="button" onClick={() => setFields((prev) => [...prev, { label: "", type: "text" }])}>
+              + Adicionar pergunta
+            </button>
+          </div>
+        </div>
 
         <button type="submit" className="btn-primary">
           Salvar modelo

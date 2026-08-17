@@ -335,13 +335,18 @@ export default function PacienteDetalhePage() {
         <p className="text-caption" style={{ margin: "4px 0 12px" }}>
           Defina uma senha para o paciente acessar o plano alimentar, chat e diário pelo app.
         </p>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <PasswordInput
-            placeholder="Senha (mín. 8 caracteres)"
-            value={portalPassword}
-            onChange={(e) => setPortalPassword(e.target.value)}
-            style={{ maxWidth: 260 }}
-          />
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-end" }}>
+          <div className="field" style={{ maxWidth: 260, marginBottom: 0 }}>
+            <label className="field-label" htmlFor="portal-password">
+              Senha
+            </label>
+            <PasswordInput
+              id="portal-password"
+              placeholder="Mín. 8 caracteres"
+              value={portalPassword}
+              onChange={(e) => setPortalPassword(e.target.value)}
+            />
+          </div>
           <button onClick={grantPortalAccess} disabled={portalSaving} className="btn-primary">
             {portalSaving ? "Salvando..." : "Habilitar acesso"}
           </button>

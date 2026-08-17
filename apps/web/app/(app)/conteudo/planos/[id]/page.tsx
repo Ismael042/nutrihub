@@ -143,13 +143,18 @@ export default function PlanoDetalhePage() {
         </section>
       ))}
 
-      <form onSubmit={addMeal} style={{ display: "flex", gap: 8, marginTop: 20 }}>
-        <input
-          placeholder="Nome da refeição (ex: Almoço)"
-          value={newMealName}
-          onChange={(e) => setNewMealName(e.target.value)}
-          style={{ flex: 1 }}
-        />
+      <form onSubmit={addMeal} style={{ display: "flex", gap: 8, marginTop: 20, alignItems: "flex-end" }}>
+        <div className="field" style={{ flex: 1, marginBottom: 0 }}>
+          <label className="field-label" htmlFor="new-meal-name">
+            Nova refeição
+          </label>
+          <input
+            id="new-meal-name"
+            placeholder="ex: Almoço"
+            value={newMealName}
+            onChange={(e) => setNewMealName(e.target.value)}
+          />
+        </div>
         <button type="submit" className="btn-primary">
           + Adicionar refeição
         </button>
@@ -171,7 +176,7 @@ function AddItemForm({
 
   return (
     <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-      <select value={foodId} onChange={(e) => setFoodId(e.target.value)} style={{ padding: 6, flex: 1 }}>
+      <select aria-label="Alimento" value={foodId} onChange={(e) => setFoodId(e.target.value)} style={{ flex: 1 }}>
         <option value="">Alimento...</option>
         {foods.map((f) => (
           <option key={f.id} value={f.id}>
@@ -180,6 +185,7 @@ function AddItemForm({
         ))}
       </select>
       <input
+        aria-label="Quantidade"
         placeholder="Qtd"
         type="number"
         min="0"
@@ -187,9 +193,15 @@ function AddItemForm({
         inputMode="decimal"
         value={quantity}
         onChange={(e) => setQuantity(e.target.value)}
-        style={{ padding: 6, width: 60 }}
+        style={{ width: 70 }}
       />
-      <input placeholder="un" value={unit} onChange={(e) => setUnit(e.target.value)} style={{ padding: 6, width: 50 }} />
+      <input
+        aria-label="Unidade"
+        placeholder="un"
+        value={unit}
+        onChange={(e) => setUnit(e.target.value)}
+        style={{ width: 60 }}
+      />
       <button
         type="button"
         onClick={() => {

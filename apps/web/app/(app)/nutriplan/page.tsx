@@ -71,6 +71,7 @@ export default function NutriPlanPage() {
 
       <form onSubmit={handleSubmit} style={{ display: "flex", gap: 8, marginTop: 12 }}>
         <select
+          aria-label="Tipo"
           value={kind}
           onChange={(e) => setKind(e.target.value as "task" | "note")}
           style={{ width: "auto", flex: "0 0 auto" }}
@@ -79,6 +80,7 @@ export default function NutriPlanPage() {
           <option value="note">Nota</option>
         </select>
         <input
+          aria-label="Conteúdo"
           placeholder="Escreva aqui..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
@@ -103,8 +105,9 @@ export default function NutriPlanPage() {
             <ul style={{ listStyle: "none", padding: 0 }}>
               {tasks.map((t) => (
                 <li key={t.id} style={{ padding: "6px 0", display: "flex", justifyContent: "space-between" }}>
-                  <label style={{ textDecoration: t.done ? "line-through" : "none" }}>
-                    <input type="checkbox" checked={t.done} onChange={() => toggleDone(t)} /> {t.content}
+                  <label className="checkbox-field" style={{ textDecoration: t.done ? "line-through" : "none" }}>
+                    <input type="checkbox" checked={t.done} onChange={() => toggleDone(t)} />
+                    {t.content}
                   </label>
                   <button onClick={() => remove(t.id, "task")} style={{ color: "var(--color-error)" }}>
                     Excluir

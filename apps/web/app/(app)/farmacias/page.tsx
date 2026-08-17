@@ -66,16 +66,34 @@ export default function FarmaciasPage() {
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Farmácias (orçamento)</h1>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
-        <input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} required />
-        <input
-          type="tel"
-          autoComplete="tel"
-          placeholder="Telefone"
-          value={phone}
-          onChange={(e) => setPhone(formatPhone(e.target.value))}
-        />
-        <input placeholder="Observações" value={notes} onChange={(e) => setNotes(e.target.value)} />
+      <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
+        <div className="field">
+          <label className="field-label field-required" htmlFor="pharmacy-name">
+            Nome
+          </label>
+          <input id="pharmacy-name" value={name} onChange={(e) => setName(e.target.value)} required />
+        </div>
+        <div className="field-row">
+          <div className="field field-md">
+            <label className="field-label" htmlFor="pharmacy-phone">
+              Telefone
+            </label>
+            <input
+              id="pharmacy-phone"
+              type="tel"
+              autoComplete="tel"
+              placeholder="(00) 00000-0000"
+              value={phone}
+              onChange={(e) => setPhone(formatPhone(e.target.value))}
+            />
+          </div>
+          <div className="field">
+            <label className="field-label" htmlFor="pharmacy-notes">
+              Observações
+            </label>
+            <input id="pharmacy-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+          </div>
+        </div>
         <button type="submit" className="btn-primary">
           Adicionar farmácia
         </button>

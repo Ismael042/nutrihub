@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { authFetch, useRequireAuth } from "@/lib/auth";
 import EmptyState from "@/components/EmptyState";
 import { SkeletonRows } from "@/components/Skeleton";
-import { IconUsers } from "@/components/icons";
+import { IconSearch, IconUsers } from "@/components/icons";
 
 interface Patient {
   id: string;
@@ -84,13 +84,17 @@ export default function PacientesPage() {
         ))}
       </div>
 
-      <input
-        placeholder="Buscar por nome..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        aria-label="Buscar paciente por nome"
-        style={{ width: "100%", marginTop: "var(--space-4)" }}
-      />
+      <div className="field-search" style={{ marginTop: "var(--space-4)" }}>
+        <span className="field-search-icon">
+          <IconSearch />
+        </span>
+        <input
+          placeholder="Buscar por nome..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          aria-label="Buscar paciente por nome"
+        />
+      </div>
 
       <div style={{ marginTop: "var(--space-4)" }}>
         {loading && <SkeletonRows count={5} />}
