@@ -111,7 +111,7 @@ export default function ListasSubstituicaoPage() {
   const categories = Array.from(new Set(lists.map((l) => l.category)));
 
   return (
-    <main className="page-container">
+    <div className="page-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Listas de substituição</h1>
       <p style={{ color: "var(--color-text-muted)" }}>Modelos prontos do sistema + suas próprias listas.</p>
@@ -281,6 +281,6 @@ export default function ListasSubstituicaoPage() {
           description="Crie sua própria lista acima — os modelos padrão do sistema aparecem aqui também."
         />
       )}
-    </main>
+    </div>
   );
 }

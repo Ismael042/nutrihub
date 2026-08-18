@@ -46,7 +46,7 @@ export default function NovoPlanoPage() {
   }
 
   return (
-    <main className="form-container">
+    <div className="form-container">
       <a href="/conteudo/planos" className="back-link">← Planos alimentares</a>
       <h1>Novo plano alimentar</h1>
       <form onSubmit={handleSubmit}>
@@ -84,6 +84,6 @@ export default function NovoPlanoPage() {
           Criar plano
         </button>
       </form>
-    </main>
+    </div>
   );
 }

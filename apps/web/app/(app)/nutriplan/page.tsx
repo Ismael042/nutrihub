@@ -64,7 +64,7 @@ export default function NutriPlanPage() {
   const notes = items.filter((i) => i.kind === "note");
 
   return (
-    <main className="page-container">
+    <div className="page-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>NutriPlan</h1>
       <p style={{ color: "var(--color-text-muted)" }}>Tarefas e notas rápidas.</p>
@@ -134,6 +134,6 @@ export default function NutriPlanPage() {
           )}
         </>
       )}
-    </main>
+    </div>
   );
 }

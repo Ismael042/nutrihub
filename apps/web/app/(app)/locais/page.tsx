@@ -73,7 +73,7 @@ export default function LocaisPage() {
   }
 
   return (
-    <main className="page-container">
+    <div className="page-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <div className="page-title-row">
         <h1>Locais de atendimento</h1>
@@ -162,6 +162,6 @@ export default function LocaisPage() {
           ))}
         </div>
       )}
-    </main>
+    </div>
   );
 }

@@ -65,7 +65,7 @@ export default function ChatPacientePage() {
   if (!professional) return null;
 
   return (
-    <main className="page-container">
+    <div className="page-container">
       <a href={`/pacientes/${params.id}`} className="back-link">← {patient?.name ?? "Paciente"}</a>
       <h1>Chat</h1>
       <p style={{ color: "var(--color-text-muted)", fontSize: 13 }}>
@@ -118,6 +118,6 @@ export default function ChatPacientePage() {
           Enviar
         </button>
       </form>
-    </main>
+    </div>
   );
 }

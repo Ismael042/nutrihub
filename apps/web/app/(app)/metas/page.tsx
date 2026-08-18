@@ -86,7 +86,7 @@ export default function MetasPage() {
   if (!professional) return null;
 
   return (
-    <main className="page-container">
+    <div className="page-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Metas</h1>
 
@@ -166,6 +166,6 @@ export default function MetasPage() {
           ))}
         </ul>
       )}
-    </main>
+    </div>
   );
 }

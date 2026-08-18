@@ -60,7 +60,7 @@ export default function ReceitasPage() {
   if (!professional) return null;
 
   return (
-    <main className="page-container">
+    <div className="page-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Receitas</h1>
 
@@ -129,6 +129,6 @@ export default function ReceitasPage() {
           ))}
         </ul>
       )}
-    </main>
+    </div>
   );
 }

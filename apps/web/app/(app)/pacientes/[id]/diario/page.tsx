@@ -38,7 +38,7 @@ export default function DiarioPacientePage() {
   if (!professional) return null;
 
   return (
-    <main className="page-container">
+    <div className="page-container">
       <a href={`/pacientes/${params.id}`} className="back-link">← {patient?.name ?? "Paciente"}</a>
       <h1>Diário alimentar</h1>
       <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>Registros feitos pelo próprio paciente no app.</p>
@@ -55,6 +55,6 @@ export default function DiarioPacientePage() {
         ))}
       </ul>
       {entries.length === 0 && <p>O paciente ainda não registrou nada.</p>}
-    </main>
+    </div>
   );
 }

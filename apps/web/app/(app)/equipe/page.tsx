@@ -91,7 +91,7 @@ export default function EquipePage() {
   }
 
   return (
-    <main className="page-container">
+    <div className="page-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Equipe</h1>
       <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>
@@ -199,6 +199,6 @@ export default function EquipePage() {
           ))}
         </ul>
       )}
-    </main>
+    </div>
   );
 }

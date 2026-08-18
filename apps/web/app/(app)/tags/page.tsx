@@ -52,7 +52,7 @@ export default function TagsPage() {
   if (!professional) return null;
 
   return (
-    <main className="page-container">
+    <div className="page-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Tags</h1>
       <p style={{ color: "var(--color-text-muted)" }}>Use tags para organizar pacientes (ex: gestante, atleta, diabético).</p>
@@ -86,6 +86,6 @@ export default function TagsPage() {
           ))}
         </ul>
       )}
-    </main>
+    </div>
   );
 }

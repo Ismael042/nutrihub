@@ -51,7 +51,7 @@ export default function NovoPacientePage() {
   }
 
   return (
-    <main className="form-container">
+    <div className="form-container">
       <a href="/pacientes" className="back-link">← Pacientes</a>
       <h1>Novo paciente</h1>
       <p className="page-subtitle">Só o nome é obrigatório — o resto você completa quando quiser.</p>
@@ -119,6 +119,6 @@ export default function NovoPacientePage() {
           {loading ? "Salvando..." : "Salvar paciente"}
         </button>
       </form>
-    </main>
+    </div>
   );
 }

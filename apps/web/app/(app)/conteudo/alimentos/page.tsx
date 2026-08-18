@@ -85,7 +85,7 @@ export default function AlimentosPage() {
   if (!professional) return null;
 
   return (
-    <main className="page-container">
+    <div className="page-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Alimentos</h1>
       <p style={{ color: "var(--color-text-muted)" }}>
@@ -156,6 +156,6 @@ export default function AlimentosPage() {
           </tbody>
         </table>
       )}
-    </main>
+    </div>
   );
 }

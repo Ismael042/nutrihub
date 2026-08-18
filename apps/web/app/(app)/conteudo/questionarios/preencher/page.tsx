@@ -55,7 +55,7 @@ export default function PreencherQuestionarioPage() {
   if (!professional) return null;
 
   return (
-    <main className="form-container">
+    <div className="form-container">
       <a href="/conteudo/questionarios" className="back-link">← Modelos</a>
       <h1>Preencher questionário</h1>
 
@@ -108,6 +108,6 @@ export default function PreencherQuestionarioPage() {
           {saved && <p style={{ color: "var(--color-success)" }}>Respostas salvas.</p>}
         </form>
       )}
-    </main>
+    </div>
   );
 }

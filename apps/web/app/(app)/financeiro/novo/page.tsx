@@ -66,7 +66,7 @@ export default function NovoLancamentoPage() {
   }
 
   return (
-    <main className="form-container">
+    <div className="form-container">
       <a href="/financeiro" className="back-link">← Financeiro</a>
       <h1>Novo lançamento</h1>
       <form onSubmit={handleSubmit}>
@@ -130,6 +130,6 @@ export default function NovoLancamentoPage() {
           {loading ? "Salvando..." : "Salvar lançamento"}
         </button>
       </form>
-    </main>
+    </div>
   );
 }

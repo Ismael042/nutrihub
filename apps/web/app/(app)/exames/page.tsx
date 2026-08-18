@@ -131,7 +131,7 @@ export default function ExamesPage() {
   if (!professional) return null;
 
   return (
-    <main className="page-container">
+    <div className="page-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Solicitações de exames</h1>
 
@@ -268,6 +268,6 @@ export default function ExamesPage() {
         hidden
         onChange={handleAttachmentSelected}
       />
-    </main>
+    </div>
   );
 }

@@ -71,7 +71,7 @@ export default function NovoAgendamentoPage() {
   }
 
   return (
-    <main className="form-container">
+    <div className="form-container">
       <a href="/agenda" className="back-link">← Agenda</a>
       <h1>Novo agendamento</h1>
 
@@ -132,6 +132,6 @@ export default function NovoAgendamentoPage() {
           {loading ? "Agendando..." : "Agendar"}
         </button>
       </form>
-    </main>
+    </div>
   );
 }

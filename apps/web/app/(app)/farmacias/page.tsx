@@ -62,7 +62,7 @@ export default function FarmaciasPage() {
   if (!professional) return null;
 
   return (
-    <main className="page-container">
+    <div className="page-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Farmácias (orçamento)</h1>
 
@@ -125,6 +125,6 @@ export default function FarmaciasPage() {
           ))}
         </ul>
       )}
-    </main>
+    </div>
   );
 }

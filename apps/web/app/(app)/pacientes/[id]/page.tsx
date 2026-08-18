@@ -160,7 +160,7 @@ export default function PacienteDetalhePage() {
   if (!professional) return null;
   if (error && !patient) {
     return (
-      <main className="page-container">
+      <div className="page-container">
         <EmptyState
           icon={<IconUsers />}
           title="Paciente não encontrado"
@@ -168,213 +168,234 @@ export default function PacienteDetalhePage() {
           actionLabel="Voltar para pacientes"
           actionHref="/pacientes"
         />
-      </main>
+      </div>
     );
   }
   if (!patient) {
     return (
-      <main className="page-container" style={{ maxWidth: 720 }}>
+      <div className="page-container">
         <SkeletonText width="30%" />
-        <div style={{ marginTop: "var(--space-6)" }}>
-          <SkeletonRows count={4} />
+        {/* Espelha a forma final para o conteúdo não pular ao carregar. */}
+        <div className="detail-columns" style={{ marginTop: "var(--space-6)" }}>
+          <aside className="detail-aside">
+            <div className="card card-static">
+              <SkeletonRows count={2} />
+            </div>
+          </aside>
+          <div className="detail-main">
+            <SkeletonRows count={4} />
+          </div>
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="page-container" style={{ maxWidth: 720 }}>
+    <div className="page-container">
       <a href="/pacientes" className="back-link">← Pacientes</a>
-      <div className="page-title-row">
-        <h1>{patient.name}</h1>
-        <span className={`badge ${patient.status === "active" ? "badge-success" : "badge-neutral"}`}>
-          {patient.status === "active" ? "Ativo" : "Inativo"}
-        </span>
-      </div>
+      <h1 style={{ marginBottom: "var(--space-5)" }}>{patient.name}</h1>
 
-      {/* Fora do form de salvar de propósito: arquivo não cabe num PATCH JSON, e
-          "escolhi a foto mas esqueci de salvar" seria um estado ruim. Envia na hora. */}
-      <div className="field">
-        <span className="field-label">Foto</span>
-        <PhotoUpload
-          endpoint={`/patients/${patient.id}/photo`}
-          photoUrl={patient.photo_url ?? null}
-          onChange={(data) => setPatient(data as unknown as Patient)}
-          fallback={initials(patient.name)}
-          hint="JPG, PNG ou WebP, até 3 MB. Visível só pra você e sua equipe."
-          alt={`Foto de ${patient.name}`}
-          confirmTitle="Remover a foto do paciente?"
-        />
-      </div>
-
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: "var(--space-6)" }}>
-        <a href={`/pacientes/${patient.id}/chat`} className="btn-secondary">
-          Chat
-        </a>
-        <a href={`/pacientes/${patient.id}/antropometria`} className="btn-secondary">
-          Antropometria
-        </a>
-        <a href={`/pacientes/${patient.id}/diario`} className="btn-secondary">
-          Diário alimentar
-        </a>
-      </div>
-
-      <div className="card" style={{ marginBottom: "var(--space-5)" }}>
-        <h3 style={{ textTransform: "none", letterSpacing: 0, color: "var(--color-text-primary)", fontSize: 15 }}>
-          Dados cadastrais
-        </h3>
-        <form onSubmit={handleSave}>
-          <div className="field-row">
-            <div className="field">
-              <label className="field-label" htmlFor="p-name">
-                Nome
-              </label>
-              <input id="p-name" value={patient.name} onChange={(e) => setPatient({ ...patient, name: e.target.value })} />
-            </div>
-            <div className="field field-sm">
-              <label className="field-label" htmlFor="p-birth">
-                Nascimento
-              </label>
-              <input
-                id="p-birth"
-                type="date"
-                value={patient.birth_date ?? ""}
-                onChange={(e) => setPatient({ ...patient, birth_date: e.target.value })}
-              />
-            </div>
-            <div className="field field-sm">
-              <label className="field-label" htmlFor="p-cpf">
-                CPF
-              </label>
-              <input
-                id="p-cpf"
-                inputMode="numeric"
-                autoComplete="off"
-                placeholder="000.000.000-00"
-                maxLength={14}
-                value={patient.cpf ? formatCPF(patient.cpf) : ""}
-                onChange={(e) => setPatient({ ...patient, cpf: onlyDigits(e.target.value) })}
-              />
-            </div>
-          </div>
-          <div className="field-row">
-            <div className="field">
-              <label className="field-label" htmlFor="p-email">
-                E-mail
-              </label>
-              <input
-                id="p-email"
-                type="email"
-                autoComplete="email"
-                value={patient.email ?? ""}
-                onChange={(e) => setPatient({ ...patient, email: e.target.value })}
-                placeholder="Sem e-mail cadastrado"
-              />
-            </div>
-            <div className="field field-md">
-              <label className="field-label" htmlFor="p-phone">
-                Telefone
-              </label>
-              <input
-                id="p-phone"
-                type="tel"
-                autoComplete="tel"
-                value={patient.phone ?? ""}
-                onChange={(e) => setPatient({ ...patient, phone: formatPhone(e.target.value) })}
-                placeholder="Sem telefone cadastrado"
-              />
-            </div>
-          </div>
-
-          {error && (
-            <div className="alert alert-error" style={{ marginBottom: "var(--space-4)" }}>
-              <p>{error}</p>
-            </div>
-          )}
-
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button type="submit" disabled={saving} className="btn-primary">
-              {saving ? "Salvando..." : "Salvar alterações"}
-            </button>
-            <button type="button" className="btn-secondary" onClick={toggleStatus}>
-              {patient.status === "active" ? "Marcar como inativo" : "Reativar"}
-            </button>
-            <button type="button" className="btn-danger" onClick={handleDelete}>
-              Excluir
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <div className="card" style={{ marginBottom: "var(--space-5)" }}>
-        <h3 style={{ textTransform: "none", letterSpacing: 0, color: "var(--color-text-primary)", fontSize: 15 }}>Tags</h3>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
-          {patientTags.length === 0 && <span className="text-caption">Nenhuma tag ainda.</span>}
-          {patientTags.map((tag) => (
-            <span key={tag.id} className="badge badge-accent" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              {tag.name}
-              <button
-                onClick={() => detachTag(tag.id)}
-                aria-label={`Remover tag ${tag.name}`}
-                style={{ border: "none", background: "none", cursor: "pointer", padding: 0, lineHeight: 1, minWidth: 0 }}
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-        {allTags.filter((t) => !patientTags.some((pt) => pt.id === t.id)).length > 0 && (
-          <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-            <select value={tagToAdd} onChange={(e) => setTagToAdd(e.target.value)} style={{ maxWidth: 220 }}>
-              <option value="">Adicionar tag...</option>
-              {allTags
-                .filter((t) => !patientTags.some((pt) => pt.id === t.id))
-                .map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-            </select>
-            <button className="btn-secondary" onClick={attachTag} disabled={!tagToAdd}>
-              Adicionar
-            </button>
-          </div>
-        )}
-        <p style={{ margin: "10px 0 0", fontSize: 13 }}>
-          <a href="/tags">Gerenciar tags</a>
-        </p>
-      </div>
-
-      <div className="card">
-        <h3 style={{ textTransform: "none", letterSpacing: 0, color: "var(--color-text-primary)", fontSize: 15 }}>
-          Acesso ao app do paciente
-        </h3>
-        <p className="text-caption" style={{ margin: "4px 0 12px" }}>
-          Defina uma senha para o paciente acessar o plano alimentar, chat e diário pelo app.
-        </p>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-end" }}>
-          <div className="field" style={{ maxWidth: 260, marginBottom: 0 }}>
-            <label className="field-label" htmlFor="portal-password">
-              Senha
-            </label>
-            <PasswordInput
-              id="portal-password"
-              placeholder="Mín. 8 caracteres"
-              value={portalPassword}
-              onChange={(e) => setPortalPassword(e.target.value)}
+      <div className="detail-columns">
+        {/* Vem antes do conteúdo principal no DOM de propósito: no mobile o
+            resumo do paciente deve ser lido primeiro. No desktop grid-column
+            manda a faixa para a direita sem inverter a ordem de leitura. */}
+        <aside className="detail-aside">
+          <div className="card card-static">
+            {/* Fora do form de salvar de propósito: arquivo não cabe num PATCH JSON, e
+                "escolhi a foto mas esqueci de salvar" seria um estado ruim. Envia na hora. */}
+            <PhotoUpload
+              endpoint={`/patients/${patient.id}/photo`}
+              photoUrl={patient.photo_url ?? null}
+              onChange={(data) => setPatient(data as unknown as Patient)}
+              fallback={initials(patient.name)}
+              hint="JPG, PNG ou WebP, até 3 MB. Visível só pra você e sua equipe."
+              alt={`Foto de ${patient.name}`}
+              confirmTitle="Remover a foto do paciente?"
             />
+            <div style={{ marginTop: 12 }}>
+              <span className={`badge ${patient.status === "active" ? "badge-success" : "badge-neutral"}`}>
+                {patient.status === "active" ? "Ativo" : "Inativo"}
+              </span>
+            </div>
           </div>
-          <button onClick={grantPortalAccess} disabled={portalSaving} className="btn-primary">
-            {portalSaving ? "Salvando..." : "Habilitar acesso"}
-          </button>
-          <button className="btn-ghost" onClick={revokePortalAccess}>
-            Revogar
-          </button>
+
+          <div className="card card-static">
+            <h3 style={{ textTransform: "none", letterSpacing: 0, color: "var(--color-text-primary)", fontSize: 15 }}>
+              Atalhos
+            </h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <a href={`/pacientes/${patient.id}/chat`} className="btn-secondary">
+                Chat
+              </a>
+              <a href={`/pacientes/${patient.id}/antropometria`} className="btn-secondary">
+                Antropometria
+              </a>
+              <a href={`/pacientes/${patient.id}/diario`} className="btn-secondary">
+                Diário alimentar
+              </a>
+            </div>
+          </div>
+
+          <div className="card card-static">
+            <h3 style={{ textTransform: "none", letterSpacing: 0, color: "var(--color-text-primary)", fontSize: 15 }}>Tags</h3>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+              {patientTags.length === 0 && <span className="text-caption">Nenhuma tag ainda.</span>}
+              {patientTags.map((tag) => (
+                <span key={tag.id} className="badge badge-accent" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  {tag.name}
+                  <button
+                    onClick={() => detachTag(tag.id)}
+                    aria-label={`Remover tag ${tag.name}`}
+                    style={{ border: "none", background: "none", cursor: "pointer", padding: 0, lineHeight: 1, minWidth: 0 }}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+            {allTags.filter((t) => !patientTags.some((pt) => pt.id === t.id)).length > 0 && (
+              <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+                <select value={tagToAdd} onChange={(e) => setTagToAdd(e.target.value)} style={{ maxWidth: 220 }}>
+                  <option value="">Adicionar tag...</option>
+                  {allTags
+                    .filter((t) => !patientTags.some((pt) => pt.id === t.id))
+                    .map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                </select>
+                <button className="btn-secondary" onClick={attachTag} disabled={!tagToAdd}>
+                  Adicionar
+                </button>
+              </div>
+            )}
+            <p style={{ margin: "10px 0 0", fontSize: 13 }}>
+              <a href="/tags">Gerenciar tags</a>
+            </p>
+          </div>
+
+          <div className="card card-static">
+            <h3 style={{ textTransform: "none", letterSpacing: 0, color: "var(--color-text-primary)", fontSize: 15 }}>
+              Acesso ao app do paciente
+            </h3>
+            <p className="text-caption" style={{ margin: "4px 0 12px" }}>
+              Defina uma senha para o paciente acessar o plano alimentar, chat e diário pelo app.
+            </p>
+            <div className="field" style={{ maxWidth: 260 }}>
+              <label className="field-label" htmlFor="portal-password">
+                Senha
+              </label>
+              <PasswordInput
+                id="portal-password"
+                placeholder="Mín. 8 caracteres"
+                value={portalPassword}
+                onChange={(e) => setPortalPassword(e.target.value)}
+              />
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button onClick={grantPortalAccess} disabled={portalSaving} className="btn-primary">
+                {portalSaving ? "Salvando..." : "Habilitar acesso"}
+              </button>
+              <button className="btn-ghost" onClick={revokePortalAccess}>
+                Revogar
+              </button>
+            </div>
+            {portalMessage && (
+              <p style={{ marginTop: 10, fontSize: 13, color: "var(--color-text-secondary)" }}>{portalMessage}</p>
+            )}
+          </div>
+        </aside>
+
+        <div className="detail-main">
+          <div className="card card-static">
+            <h3 style={{ textTransform: "none", letterSpacing: 0, color: "var(--color-text-primary)", fontSize: 15 }}>
+              Dados cadastrais
+            </h3>
+            <form onSubmit={handleSave}>
+              <div className="field-row">
+                <div className="field">
+                  <label className="field-label" htmlFor="p-name">
+                    Nome
+                  </label>
+                  <input id="p-name" value={patient.name} onChange={(e) => setPatient({ ...patient, name: e.target.value })} />
+                </div>
+                <div className="field field-sm">
+                  <label className="field-label" htmlFor="p-birth">
+                    Nascimento
+                  </label>
+                  <input
+                    id="p-birth"
+                    type="date"
+                    value={patient.birth_date ?? ""}
+                    onChange={(e) => setPatient({ ...patient, birth_date: e.target.value })}
+                  />
+                </div>
+                <div className="field field-sm">
+                  <label className="field-label" htmlFor="p-cpf">
+                    CPF
+                  </label>
+                  <input
+                    id="p-cpf"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    placeholder="000.000.000-00"
+                    maxLength={14}
+                    value={patient.cpf ? formatCPF(patient.cpf) : ""}
+                    onChange={(e) => setPatient({ ...patient, cpf: onlyDigits(e.target.value) })}
+                  />
+                </div>
+              </div>
+              <div className="field-row">
+                <div className="field">
+                  <label className="field-label" htmlFor="p-email">
+                    E-mail
+                  </label>
+                  <input
+                    id="p-email"
+                    type="email"
+                    autoComplete="email"
+                    value={patient.email ?? ""}
+                    onChange={(e) => setPatient({ ...patient, email: e.target.value })}
+                    placeholder="Sem e-mail cadastrado"
+                  />
+                </div>
+                <div className="field field-md">
+                  <label className="field-label" htmlFor="p-phone">
+                    Telefone
+                  </label>
+                  <input
+                    id="p-phone"
+                    type="tel"
+                    autoComplete="tel"
+                    value={patient.phone ?? ""}
+                    onChange={(e) => setPatient({ ...patient, phone: formatPhone(e.target.value) })}
+                    placeholder="Sem telefone cadastrado"
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="alert alert-error" style={{ marginBottom: "var(--space-4)" }}>
+                  <p>{error}</p>
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button type="submit" disabled={saving} className="btn-primary">
+                  {saving ? "Salvando..." : "Salvar alterações"}
+                </button>
+                <button type="button" className="btn-secondary" onClick={toggleStatus}>
+                  {patient.status === "active" ? "Marcar como inativo" : "Reativar"}
+                </button>
+                <button type="button" className="btn-danger" onClick={handleDelete}>
+                  Excluir
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-        {portalMessage && (
-          <p style={{ marginTop: 10, fontSize: 13, color: "var(--color-text-secondary)" }}>{portalMessage}</p>
-        )}
       </div>
-    </main>
+    </div>
   );
 }

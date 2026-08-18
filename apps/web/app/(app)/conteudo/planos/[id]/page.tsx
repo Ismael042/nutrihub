@@ -106,10 +106,10 @@ export default function PlanoDetalhePage() {
   }
 
   if (!professional) return null;
-  if (!plan) return <main className="page-container">Carregando...</main>;
+  if (!plan) return <div className="page-container">Carregando...</div>;
 
   return (
-    <main className="page-container">
+    <div className="page-container">
       <a href="/conteudo/planos" className="back-link">← Planos alimentares</a>
       <div className="page-title-row">
         <h1>{plan.name}</h1>
@@ -159,7 +159,7 @@ export default function PlanoDetalhePage() {
           + Adicionar refeição
         </button>
       </form>
-    </main>
+    </div>
   );
 }
 

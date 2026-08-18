@@ -36,7 +36,7 @@ function NovoLocalForm() {
   }
 
   return (
-    <main className="form-container">
+    <div className="form-container">
       <a href={returnTo} className="back-link">← Voltar</a>
       <h1>Novo local de atendimento</h1>
       <form onSubmit={handleSubmit}>
@@ -76,7 +76,7 @@ function NovoLocalForm() {
           {loading ? "Salvando..." : "Salvar"}
         </button>
       </form>
-    </main>
+    </div>
   );
 }
 

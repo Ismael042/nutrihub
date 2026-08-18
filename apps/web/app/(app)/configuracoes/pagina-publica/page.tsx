@@ -76,7 +76,7 @@ export default function PaginaPublicaConfigPage() {
   }
 
   return (
-    <main className="form-container">
+    <div className="form-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Página pública</h1>
       <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>
@@ -193,6 +193,6 @@ export default function PaginaPublicaConfigPage() {
       <p style={{ marginTop: 16, fontSize: 13 }}>
         <a href="/agenda/solicitacoes">Ver solicitações de horário</a>
       </p>
-    </main>
+    </div>
   );
 }

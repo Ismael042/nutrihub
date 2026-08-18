@@ -82,7 +82,7 @@ export default function PrescricoesPage() {
   if (!professional) return null;
 
   return (
-    <main className="page-container">
+    <div className="page-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Prescrições</h1>
 
@@ -217,6 +217,6 @@ export default function PrescricoesPage() {
           ))}
         </ul>
       )}
-    </main>
+    </div>
   );
 }

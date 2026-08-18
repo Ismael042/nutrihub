@@ -178,7 +178,7 @@ export default function AntropometriaPage() {
   })();
 
   return (
-    <main className="page-container">
+    <div className="page-container">
       <a href={`/pacientes/${params.id}`} className="back-link">← {patient?.name ?? "Paciente"}</a>
       <h1>Antropometria</h1>
 
@@ -325,6 +325,6 @@ export default function AntropometriaPage() {
         onChange={handlePhotoSelected}
       />
       {measurements.length === 0 && <p style={{ marginTop: 12 }}>Nenhuma medição registrada ainda.</p>}
-    </main>
+    </div>
   );
 }

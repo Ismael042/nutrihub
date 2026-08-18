@@ -26,7 +26,7 @@ export default function ConsultorioConfigPage() {
   const isAdmin = professional.role === "admin" || !professional.role;
 
   return (
-    <main className="form-container">
+    <div className="form-container">
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Consultório</h1>
       <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>
@@ -54,6 +54,6 @@ export default function ConsultorioConfigPage() {
           </p>
         )}
       </div>
-    </main>
+    </div>
   );
 }
