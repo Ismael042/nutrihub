@@ -11,6 +11,7 @@ from app.routers import (
     auth,
     booking_requests,
     chat,
+    chat_inbox,
     diet_plans,
     financial,
     foods,
@@ -73,6 +74,7 @@ app.include_router(anthropometry.router)
 app.include_router(patient_auth.router)
 app.include_router(patient_portal.router)
 app.include_router(chat.router)
+app.include_router(chat_inbox.router)
 app.include_router(recurring_charges.router)
 app.include_router(inventory.router)
 app.include_router(team.router)

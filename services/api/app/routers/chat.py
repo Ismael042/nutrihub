@@ -35,6 +35,17 @@ async def list_messages(
         )
         if patient is None:
             raise HTTPException(status_code=404, detail="Paciente não encontrado")
+        # Ver a thread = ler a thread: qualquer mensagem do paciente ainda não lida
+        # é marcada aqui, antes do select. Isso é o que faz o inbox (/chat/conversations)
+        # zerar a contagem de não lidas quando o profissional abre a conversa.
+        await conn.execute(
+            """
+            update chat_messages set read_at = now()
+            where patient_id = $1 and tenant_id = $2 and sender = 'patient' and read_at is null
+            """,
+            patient_id,
+            current.tenant_id,
+        )
         rows = await conn.fetch(
             """
             select id, patient_id, sender, content, created_at from chat_messages

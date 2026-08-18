@@ -1874,6 +1874,123 @@ table {
   margin-top: var(--space-5);
 }
 
+/* ---- Inbox de mensagens (lista de conversas + thread) ---- */
+
+.inbox-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-6);
+}
+
+.inbox-layout > * {
+  min-width: 0;
+}
+
+@media (min-width: 860px) {
+  .inbox-layout {
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  }
+}
+
+/* Abaixo do breakpoint mostra lista OU thread, nunca as duas — .showing-thread
+   é ligada via JS quando uma conversa é selecionada. Acima do breakpoint as
+   duas colunas ficam sempre visíveis (regra abaixo não se aplica). */
+@media (max-width: 859px) {
+  .inbox-layout.showing-thread .conversation-list-pane {
+    display: none;
+  }
+
+  .inbox-layout:not(.showing-thread) .thread-pane {
+    display: none;
+  }
+}
+
+@media (min-width: 860px) {
+  .thread-back {
+    display: none;
+  }
+}
+
+/* Combina com .list-row (borda/padding/flex já vêm de lá) — só o necessário
+   pra virar um <button> clicável em vez de <li> estático. */
+.conversation-row {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.conversation-row:last-child {
+  border-bottom: none;
+}
+
+.conversation-row:hover {
+  background: var(--color-bg-subtle);
+}
+
+.conversation-row.active {
+  background: var(--color-primary-subtle);
+}
+
+.conversation-row-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.conversation-row-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.conversation-row-preview {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conversation-row.unread .conversation-row-name,
+.conversation-row.unread .conversation-row-preview {
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.conversation-row-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.conversation-row-time {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .page-subtitle {
   color: var(--color-text-muted);
   font-size: 0.9rem;

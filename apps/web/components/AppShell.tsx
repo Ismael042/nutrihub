@@ -8,6 +8,7 @@ import {
   IconApple,
   IconBook,
   IconCalendar,
+  IconChat,
   IconCheckSquare,
   IconClipboard,
   IconFileText,
@@ -43,6 +44,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Atendimento",
     items: [
       { href: "/pacientes", label: "Pacientes", icon: IconUsers },
+      { href: "/mensagens", label: "Mensagens", icon: IconChat },
       { href: "/agenda", label: "Agenda", icon: IconCalendar },
       { href: "/locais", label: "Locais", icon: IconMapPin },
       { href: "/financeiro", label: "Financeiro", icon: IconWallet }
