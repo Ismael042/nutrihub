@@ -64,7 +64,7 @@ export default function ReceitasPage() {
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Receitas</h1>
 
-      <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
+      <form onSubmit={handleSubmit} className="form-narrow" style={{ marginTop: 12 }}>
         <div className="field">
           <label className="field-label field-required" htmlFor="recipe-name">
             Nome da receita
@@ -98,19 +98,21 @@ export default function ReceitasPage() {
       )}
 
       {!loading && recipes.length > 0 && (
-        <ul style={{ listStyle: "none", padding: 0, marginTop: 20 }}>
+        <div className="card-grid">
           {recipes.map((r) => (
-            <li key={r.id} style={{ padding: "12px 0", borderBottom: "1px solid var(--color-border)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <article key={r.id} className="card card-static">
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "start" }}>
                 <strong>{r.name}</strong>
-                <button onClick={() => remove(r.id)} style={{ color: "var(--color-error)" }}>
+                <button onClick={() => remove(r.id)} style={{ color: "var(--color-error)", flexShrink: 0 }}>
                   Excluir
                 </button>
               </div>
-              {r.instructions && <div style={{ color: "var(--color-text-muted)" }}>{r.instructions}</div>}
+              {r.instructions && (
+                <p style={{ color: "var(--color-text-muted)", margin: "6px 0 0", fontSize: 14 }}>{r.instructions}</p>
+              )}
               {/* Upload por item: não existe página de detalhe de receita, e a chave do
                   objeto usa o id — então a receita precisa existir antes da foto. */}
-              <div style={{ marginTop: 8 }}>
+              <div style={{ marginTop: 12 }}>
                 <PhotoUpload
                   endpoint={`/recipes/${r.id}/photo`}
                   photoUrl={r.photo_url}
@@ -125,9 +127,9 @@ export default function ReceitasPage() {
                   confirmTitle="Remover a foto da receita?"
                 />
               </div>
-            </li>
+            </article>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

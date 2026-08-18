@@ -1884,6 +1884,13 @@ table {
   }
 }
 
+/* Formulário de cadastro rápido no topo de uma tela de lista. A lista embaixo
+   usa a largura toda; o formulário não deve — campo de nome com 1300px é o
+   mesmo desperdício que a lista de uma coluna. */
+.form-narrow {
+  max-width: var(--form-max);
+}
+
 /* Chips que quebram linha — para listas de um termo só. */
 .chip-list {
   display: flex;
@@ -2239,7 +2246,9 @@ table {
 
 /* ---- Anexos (exames) ---- */
 
-.attachment-list {
+/* ul.* e não .attachment-list: dentro de um .card a regra `.card ul` tem a mesma
+   especificidade que uma classe e sobrescreveria margem e gap desta lista. */
+ul.attachment-list {
   list-style: none;
   padding: 0;
   margin: var(--space-2) 0 0;

@@ -66,7 +66,7 @@ export default function FarmaciasPage() {
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Farmácias (orçamento)</h1>
 
-      <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
+      <form onSubmit={handleSubmit} className="form-narrow" style={{ marginTop: 12 }}>
         <div className="field">
           <label className="field-label field-required" htmlFor="pharmacy-name">
             Nome
@@ -110,20 +110,34 @@ export default function FarmaciasPage() {
       )}
 
       {!loading && pharmacies.length > 0 && (
-        <ul style={{ listStyle: "none", padding: 0, marginTop: 20 }}>
-          {pharmacies.map((f) => (
-            <li key={f.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--color-border)", display: "flex", justifyContent: "space-between" }}>
-              <div>
-                <strong>{f.name}</strong>
-                {f.phone && <span style={{ color: "var(--color-text-muted)" }}> · {f.phone}</span>}
-                {f.notes && <span style={{ color: "var(--color-text-muted)" }}> · {f.notes}</span>}
-              </div>
-              <button onClick={() => remove(f.id)} style={{ color: "var(--color-error)" }}>
-                Excluir
-              </button>
-            </li>
-          ))}
-        </ul>
+        <div className="table-wrap" style={{ marginTop: 20 }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>Observações</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {pharmacies.map((f) => (
+                <tr key={f.id}>
+                  <td>
+                    <strong>{f.name}</strong>
+                  </td>
+                  <td>{f.phone || "—"}</td>
+                  <td>{f.notes || "—"}</td>
+                  <td className="table-actions">
+                    <button onClick={() => remove(f.id)} style={{ color: "var(--color-error)" }}>
+                      Excluir
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

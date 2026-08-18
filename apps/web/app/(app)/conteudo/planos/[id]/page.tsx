@@ -119,31 +119,37 @@ export default function PlanoDetalhePage() {
       </div>
       <p style={{ color: "var(--color-text-muted)" }}>Paciente: {plan.patient_name}</p>
 
-      {plan.meals.map((meal) => (
-        <section key={meal.id} style={{ marginTop: 20, border: "1px solid var(--color-border)", padding: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <h3 style={{ margin: 0 }}>{meal.name}</h3>
-            <button onClick={() => deleteMeal(meal.id)} style={{ color: "var(--color-error)" }}>
-              Excluir refeição
-            </button>
-          </div>
-          <ul style={{ listStyle: "none", padding: 0, marginTop: 8 }}>
-            {meal.items.map((item) => (
-              <li key={item.id} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0" }}>
-                <span>
-                  {item.food_name} — {item.quantity} {item.unit}
-                </span>
-                <button onClick={() => deleteItem(meal.id, item.id)} style={{ color: "var(--color-error)" }}>
-                  x
-                </button>
-              </li>
-            ))}
-          </ul>
-          <AddItemForm foods={foods} onAdd={(foodId, qty, unit) => addItem(meal.id, foodId, qty, unit)} />
-        </section>
-      ))}
+      <div className="meal-grid">
+        {plan.meals.map((meal) => (
+          <section key={meal.id} className="card card-static">
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
+              <h3 style={{ margin: 0 }}>{meal.name}</h3>
+              <button onClick={() => deleteMeal(meal.id)} style={{ color: "var(--color-error)", flexShrink: 0 }}>
+                Excluir refeição
+              </button>
+            </div>
+            <ul style={{ marginTop: 10 }}>
+              {meal.items.map((item) => (
+                <li key={item.id} style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                  <span>
+                    {item.food_name} — {item.quantity} {item.unit}
+                  </span>
+                  <button
+                    onClick={() => deleteItem(meal.id, item.id)}
+                    aria-label={`Remover ${item.food_name}`}
+                    style={{ color: "var(--color-error)", flexShrink: 0 }}
+                  >
+                    ×
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <AddItemForm foods={foods} onAdd={(foodId, qty, unit) => addItem(meal.id, foodId, qty, unit)} />
+          </section>
+        ))}
+      </div>
 
-      <form onSubmit={addMeal} style={{ display: "flex", gap: 8, marginTop: 20, alignItems: "flex-end" }}>
+      <form onSubmit={addMeal} className="form-narrow" style={{ display: "flex", gap: 8, marginTop: 20, alignItems: "flex-end" }}>
         <div className="field" style={{ flex: 1, marginBottom: 0 }}>
           <label className="field-label" htmlFor="new-meal-name">
             Nova refeição

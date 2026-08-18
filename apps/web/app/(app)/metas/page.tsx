@@ -90,7 +90,7 @@ export default function MetasPage() {
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Metas</h1>
 
-      <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
+      <form onSubmit={handleSubmit} className="form-narrow" style={{ marginTop: 12 }}>
         <div className="field">
           <label className="field-label field-required" htmlFor="goal-patient">
             Paciente
@@ -145,26 +145,37 @@ export default function MetasPage() {
       )}
 
       {!loading && goals.length > 0 && (
-        <ul style={{ listStyle: "none", padding: 0, marginTop: 20 }}>
-          {goals.map((g) => (
-            <li
-              key={g.id}
-              style={{ padding: "10px 0", borderBottom: "1px solid var(--color-border)", display: "flex", justifyContent: "space-between" }}
-            >
-              <div>
-                <span style={{ textDecoration: g.achieved ? "line-through" : "none" }}>{g.description}</span>
-                <span style={{ color: "var(--color-text-muted)" }}> · {g.patient_name}</span>
-                {g.target_date && <span style={{ color: "var(--color-text-muted)" }}> · até {formatDate(g.target_date)}</span>}
-              </div>
-              <div style={{ display: "flex", gap: 6 }}>
-                <button onClick={() => toggleAchieved(g)}>{g.achieved ? "Reabrir" : "Concluir"}</button>
-                <button onClick={() => remove(g.id)} style={{ color: "var(--color-error)" }}>
-                  Excluir
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <div className="table-wrap" style={{ marginTop: 20 }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Meta</th>
+                <th>Paciente</th>
+                <th>Prazo</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {goals.map((g) => (
+                <tr key={g.id}>
+                  <td>
+                    <span style={{ textDecoration: g.achieved ? "line-through" : "none" }}>{g.description}</span>
+                  </td>
+                  <td>{g.patient_name}</td>
+                  <td>{g.target_date ? formatDate(g.target_date) : "—"}</td>
+                  <td className="table-actions">
+                    <div style={{ display: "inline-flex", gap: 6 }}>
+                      <button onClick={() => toggleAchieved(g)}>{g.achieved ? "Reabrir" : "Concluir"}</button>
+                      <button onClick={() => remove(g.id)} style={{ color: "var(--color-error)" }}>
+                        Excluir
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

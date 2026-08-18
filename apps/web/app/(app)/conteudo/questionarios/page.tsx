@@ -80,7 +80,7 @@ export default function QuestionariosPage() {
         </a>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
+      <form onSubmit={handleSubmit} className="form-narrow" style={{ marginTop: 12 }}>
         <div className="field-row">
           <div className="field field-md">
             <label className="field-label" htmlFor="tpl-kind">
@@ -137,21 +137,24 @@ export default function QuestionariosPage() {
       )}
 
       {!loading && templates.length > 0 && (
-        <ul style={{ listStyle: "none", padding: 0, marginTop: 20 }}>
+        <div className="card-grid">
           {templates.map((t) => (
-            <li key={t.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--color-border)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <article key={t.id} className="card card-static">
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "start" }}>
                 <strong>{t.name}</strong>
-                <button onClick={() => remove(t.id)} style={{ color: "var(--color-error)" }}>
+                <button onClick={() => remove(t.id)} style={{ color: "var(--color-error)", flexShrink: 0 }}>
                   Excluir
                 </button>
               </div>
-              <div style={{ color: "var(--color-text-muted)" }}>
-                {t.kind === "anamnesis" ? "Anamnese" : "Pré-consulta"} · {t.fields.map((f) => f.label).join(", ")}
-              </div>
-            </li>
+              <p style={{ margin: "6px 0 0" }}>
+                <span className="badge badge-neutral">{t.kind === "anamnesis" ? "Anamnese" : "Pré-consulta"}</span>
+              </p>
+              <p style={{ color: "var(--color-text-muted)", fontSize: 14, margin: "8px 0 0" }}>
+                {t.fields.map((f) => f.label).join(", ")}
+              </p>
+            </article>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

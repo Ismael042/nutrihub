@@ -86,7 +86,7 @@ export default function PrescricoesPage() {
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Prescrições</h1>
 
-      <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
+      <form onSubmit={handleSubmit} className="form-narrow" style={{ marginTop: 12 }}>
         <div className="field-row">
           <div className="field">
             <label className="field-label field-required" htmlFor="rx-patient">
@@ -194,17 +194,19 @@ export default function PrescricoesPage() {
       )}
 
       {!loading && prescriptions.length > 0 && (
-        <ul style={{ listStyle: "none", padding: 0, marginTop: 20 }}>
+        <div className="card-grid">
           {prescriptions.map((p) => (
-            <li key={p.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--color-border)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <article key={p.id} className="card card-static">
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "start" }}>
                 <strong>{p.patient_name}</strong>
-                <button onClick={() => remove(p.id)} style={{ color: "var(--color-error)" }}>
+                <button onClick={() => remove(p.id)} style={{ color: "var(--color-error)", flexShrink: 0 }}>
                   Excluir
                 </button>
               </div>
-              <div style={{ color: "var(--color-text-muted)" }}>{p.kind === "supplement" ? "Suplemento" : "Fitoterápico"}</div>
-              <ul style={{ marginTop: 6 }}>
+              <p style={{ margin: "6px 0 0" }}>
+                <span className="badge badge-neutral">{p.kind === "supplement" ? "Suplemento" : "Fitoterápico"}</span>
+              </p>
+              <ul style={{ marginTop: 10 }}>
                 {p.items.map((item, i) => (
                   <li key={i} style={{ fontSize: 14 }}>
                     {item.description}
@@ -213,9 +215,9 @@ export default function PrescricoesPage() {
                   </li>
                 ))}
               </ul>
-            </li>
+            </article>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

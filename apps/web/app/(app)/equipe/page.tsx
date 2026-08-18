@@ -101,7 +101,7 @@ export default function EquipePage() {
       {isAdmin && (
         <details style={{ marginTop: 16 }}>
           <summary>+ Convidar profissional</summary>
-          <form onSubmit={handleSubmit} style={{ marginTop: 8 }}>
+          <form onSubmit={handleSubmit} className="form-narrow" style={{ marginTop: 8 }}>
             <div className="field">
               <label className="field-label field-required" htmlFor="invite-name">
                 Nome
@@ -177,27 +177,49 @@ export default function EquipePage() {
       )}
 
       {!loading && members.length > 0 && (
-        <ul style={{ listStyle: "none", padding: 0, marginTop: 20 }}>
-          {members.map((m) => (
-            <li key={m.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--color-border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <strong>{m.name}</strong>
-                <span style={{ color: "var(--color-text-muted)" }}> · {m.email}</span>
-                <span className="badge" style={{ marginLeft: 8 }}>{ROLE_LABELS[m.role] ?? m.role}</span>
-              </div>
-              {isAdmin && (
-                <div style={{ display: "flex", gap: 8 }}>
-                  <select value={m.role} onChange={(e) => changeRole(m.id, e.target.value)}>
-                    <option value="admin">Administrador</option>
-                    <option value="nutritionist">Nutricionista</option>
-                    <option value="assistant">Assistente</option>
-                  </select>
-                  <button onClick={() => remove(m.id)} style={{ color: "var(--color-error)" }}>Remover</button>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
+        <div className="table-wrap" style={{ marginTop: 20 }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Papel</th>
+                {isAdmin && <th />}
+              </tr>
+            </thead>
+            <tbody>
+              {members.map((m) => (
+                <tr key={m.id}>
+                  <td>
+                    <strong>{m.name}</strong>
+                  </td>
+                  <td>{m.email}</td>
+                  <td>
+                    <span className="badge">{ROLE_LABELS[m.role] ?? m.role}</span>
+                  </td>
+                  {isAdmin && (
+                    <td className="table-actions">
+                      <div style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+                        <select
+                          value={m.role}
+                          onChange={(e) => changeRole(m.id, e.target.value)}
+                          aria-label={`Papel de ${m.name}`}
+                        >
+                          <option value="admin">Administrador</option>
+                          <option value="nutritionist">Nutricionista</option>
+                          <option value="assistant">Assistente</option>
+                        </select>
+                        <button onClick={() => remove(m.id)} style={{ color: "var(--color-error)" }}>
+                          Remover
+                        </button>
+                      </div>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

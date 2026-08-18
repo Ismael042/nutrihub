@@ -69,7 +69,7 @@ export default function NutriPlanPage() {
       <h1>NutriPlan</h1>
       <p style={{ color: "var(--color-text-muted)" }}>Tarefas e notas rápidas.</p>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", gap: 8, marginTop: 12 }}>
+      <form onSubmit={handleSubmit} className="form-narrow" style={{ display: "flex", gap: 8, marginTop: 12 }}>
         <select
           aria-label="Tipo"
           value={kind}
@@ -97,42 +97,50 @@ export default function NutriPlanPage() {
           <SkeletonRows count={4} />
         </div>
       ) : (
-        <>
-          <h3 style={{ marginTop: 24 }}>Tarefas</h3>
-          {tasks.length === 0 ? (
-            <EmptyState icon={<IconCheckSquare />} title="Nenhuma tarefa" />
-          ) : (
-            <ul style={{ listStyle: "none", padding: 0 }}>
-              {tasks.map((t) => (
-                <li key={t.id} style={{ padding: "6px 0", display: "flex", justifyContent: "space-between" }}>
-                  <label className="checkbox-field" style={{ textDecoration: t.done ? "line-through" : "none" }}>
-                    <input type="checkbox" checked={t.done} onChange={() => toggleDone(t)} />
-                    {t.content}
-                  </label>
-                  <button onClick={() => remove(t.id, "task")} style={{ color: "var(--color-error)" }}>
-                    Excluir
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+        <div className="split-columns" style={{ marginTop: 24 }}>
+          <section>
+            <h3>Tarefas</h3>
+            {tasks.length === 0 ? (
+              <EmptyState icon={<IconCheckSquare />} title="Nenhuma tarefa" />
+            ) : (
+              <ul className="list-rows">
+                {tasks.map((t) => (
+                  <li key={t.id} className="list-row">
+                    <label className="checkbox-field" style={{ textDecoration: t.done ? "line-through" : "none" }}>
+                      <input type="checkbox" checked={t.done} onChange={() => toggleDone(t)} />
+                      {t.content}
+                    </label>
+                    <div className="list-row-actions">
+                      <button onClick={() => remove(t.id, "task")} style={{ color: "var(--color-error)" }}>
+                        Excluir
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
 
-          <h3 style={{ marginTop: 24 }}>Notas</h3>
-          {notes.length === 0 ? (
-            <EmptyState icon={<IconCheckSquare />} title="Nenhuma nota" />
-          ) : (
-            <ul style={{ listStyle: "none", padding: 0 }}>
-              {notes.map((n) => (
-                <li key={n.id} style={{ padding: "6px 0", display: "flex", justifyContent: "space-between" }}>
-                  <span>{n.content}</span>
-                  <button onClick={() => remove(n.id, "note")} style={{ color: "var(--color-error)" }}>
-                    Excluir
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </>
+          <section>
+            <h3>Notas</h3>
+            {notes.length === 0 ? (
+              <EmptyState icon={<IconCheckSquare />} title="Nenhuma nota" />
+            ) : (
+              <ul className="list-rows">
+                {notes.map((n) => (
+                  <li key={n.id} className="list-row">
+                    <span>{n.content}</span>
+                    <div className="list-row-actions">
+                      <button onClick={() => remove(n.id, "note")} style={{ color: "var(--color-error)" }}>
+                        Excluir
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
       )}
     </div>
   );

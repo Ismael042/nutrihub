@@ -135,7 +135,7 @@ export default function ExamesPage() {
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Solicitações de exames</h1>
 
-      <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
+      <form onSubmit={handleSubmit} className="form-narrow" style={{ marginTop: 12 }}>
         <div className="field">
           <label className="field-label field-required" htmlFor="exam-patient">
             Paciente
@@ -206,20 +206,20 @@ export default function ExamesPage() {
       )}
 
       {!loading && requests.length > 0 && (
-        <ul style={{ listStyle: "none", padding: 0, marginTop: 20 }}>
+        <div className="card-grid">
           {requests.map((r) => (
-            <li key={r.id} style={{ padding: "10px 0", borderBottom: "1px solid var(--color-border)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <article key={r.id} className="card card-static">
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "start" }}>
                 <strong>{r.patient_name}</strong>
-                <button onClick={() => remove(r.id)} style={{ color: "var(--color-error)" }}>
+                <button onClick={() => remove(r.id)} style={{ color: "var(--color-error)", flexShrink: 0 }}>
                   Excluir
                 </button>
               </div>
-              <div>{r.exams.map((e) => e.name).join(", ")}</div>
-              <div style={{ color: "var(--color-text-muted)" }}>
+              <p style={{ margin: "6px 0 0", fontSize: 14 }}>{r.exams.map((e) => e.name).join(", ")}</p>
+              <p style={{ color: "var(--color-text-muted)", fontSize: 13, margin: "6px 0 0" }}>
                 {formatDate(r.requested_at)}
                 {r.notes && ` · ${r.notes}`}
-              </div>
+              </p>
 
               {(r.attachments ?? []).length > 0 && (
                 <ul className="attachment-list">
@@ -247,7 +247,7 @@ export default function ExamesPage() {
 
               <button
                 className="btn-sm"
-                style={{ marginTop: 8 }}
+                style={{ marginTop: 12 }}
                 disabled={uploadingAttachment}
                 onClick={() => {
                   setAttachTarget(r.id);
@@ -256,9 +256,9 @@ export default function ExamesPage() {
               >
                 {uploadingAttachment ? "Enviando..." : "+ Anexar resultado"}
               </button>
-            </li>
+            </article>
           ))}
-        </ul>
+        </div>
       )}
 
       <input

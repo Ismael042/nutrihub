@@ -188,8 +188,10 @@ export default function AntropometriaPage() {
         </p>
       )}
 
+      {/* Largura contida de propósito: esticar um sparkline de poucos pontos até a
+          tela toda não acrescenta informação nenhuma. */}
       {weightPoints.length >= 2 && (
-        <div className="card" style={{ marginTop: 12, display: "inline-block" }}>
+        <div className="card card-static" style={{ marginTop: 12, maxWidth: 480 }}>
           <p style={{ margin: "0 0 8px", fontSize: 13, color: "var(--color-text-muted)" }}>Evolução do peso</p>
           <Sparkline points={weightPoints} />
         </div>
@@ -197,7 +199,7 @@ export default function AntropometriaPage() {
 
       <details style={{ marginTop: 20 }} open={measurements.length === 0}>
         <summary>+ Nova medição</summary>
-        <form onSubmit={handleSubmit} style={{ marginTop: 8 }}>
+        <form onSubmit={handleSubmit} className="form-narrow" style={{ marginTop: 8 }}>
           <div className="field field-sm">
             <label className="field-label" htmlFor="measurement-date">
               Data
@@ -246,10 +248,13 @@ export default function AntropometriaPage() {
         </form>
       </details>
 
-      <div className="table-scroll" style={{ marginTop: 20, overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      {/* .table-wrap (e não a antiga .table-scroll, que nunca existiu no CSS) para
+          esta tabela ganhar a mesma borda, cabeçalho e padding das demais. */}
+      {measurements.length > 0 && (
+      <div className="table-wrap" style={{ marginTop: 20 }}>
+        <table>
           <thead>
-            <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border-strong)" }}>
+            <tr>
               <th>Data</th>
               {FIELDS.map((f) => (
                 <th key={f.key}>{f.label}</th>
@@ -265,12 +270,14 @@ export default function AntropometriaPage() {
             {measurements.map((m) => {
               const measurementBmi = bmi(m.weight_kg, m.height_cm);
               return (
-                <tr key={m.id} style={{ borderBottom: "1px solid var(--color-border)" }}>
+                <tr key={m.id}>
                   <td>{formatDate(m.measured_at)}</td>
                   {FIELDS.map((f) => (
-                    <td key={f.key}>{m[f.key] != null ? String(m[f.key]) : "—"}</td>
+                    <td className="table-num" key={f.key}>
+                      {m[f.key] != null ? String(m[f.key]) : "—"}
+                    </td>
                   ))}
-                  <td>{measurementBmi ? measurementBmi.toFixed(1) : "—"}</td>
+                  <td className="table-num">{measurementBmi ? measurementBmi.toFixed(1) : "—"}</td>
                   <td>
                     <div className="photo-grid">
                       {(m.photos ?? []).map((photo) => (
@@ -304,7 +311,7 @@ export default function AntropometriaPage() {
                       ))}
                     </div>
                   </td>
-                  <td>
+                  <td className="table-actions">
                     <button onClick={() => remove(m.id)} style={{ color: "var(--color-error)" }}>
                       Excluir
                     </button>
@@ -315,6 +322,7 @@ export default function AntropometriaPage() {
           </tbody>
         </table>
       </div>
+      )}
       {/* Um input só, reaproveitado por todas as linhas — qual medição recebe a foto
           vem do photoTarget setado no clique. */}
       <input

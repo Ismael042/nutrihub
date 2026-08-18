@@ -94,15 +94,20 @@ export default function AlimentosPage() {
       </p>
 
       <input
+        type="search"
         placeholder="Buscar alimento..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        style={{ width: "100%", marginTop: 12 }}
+        style={{ maxWidth: 360, marginTop: 12 }}
       />
 
       <details style={{ marginTop: 16 }}>
         <summary>+ Cadastrar alimento próprio</summary>
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
+        <form
+          onSubmit={handleSubmit}
+          className="form-narrow"
+          style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}
+        >
           <input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} required />
           <div style={{ display: "flex", gap: 8 }}>
             <input placeholder="Kcal" value={kcal} onChange={(e) => setKcal(e.target.value)} style={{ flex: 1 }} />
@@ -131,30 +136,32 @@ export default function AlimentosPage() {
       )}
 
       {foods.length > 0 && (
-        <table style={{ width: "100%", marginTop: 20, borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ textAlign: "left", borderBottom: "1px solid var(--color-border-strong)" }}>
-              <th>Nome</th>
-              <th>Fonte</th>
-              <th>Kcal</th>
-              <th>Prot</th>
-              <th>Carbo</th>
-              <th>Gord</th>
-            </tr>
-          </thead>
-          <tbody>
-            {foods.map((f) => (
-              <tr key={f.id} style={{ borderBottom: "1px solid var(--color-border)" }}>
-                <td>{f.name}</td>
-                <td style={{ color: "var(--color-text-muted)" }}>{SOURCE_LABEL[f.source] ?? f.source}</td>
-                <td>{f.kcal}</td>
-                <td>{f.protein_g}</td>
-                <td>{f.carbs_g}</td>
-                <td>{f.fat_g}</td>
+        <div className="table-wrap" style={{ marginTop: 20 }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Fonte</th>
+                <th>Kcal</th>
+                <th>Prot</th>
+                <th>Carbo</th>
+                <th>Gord</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {foods.map((f) => (
+                <tr key={f.id}>
+                  <td>{f.name}</td>
+                  <td style={{ color: "var(--color-text-muted)" }}>{SOURCE_LABEL[f.source] ?? f.source}</td>
+                  <td className="table-num">{f.kcal}</td>
+                  <td className="table-num">{f.protein_g}</td>
+                  <td className="table-num">{f.carbs_g}</td>
+                  <td className="table-num">{f.fat_g}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

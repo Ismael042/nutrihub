@@ -57,7 +57,7 @@ export default function TagsPage() {
       <h1>Tags</h1>
       <p style={{ color: "var(--color-text-muted)" }}>Use tags para organizar pacientes (ex: gestante, atleta, diabético).</p>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", gap: 8, marginTop: 12 }}>
+      <form onSubmit={handleSubmit} className="form-narrow" style={{ display: "flex", gap: 8, marginTop: 12 }}>
         <input placeholder="Nova tag" value={name} onChange={(e) => setName(e.target.value)} required style={{ flex: 1 }} />
         <button type="submit" className="btn-primary">
           Adicionar
@@ -75,13 +75,19 @@ export default function TagsPage() {
       )}
 
       {!loading && tags.length > 0 && (
-        <ul style={{ listStyle: "none", padding: 0, marginTop: 16 }}>
+        <ul className="chip-list" style={{ listStyle: "none", padding: 0 }}>
           {tags.map((t) => (
-            <li key={t.id} style={{ padding: "8px 0", borderBottom: "1px solid var(--color-border)", display: "flex", justifyContent: "space-between" }}>
-              {t.name}
-              <button onClick={() => remove(t.id)} style={{ color: "var(--color-error)" }}>
-                Excluir
-              </button>
+            <li key={t.id}>
+              <span className="badge badge-accent" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                {t.name}
+                <button
+                  onClick={() => remove(t.id)}
+                  aria-label={`Excluir tag ${t.name}`}
+                  style={{ border: "none", background: "none", cursor: "pointer", padding: 0, lineHeight: 1, minWidth: 0 }}
+                >
+                  ×
+                </button>
+              </span>
             </li>
           ))}
         </ul>
