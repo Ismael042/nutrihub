@@ -353,7 +353,11 @@ export default function PacienteDetalhePage() {
           Defina uma senha para o paciente acessar o plano alimentar, chat e diário pelo app.
         </p>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-end" }}>
-          <div className="field" style={{ maxWidth: 260, marginBottom: 0 }}>
+          {/* flex-basis (não width fixo) para o campo encolher de verdade em telas
+              estreitas — um <input width:100%> dentro de item flex sem base
+              explícita tende a colapsar no tamanho mínimo em vez de acompanhar
+              o espaço disponível. */}
+          <div className="field" style={{ flex: "1 1 200px", maxWidth: 320, marginBottom: 0 }}>
             <label className="field-label" htmlFor="portal-password">
               Senha
             </label>
@@ -364,12 +368,16 @@ export default function PacienteDetalhePage() {
               onChange={(e) => setPortalPassword(e.target.value)}
             />
           </div>
-          <button onClick={grantPortalAccess} disabled={portalSaving} className="btn-primary">
-            {portalSaving ? "Salvando..." : "Habilitar acesso"}
-          </button>
-          <button className="btn-ghost" onClick={revokePortalAccess}>
-            Revogar
-          </button>
+          {/* Botões num grupo à parte para quebrarem linha juntos, em vez de um
+              de cada vez ficando solto. */}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button onClick={grantPortalAccess} disabled={portalSaving} className="btn-primary">
+              {portalSaving ? "Salvando..." : "Habilitar acesso"}
+            </button>
+            <button className="btn-ghost" onClick={revokePortalAccess}>
+              Revogar
+            </button>
+          </div>
         </div>
         {portalMessage && (
           <p style={{ marginTop: 10, fontSize: 13, color: "var(--color-text-secondary)" }}>{portalMessage}</p>
