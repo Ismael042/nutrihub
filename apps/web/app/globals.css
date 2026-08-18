@@ -1763,47 +1763,6 @@ table {
   }
 }
 
-/* Ficha de detalhe: conteúdo principal + faixa lateral de identidade/atalhos.
-   Separado de .dashboard-columns porque a lateral aqui não deve crescer junto
-   com a tela — é painel de referência, não segunda coluna de conteúdo. */
-.detail-columns {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: start;
-  gap: var(--space-6);
-}
-
-/* min-width:0 explícito: grid item nasce com min-width:auto e os inputs
-   width:100% do formulário estourariam a track entre 960 e 1100px. */
-.detail-columns > * {
-  min-width: 0;
-}
-
-.detail-aside {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-@media (min-width: 960px) {
-  .detail-columns {
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
-  }
-
-  /* O <aside> vem antes no DOM (no mobile o resumo deve ser lido primeiro) e é
-     reposicionado por grid-column, não por order — assim a ordem de leitura
-     continua batendo com a ordem visual. */
-  .detail-columns > .detail-aside {
-    grid-column: 2;
-    grid-row: 1;
-  }
-
-  .detail-columns > .detail-main {
-    grid-column: 1;
-    grid-row: 1;
-  }
-}
-
 /* ---- Listas de uma linha (nome + ação) ---- */
 
 .list-rows {
