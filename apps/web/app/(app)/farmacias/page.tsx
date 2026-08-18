@@ -66,7 +66,7 @@ export default function FarmaciasPage() {
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Farmácias (orçamento)</h1>
 
-      <form onSubmit={handleSubmit} className="form-narrow" style={{ marginTop: 12 }}>
+      <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
         <div className="field">
           <label className="field-label field-required" htmlFor="pharmacy-name">
             Nome

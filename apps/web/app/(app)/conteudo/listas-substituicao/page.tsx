@@ -118,7 +118,7 @@ export default function ListasSubstituicaoPage() {
 
       <details style={{ marginTop: 16 }}>
         <summary>+ Criar lista de substituição</summary>
-        <form onSubmit={handleCreate} className="form-narrow" style={{ marginTop: 8 }}>
+        <form onSubmit={handleCreate} style={{ marginTop: 8 }}>
           <div className="field-row">
             <div className="field field-md">
               <label className="field-label" htmlFor="sub-category">

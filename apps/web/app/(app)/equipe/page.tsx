@@ -101,7 +101,7 @@ export default function EquipePage() {
       {isAdmin && (
         <details style={{ marginTop: 16 }}>
           <summary>+ Convidar profissional</summary>
-          <form onSubmit={handleSubmit} className="form-narrow" style={{ marginTop: 8 }}>
+          <form onSubmit={handleSubmit} style={{ marginTop: 8 }}>
             <div className="field">
               <label className="field-label field-required" htmlFor="invite-name">
                 Nome

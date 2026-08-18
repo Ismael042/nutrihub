@@ -90,7 +90,7 @@ export default function MetasPage() {
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Metas</h1>
 
-      <form onSubmit={handleSubmit} className="form-narrow" style={{ marginTop: 12 }}>
+      <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
         <div className="field">
           <label className="field-label field-required" htmlFor="goal-patient">
             Paciente

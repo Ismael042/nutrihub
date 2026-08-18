@@ -149,7 +149,7 @@ export default function PlanoDetalhePage() {
         ))}
       </div>
 
-      <form onSubmit={addMeal} className="form-narrow" style={{ display: "flex", gap: 8, marginTop: 20, alignItems: "flex-end" }}>
+      <form onSubmit={addMeal} style={{ display: "flex", gap: 8, marginTop: 20, alignItems: "flex-end" }}>
         <div className="field" style={{ flex: 1, marginBottom: 0 }}>
           <label className="field-label" htmlFor="new-meal-name">
             Nova refeição

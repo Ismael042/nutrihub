@@ -57,7 +57,7 @@ export default function TagsPage() {
       <h1>Tags</h1>
       <p style={{ color: "var(--color-text-muted)" }}>Use tags para organizar pacientes (ex: gestante, atleta, diabético).</p>
 
-      <form onSubmit={handleSubmit} className="form-narrow" style={{ display: "flex", gap: 8, marginTop: 12 }}>
+      <form onSubmit={handleSubmit} style={{ display: "flex", gap: 8, marginTop: 12 }}>
         <input placeholder="Nova tag" value={name} onChange={(e) => setName(e.target.value)} required style={{ flex: 1 }} />
         <button type="submit" className="btn-primary">
           Adicionar

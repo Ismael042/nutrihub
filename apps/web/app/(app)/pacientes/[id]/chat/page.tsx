@@ -72,9 +72,6 @@ export default function ChatPacientePage() {
         Requer que o paciente tenha acesso ao app habilitado (ver perfil do paciente).
       </p>
 
-      {/* .list-panel: uma conversa é coluna de leitura — esticar os balões até a
-          largura toda da tela só afasta remetente e destinatário. */}
-      <div className="list-panel">
       <div
         style={{
           border: "1px solid var(--color-border, #ddd)",
@@ -121,7 +118,6 @@ export default function ChatPacientePage() {
           Enviar
         </button>
       </form>
-      </div>
     </div>
   );
 }

@@ -86,7 +86,7 @@ export default function PrescricoesPage() {
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Prescrições</h1>
 
-      <form onSubmit={handleSubmit} className="form-narrow" style={{ marginTop: 12 }}>
+      <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
         <div className="field-row">
           <div className="field">
             <label className="field-label field-required" htmlFor="rx-patient">

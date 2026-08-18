@@ -111,7 +111,7 @@ export default function EstoquePage() {
 
       <details className="card" style={{ marginBottom: "var(--space-5)" }}>
         <summary style={{ cursor: "pointer", fontWeight: 600 }}>+ Novo produto</summary>
-        <form onSubmit={handleSubmit} className="form-narrow" style={{ marginTop: "var(--space-4)" }}>
+        <form onSubmit={handleSubmit} style={{ marginTop: "var(--space-4)" }}>
           <div className="field">
             <label className="field-label field-required" htmlFor="name">
               Nome

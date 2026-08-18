@@ -105,7 +105,7 @@ export default function AlimentosPage() {
         <summary>+ Cadastrar alimento próprio</summary>
         <form
           onSubmit={handleSubmit}
-          className="form-narrow"
+         
           style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}
         >
           <input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} required />

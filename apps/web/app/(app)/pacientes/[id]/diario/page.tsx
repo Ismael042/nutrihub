@@ -43,10 +43,8 @@ export default function DiarioPacientePage() {
       <h1>Diário alimentar</h1>
       <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>Registros feitos pelo próprio paciente no app.</p>
 
-      {/* Fluxo cronológico de leitura: o limite aqui é comprimento de linha,
-          não espaço vazio — por isso continua lista, só que contida. */}
       {entries.length > 0 && (
-        <ul className="list-rows list-panel">
+        <ul className="list-rows">
           {entries.map((e) => (
             <li key={e.id} className="list-row" style={{ display: "block" }}>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>

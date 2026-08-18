@@ -69,7 +69,7 @@ export default function NutriPlanPage() {
       <h1>NutriPlan</h1>
       <p style={{ color: "var(--color-text-muted)" }}>Tarefas e notas rápidas.</p>
 
-      <form onSubmit={handleSubmit} className="form-narrow" style={{ display: "flex", gap: 8, marginTop: 12 }}>
+      <form onSubmit={handleSubmit} style={{ display: "flex", gap: 8, marginTop: 12 }}>
         <select
           aria-label="Tipo"
           value={kind}

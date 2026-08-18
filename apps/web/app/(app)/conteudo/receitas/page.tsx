@@ -64,7 +64,7 @@ export default function ReceitasPage() {
       <a href="/dashboard" className="back-link">← Dashboard</a>
       <h1>Receitas</h1>
 
-      <form onSubmit={handleSubmit} className="form-narrow" style={{ marginTop: 12 }}>
+      <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
         <div className="field">
           <label className="field-label field-required" htmlFor="recipe-name">
             Nome da receita

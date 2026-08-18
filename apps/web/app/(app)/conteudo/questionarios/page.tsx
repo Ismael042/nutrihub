@@ -80,7 +80,7 @@ export default function QuestionariosPage() {
         </a>
       </div>
 
-      <form onSubmit={handleSubmit} className="form-narrow" style={{ marginTop: 12 }}>
+      <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
         <div className="field-row">
           <div className="field field-md">
             <label className="field-label" htmlFor="tpl-kind">

@@ -132,7 +132,7 @@ export default function CobrancaRecorrentePage() {
 
       <details className="card" style={{ marginBottom: "var(--space-5)" }}>
         <summary style={{ cursor: "pointer", fontWeight: 600 }}>+ Nova cobrança recorrente</summary>
-        <form onSubmit={handleSubmit} className="form-narrow" style={{ marginTop: "var(--space-4)" }}>
+        <form onSubmit={handleSubmit} style={{ marginTop: "var(--space-4)" }}>
           <div className="field">
             <label className="field-label field-required" htmlFor="description">
               Descrição

@@ -100,10 +100,6 @@
   /* ---- Layout do app autenticado ---- */
   --sidebar-width: 248px;
   --topbar-height: 60px;
-  /* Teto do conteúdo. Até 1440px a tela usa tudo; acima disso sobra margem
-     simétrica em vez de esticar linha de texto e campo de form sem limite. */
-  --content-max: 1440px;
-  --form-max: 640px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -129,6 +125,10 @@ body {
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Sem teto de largura no conteúdo: em vez de parar de esticar e sobrar
+     margem morta, a tipografia cresce com a viewport. Só a fonte — os tokens
+     --space-* são px fixo, então espaçamento não infla junto. */
+  font-size: clamp(16px, 15px + 0.3vw, 19px);
 }
 
 body {
@@ -1586,12 +1586,6 @@ table {
 
 .app-content {
   flex: 1;
-  /* width:100% não é redundante: .app-content é flex item de .app-main (column),
-     então a largura é o eixo cruzado — e o stretch padrão é ignorado quando há
-     margem auto nesse eixo. Sem ele, página curta encolhe numa tira estreita. */
-  width: 100%;
-  max-width: var(--content-max);
-  margin-inline: auto;
   padding: var(--space-6);
 }
 
@@ -1709,19 +1703,11 @@ table {
   padding: clamp(1.25rem, 4vw, 2.5rem) clamp(1rem, 4vw, 2rem);
 }
 
-/* Dentro do shell o padding e o teto já vêm de .app-content. O margin-inline:auto
-   fica para que qualquer max-width mais específico (inline ou .form-container)
-   centralize em vez de grudar à esquerda e jogar toda a sobra para a direita. */
 .app-content .page-container,
 .app-content .form-container {
   max-width: 100%;
   padding: 0;
-  margin-block: 0;
-  margin-inline: auto;
-}
-
-.app-content .form-container {
-  max-width: var(--form-max);
+  margin: 0;
 }
 
 .back-link {
@@ -1820,11 +1806,6 @@ table {
 
 /* ---- Listas de uma linha (nome + ação) ---- */
 
-/* Lista de leitura: o limite é comprimento de linha, não espaço vazio. */
-.list-panel {
-  max-width: 760px;
-}
-
 .list-rows {
   list-style: none;
   padding: 0;
@@ -1832,7 +1813,6 @@ table {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
-  max-width: 760px;
 }
 
 .list-row {
@@ -1882,13 +1862,6 @@ table {
   .meal-grid {
     grid-template-columns: minmax(0, 1fr);
   }
-}
-
-/* Formulário de cadastro rápido no topo de uma tela de lista. A lista embaixo
-   usa a largura toda; o formulário não deve — campo de nome com 1300px é o
-   mesmo desperdício que a lista de uma coluna. */
-.form-narrow {
-  max-width: var(--form-max);
 }
 
 /* Chips que quebram linha — para listas de um termo só. */

@@ -188,10 +188,8 @@ export default function AntropometriaPage() {
         </p>
       )}
 
-      {/* Largura contida de propósito: esticar um sparkline de poucos pontos até a
-          tela toda não acrescenta informação nenhuma. */}
       {weightPoints.length >= 2 && (
-        <div className="card card-static" style={{ marginTop: 12, maxWidth: 480 }}>
+        <div className="card card-static" style={{ marginTop: 12, display: "inline-block" }}>
           <p style={{ margin: "0 0 8px", fontSize: 13, color: "var(--color-text-muted)" }}>Evolução do peso</p>
           <Sparkline points={weightPoints} />
         </div>
@@ -199,7 +197,7 @@ export default function AntropometriaPage() {
 
       <details style={{ marginTop: 20 }} open={measurements.length === 0}>
         <summary>+ Nova medição</summary>
-        <form onSubmit={handleSubmit} className="form-narrow" style={{ marginTop: 8 }}>
+        <form onSubmit={handleSubmit} style={{ marginTop: 8 }}>
           <div className="field field-sm">
             <label className="field-label" htmlFor="measurement-date">
               Data
