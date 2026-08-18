@@ -90,6 +90,16 @@ export function IconBook(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function IconChat(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <path d="M3 5.5c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v6.5c0 1.1-.9 2-2 2H8.5L5 17v-3H5c-1.1 0-2-.9-2-2Z" />
+      <path d="M6.5 7.5h7" />
+      <path d="M6.5 10.5h4.5" />
+    </Icon>
+  );
+}
+
 export function IconRepeat(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>

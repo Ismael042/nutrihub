@@ -1589,6 +1589,49 @@ table {
   padding: var(--space-6);
 }
 
+/* ============================================================================
+   SHELL DO PACIENTE (barra inferior fixa, previsão do app mobile futuro)
+   ============================================================================ */
+
+.patient-tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  display: flex;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  /* "Adicionar à tela inicial" no iOS já respeita a safe area mesmo antes de
+     existir app nativo — sem isso a aba fica atrás do indicador de home. */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* .patient-tab é <a>, então precisa vencer a especificidade de "a:hover" global
+   (elemento+pseudo-classe) — sem isso o hover troca a cor pra --color-primary e
+   sublinha, mesmo na aba inativa. */
+.patient-tab,
+.patient-tab:hover,
+.patient-tab:focus-visible {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 4px 10px;
+  color: var(--color-text-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  border: none;
+  background: none;
+  text-decoration: none;
+}
+
+.patient-tab.active,
+.patient-tab.active:hover {
+  color: var(--color-primary);
+}
+
 .app-user-menu {
   display: flex;
   align-items: center;

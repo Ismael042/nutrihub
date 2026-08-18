@@ -21,6 +21,9 @@ export default function PacientePage() {
           <span style={{ fontWeight: 700, fontSize: 18 }}>
             Nutri<span style={{ color: "var(--color-primary)" }}>Hub</span>
           </span>
+          <a href="/portal/entrar" className="btn-primary btn-sm" style={{ marginRight: 8 }}>
+            Entrar
+          </a>
           <a href="/" className="btn-secondary btn-sm">
             Sou nutricionista
           </a>
@@ -72,12 +75,17 @@ export default function PacientePage() {
           <h2 style={{ fontSize: 17 }}>Como ter acesso</h2>
           <div className="alert alert-info" style={{ maxWidth: "70ch" }}>
             <p>
-              O acesso ao app é liberado pelo seu nutricionista, não por cadastro
-              próprio — peça a ele para habilitar seu acesso e te passar o e-mail e a
-              senha de entrada. O app ainda está em fase de testes e não está
-              publicado nas lojas; se seu nutricionista já usa o NutriHub, pergunte a
-              ele como acessar.
+              O acesso é liberado pelo seu nutricionista, não por cadastro próprio —
+              peça a ele para habilitar seu acesso e te passar o e-mail e a senha de
+              entrada. Por enquanto o acesso é pelo navegador (o app pra loja de
+              celular ainda não foi publicado); se seu nutricionista já usa o
+              NutriHub, é só entrar direto pelo site.
             </p>
+          </div>
+          <div className="marketing-cta-row" style={{ marginTop: 16 }}>
+            <a href="/portal/entrar" className="btn-primary">
+              Já tenho acesso — Entrar
+            </a>
           </div>
         </section>
 
