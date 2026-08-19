@@ -65,14 +65,22 @@ export default function PatientShell({
         </div>
       </header>
 
-      {/* padding-bottom extra só aqui via style — não mexe na regra .app-content
-          compartilhada com o painel do profissional, que não tem barra fixa embaixo.
-          Usa a mesma --patient-tabbar-height que .patient-tabbar e o offset do toast
-          usam, pra nunca ficar com um número chutado desincronizado do tamanho real
-          da barra. */}
+      {/* padding-bottom e display:flex só aqui via style — não mexe na regra
+          .app-content compartilhada com o painel do profissional. O padding usa
+          a mesma --patient-tabbar-height que .patient-tabbar e o offset do toast
+          usam, pra nunca ficar com número chutado desincronizado do tamanho real
+          da barra. O flex column é o que permite telas como o chat (.page-container-
+          fill) esticarem até preencher a altura disponível em vez de pararem do
+          tamanho do próprio conteúdo — sem isso, altura 100% num filho não resolve
+          contra um pai cuja altura só existe por flex-grow (percentual só resolve
+          contra altura explícita, não contra o tamanho "de fato" que o flexbox deu). */}
       <main
         className="app-content"
-        style={{ paddingBottom: "calc(var(--patient-tabbar-height) + env(safe-area-inset-bottom) + var(--space-4))" }}
+        style={{
+          paddingBottom: "calc(var(--patient-tabbar-height) + env(safe-area-inset-bottom) + var(--space-4))",
+          display: "flex",
+          flexDirection: "column"
+        }}
       >
         {children}
       </main>

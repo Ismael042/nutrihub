@@ -15,6 +15,11 @@ interface ChatThreadProps {
   /** Muda quando a conversa selecionada muda (ex: trocar de paciente no inbox) —
       força recarregar do zero em vez de acumular mensagens da conversa anterior. */
   resetKey?: string;
+  /** Quando o chat é o conteúdo inteiro da tela (app do paciente), em vez de um
+      bloco de altura fixa dentro de uma página com outras coisas — estica até
+      preencher o espaço disponível até a barra de abas, em vez de parar numa
+      altura fixa e sobrar vazio embaixo. */
+  fill?: boolean;
 }
 
 export default function ChatThread({
@@ -22,7 +27,8 @@ export default function ChatThread({
   mySender,
   fetchFn,
   emptyLabel = "Nenhuma mensagem ainda.",
-  resetKey
+  resetKey,
+  fill = false
 }: ChatThreadProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [content, setContent] = useState("");
@@ -65,16 +71,22 @@ export default function ChatThread({
   }
 
   return (
-    <div>
+    <div
+      style={
+        fill ? { display: "flex", flexDirection: "column", flex: 1, minHeight: 0, marginTop: 12 } : undefined
+      }
+    >
       <div
         style={{
           border: "1px solid var(--color-border, #ddd)",
           borderRadius: 8,
           padding: 12,
-          // min() em vez de 420px fixo: em viewport baixo (iPhone SE, celular em
-          // paisagem) 420px sozinho já passa da altura visível, forçando a página
-          // a rolar em vez da lista de mensagens — aqui ela encolhe antes disso.
-          height: "min(420px, 55dvh)",
+          // fill: estica pra preencher o espaço até a barra de abas em vez de
+          // parar numa altura fixa — era isso que deixava um vão vazio e feio
+          // entre o campo de mensagem e a tab bar. Sem fill (thread dentro de
+          // uma página com outras coisas, ex: ficha do paciente), mantém o
+          // min() — em viewport baixo, 420px sozinho já passaria da tela.
+          ...(fill ? { flex: 1, minHeight: 0 } : { height: "min(420px, 55dvh)" }),
           overflowY: "auto",
           display: "flex",
           flexDirection: "column",
@@ -105,7 +117,7 @@ export default function ChatThread({
         <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", gap: 8, marginTop: 12 }}>
+      <form onSubmit={handleSubmit} style={{ display: "flex", gap: 8, marginTop: 12, flexShrink: 0 }}>
         <input
           placeholder="Escreva uma mensagem..."
           value={content}

@@ -1908,6 +1908,21 @@ body:has(.patient-tabbar) .toast-viewport {
   margin: 0;
 }
 
+/* Modificador pra telas onde o conteúdo deve esticar até preencher a altura
+   disponível (ex: chat do paciente) em vez de parar do tamanho do próprio
+   conteúdo e sobrar vazio antes da tab bar fixa. flex:1 (não height:100%) de
+   propósito: percentual só resolve contra uma altura explícita do pai, não
+   contra o tamanho que o flexbox deu de fato — precisa ser flex item de
+   verdade (só funciona dentro do .app-content do PatientShell, que é
+   display:flex column só ali, via inline style, sem tocar a classe
+   compartilhada com o profissional). */
+.page-container-fill {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .back-link {
   display: block;
   width: fit-content;
