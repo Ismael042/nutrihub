@@ -180,6 +180,12 @@ export default function AppShell({
                     href={item.href}
                     className={`app-sidebar-link${isActive(item.href) ? " active" : ""}`}
                     aria-current={isActive(item.href) ? "page" : undefined}
+                    // Fecha o drawer explicitamente no clique — sem isso ele só
+                    // "fechava" de fato porque o <a> normal recarrega a página
+                    // inteira (o estado mobileOpen reseta no remount), efeito
+                    // colateral em vez de intenção. Fechar antes evita o menu
+                    // full-screen aparecer aberto por um instante durante a troca.
+                    onClick={() => setMobileOpen(false)}
                   >
                     <span className="icon">
                       <ItemIcon />

@@ -1810,6 +1810,13 @@ body:has(.patient-tabbar) .toast-viewport {
     position: fixed;
     left: 0;
     top: 0;
+    /* width:100% (não 100vw — 100vw conta a barra de rolagem e pode estourar)
+       ocupa a tela inteira aberto, igual menu mobile de app de verdade, em vez
+       da faixa fixa de 248px sobrando uma tira cinza estranha do lado. Capado
+       em 480px pra não ficar uma faixa esticada e vazia num tablet estreito
+       (esse breakpoint vai até 900px). */
+    width: 100%;
+    max-width: 480px;
     transform: translateX(-100%);
     transition: transform var(--duration-base) var(--ease-standard);
     box-shadow: var(--shadow-lg);
