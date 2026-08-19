@@ -156,7 +156,11 @@ export default function AppShell({
           <button
             type="button"
             className="btn-icon app-topbar-menu-btn"
-            style={{ marginLeft: "auto", color: "white", borderColor: "rgba(255,255,255,.3)" }}
+            // background:transparent é o que faltava — o reset global de <button>
+            // dá fundo branco por padrão, e como o ícone também é branco (pra
+            // combinar com o texto da sidebar escura), ficava um quadrado branco
+            // com um X branco invisível dentro.
+            style={{ marginLeft: "auto", color: "white", background: "transparent", borderColor: "rgba(255,255,255,.3)" }}
             onClick={() => setMobileOpen(false)}
             aria-label="Fechar menu"
           >
