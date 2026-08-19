@@ -1619,7 +1619,13 @@ body:has(.patient-tabbar) .toast-viewport {
   color: var(--color-white);
   display: flex;
   flex-direction: column;
-  position: sticky;
+  /* fixed (não sticky): sticky prende a barra dentro dos limites do próprio
+     pai (.app-shell), mas continua fazendo parte do fluxo flex — então ela
+     "puxa" a largura do layout e depende da altura do container pai pra
+     colar. fixed tira a barra do fluxo de vez e a trava direto na viewport,
+     por isso .app-main abaixo ganha margin-left equivalente pra compensar. */
+  position: fixed;
+  left: 0;
   top: 0;
   height: 100vh;
   height: 100dvh;
@@ -1710,6 +1716,9 @@ body:has(.patient-tabbar) .toast-viewport {
   min-width: 0;
   display: flex;
   flex-direction: column;
+  /* Compensa o .app-sidebar ter saído do fluxo (position:fixed) — sem isso o
+     conteúdo principal começaria embaixo da barra em vez de ao lado dela. */
+  margin-left: var(--sidebar-width);
 }
 
 .app-topbar {
@@ -1828,6 +1837,10 @@ body:has(.patient-tabbar) .toast-viewport {
 
   .app-topbar-menu-btn {
     display: inline-flex;
+  }
+
+  .app-main {
+    margin-left: 0;
   }
 
   .app-content {
