@@ -2274,7 +2274,7 @@ body:has(.patient-tabbar) .toast-viewport {
   font: var(--text-display);
   border-bottom: none;
   display: block;
-  max-width: 16ch;
+  max-width: 20ch;
 }
 
 .marketing-lede {
@@ -2282,6 +2282,102 @@ body:has(.patient-tabbar) .toast-viewport {
   color: var(--color-text-secondary);
   line-height: 1.6;
   max-width: 56ch;
+}
+
+/* Hero de duas colunas: texto + painel visual — sem isso o texto fica numa
+   faixa estreita à esquerda e sobra um vazio enorme no resto da tela em
+   telas largas. O painel não é decoração vazia: resume as áreas do produto,
+   então preenche o espaço com informação, não só com estética. */
+.hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-10);
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .hero-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+    gap: var(--space-12);
+  }
+
+  .marketing-hero h1 {
+    max-width: none;
+  }
+}
+
+.hero-visual {
+  position: relative;
+  min-width: 0;
+}
+
+.hero-visual::before {
+  content: "";
+  position: absolute;
+  /* inset:0 (não negativo) — um valor negativo faz esse fundo decorativo
+     sangrar além da própria .hero-visual, o que estoura a largura da página
+     em telas estreitas (o pai não tem overflow:hidden pra conter isso). */
+  inset: 0;
+  background:
+    radial-gradient(circle at 25% 15%, var(--color-primary-subtle), transparent 60%),
+    radial-gradient(circle at 85% 85%, var(--color-accent-subtle), transparent 55%);
+  z-index: 0;
+}
+
+.hero-visual-card {
+  position: relative;
+  z-index: 1;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-3) var(--space-5);
+}
+
+.hero-visual-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) 0;
+}
+
+.hero-visual-row:not(:last-child) {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.hero-visual-row .icon-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hero-visual-row span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.35;
+}
+
+/* Título/legenda numa coluna estreita à esquerda + conteúdo (lista, FAQ) ocupando
+   o resto da largura — mesmo raciocínio do .hero-grid, pra seções que também
+   tinham um bloco de texto estreito perdido numa página larga. */
+.marketing-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+}
+
+@media (min-width: 800px) {
+  .marketing-split {
+    grid-template-columns: minmax(200px, 300px) minmax(0, 1fr);
+    gap: var(--space-10);
+  }
 }
 
 .marketing-grid {

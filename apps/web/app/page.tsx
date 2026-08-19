@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IconUsers, IconClipboard, IconWallet, IconCalendar } from "@/components/icons";
+import { IconUsers, IconClipboard, IconWallet, IconCalendar, IconChat } from "@/components/icons";
 
 export const metadata: Metadata = {
   title: "NutriHub — painel para nutricionistas",
@@ -29,21 +29,53 @@ export default function HomePage() {
 
       <main>
         <section className="marketing marketing-section marketing-hero">
-          <span className="marketing-eyebrow">Para nutricionistas</span>
-          <h1>O consultório de nutrição, organizado num só lugar.</h1>
-          <p className="marketing-lede">
-            Pare de dividir o consultório entre planilha, WhatsApp e agenda de papel.
-            Pacientes, agenda, planos alimentares e financeiro num só painel — com um
-            app próprio para o seu paciente acompanhar o plano, conversar com você e
-            registrar o diário alimentar pelo celular.
-          </p>
-          <div className="marketing-cta-row">
-            <a href="/cadastro" className="btn-primary">
-              Criar minha conta
-            </a>
-            <a href="/login" className="btn-secondary">
-              Já tenho conta
-            </a>
+          <div className="hero-grid">
+            <div>
+              <span className="marketing-eyebrow">Para nutricionistas</span>
+              <h1>O consultório de nutrição, organizado num só lugar.</h1>
+              <p className="marketing-lede">
+                Pare de dividir o consultório entre planilha, WhatsApp e agenda de papel.
+                Pacientes, agenda, planos alimentares e financeiro num só painel — com um
+                app próprio para o seu paciente acompanhar o plano, conversar com você e
+                registrar o diário alimentar pelo celular.
+              </p>
+              <div className="marketing-cta-row">
+                <a href="/cadastro" className="btn-primary">
+                  Criar minha conta
+                </a>
+                <a href="/login" className="btn-secondary">
+                  Já tenho conta
+                </a>
+              </div>
+            </div>
+            <div className="hero-visual">
+              <div className="hero-visual-card">
+                <div className="hero-visual-row">
+                  <span className="icon-badge">
+                    <IconUsers width={18} height={18} />
+                  </span>
+                  <span>Pacientes e agenda organizados num só lugar</span>
+                </div>
+                <div className="hero-visual-row">
+                  <span className="icon-badge">
+                    <IconClipboard width={18} height={18} />
+                  </span>
+                  <span>Planos alimentares prontos em PDF</span>
+                </div>
+                <div className="hero-visual-row">
+                  <span className="icon-badge">
+                    <IconChat width={18} height={18} />
+                  </span>
+                  <span>Chat direto com o paciente</span>
+                </div>
+                <div className="hero-visual-row">
+                  <span className="icon-badge">
+                    <IconWallet width={18} height={18} />
+                  </span>
+                  <span>Financeiro sem planilha paralela</span>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -127,28 +159,32 @@ export default function HomePage() {
         </section>
 
         <section className="marketing marketing-section marketing-section-border">
-          <span className="marketing-eyebrow">Dúvidas comuns</span>
-          <h2>Perguntas frequentes</h2>
-          <div style={{ maxWidth: "68ch" }}>
-            <details className="faq-item">
-              <summary>Preciso instalar algo?</summary>
-              <p>Não. O painel do NutriHub roda no navegador, sem instalação.</p>
-            </details>
-            <details className="faq-item">
-              <summary>Meu paciente também precisa instalar um aplicativo?</summary>
-              <p>
-                O acesso do paciente é liberado por você, direto do cadastro dele — não
-                é um cadastro público. O app do paciente ainda está em fase de testes e
-                não está publicado nas lojas de aplicativo.
-              </p>
-            </details>
-            <details className="faq-item">
-              <summary>Os dados de cada consultório ficam isolados?</summary>
-              <p>
-                Sim. O NutriHub é multi-tenant: cada consultório só enxerga os próprios
-                pacientes, agenda e financeiro.
-              </p>
-            </details>
+          <div className="marketing-split">
+            <div>
+              <span className="marketing-eyebrow">Dúvidas comuns</span>
+              <h2>Perguntas frequentes</h2>
+            </div>
+            <div>
+              <details className="faq-item">
+                <summary>Preciso instalar algo?</summary>
+                <p>Não. O painel do NutriHub roda no navegador, sem instalação.</p>
+              </details>
+              <details className="faq-item">
+                <summary>Meu paciente também precisa instalar um aplicativo?</summary>
+                <p>
+                  O acesso do paciente é liberado por você, direto do cadastro dele — não
+                  é um cadastro público. O app do paciente ainda está em fase de testes e
+                  não está publicado nas lojas de aplicativo.
+                </p>
+              </details>
+              <details className="faq-item">
+                <summary>Os dados de cada consultório ficam isolados?</summary>
+                <p>
+                  Sim. O NutriHub é multi-tenant: cada consultório só enxerga os próprios
+                  pacientes, agenda e financeiro.
+                </p>
+              </details>
+            </div>
           </div>
         </section>
 

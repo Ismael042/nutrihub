@@ -32,13 +32,39 @@ export default function PacientePage() {
 
       <main>
         <section className="marketing marketing-section marketing-hero">
-          <span className="marketing-eyebrow">Para pacientes</span>
-          <h1>Seu plano alimentar e seu nutricionista, no celular.</h1>
-          <p className="marketing-lede">
-            O app do NutriHub mostra seu plano alimentar e prescrições, deixa você
-            registrar o que comeu no diário alimentar e conversar direto com seu
-            nutricionista — sem precisar esperar a próxima consulta.
-          </p>
+          <div className="hero-grid">
+            <div>
+              <span className="marketing-eyebrow">Para pacientes</span>
+              <h1>Seu plano alimentar e seu nutricionista, no celular.</h1>
+              <p className="marketing-lede">
+                O app do NutriHub mostra seu plano alimentar e prescrições, deixa você
+                registrar o que comeu no diário alimentar e conversar direto com seu
+                nutricionista — sem precisar esperar a próxima consulta.
+              </p>
+            </div>
+            <div className="hero-visual">
+              <div className="hero-visual-card">
+                <div className="hero-visual-row">
+                  <span className="icon-badge">
+                    <IconClipboard width={18} height={18} />
+                  </span>
+                  <span>Plano alimentar sempre à mão, com PDF</span>
+                </div>
+                <div className="hero-visual-row">
+                  <span className="icon-badge">
+                    <IconBook width={18} height={18} />
+                  </span>
+                  <span>Diário alimentar em cada refeição</span>
+                </div>
+                <div className="hero-visual-row">
+                  <span className="icon-badge">
+                    <IconUsers width={18} height={18} />
+                  </span>
+                  <span>Chat direto com seu nutricionista</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section className="marketing marketing-section marketing-section-border">
