@@ -105,15 +105,16 @@ export default function AlimentosPage() {
         <summary>+ Cadastrar alimento próprio</summary>
         <form
           onSubmit={handleSubmit}
-         
           style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}
         >
           <input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} required />
-          <div style={{ display: "flex", gap: 8 }}>
-            <input placeholder="Kcal" value={kcal} onChange={(e) => setKcal(e.target.value)} style={{ flex: 1 }} />
-            <input placeholder="Proteína (g)" value={protein} onChange={(e) => setProtein(e.target.value)} style={{ flex: 1 }} />
-            <input placeholder="Carbo (g)" value={carbs} onChange={(e) => setCarbs(e.target.value)} style={{ flex: 1 }} />
-            <input placeholder="Gordura (g)" value={fat} onChange={(e) => setFat(e.target.value)} style={{ flex: 1 }} />
+          {/* grid 2x2 em vez de 4 numa linha só — 4 inputs num flex sem wrap não
+              cabem em 320-375px (cada um ficaria com ~60-70px, ilegível). */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
+            <input placeholder="Kcal" value={kcal} onChange={(e) => setKcal(e.target.value)} />
+            <input placeholder="Proteína (g)" value={protein} onChange={(e) => setProtein(e.target.value)} />
+            <input placeholder="Carbo (g)" value={carbs} onChange={(e) => setCarbs(e.target.value)} />
+            <input placeholder="Gordura (g)" value={fat} onChange={(e) => setFat(e.target.value)} />
           </div>
           <button type="submit" className="btn-primary">
             Salvar alimento
@@ -136,7 +137,7 @@ export default function AlimentosPage() {
       )}
 
       {foods.length > 0 && (
-        <div className="table-wrap" style={{ marginTop: 20 }}>
+        <div className="table-wrap table-responsive-cards" style={{ marginTop: 20 }}>
           <table>
             <thead>
               <tr>
@@ -151,12 +152,14 @@ export default function AlimentosPage() {
             <tbody>
               {foods.map((f) => (
                 <tr key={f.id}>
-                  <td>{f.name}</td>
-                  <td style={{ color: "var(--color-text-muted)" }}>{SOURCE_LABEL[f.source] ?? f.source}</td>
-                  <td className="table-num">{f.kcal}</td>
-                  <td className="table-num">{f.protein_g}</td>
-                  <td className="table-num">{f.carbs_g}</td>
-                  <td className="table-num">{f.fat_g}</td>
+                  <td data-label="Nome">{f.name}</td>
+                  <td data-label="Fonte" style={{ color: "var(--color-text-muted)" }}>
+                    {SOURCE_LABEL[f.source] ?? f.source}
+                  </td>
+                  <td className="table-num" data-label="Kcal">{f.kcal}</td>
+                  <td className="table-num" data-label="Prot">{f.protein_g}</td>
+                  <td className="table-num" data-label="Carbo">{f.carbs_g}</td>
+                  <td className="table-num" data-label="Gord">{f.fat_g}</td>
                 </tr>
               ))}
             </tbody>

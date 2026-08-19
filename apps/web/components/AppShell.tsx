@@ -118,6 +118,23 @@ export default function AppShell({
     };
   }, [userMenuOpen]);
 
+  // Trava o scroll do body com o drawer mobile aberto — sem isso, arrastar o dedo
+  // sobre o overlay escurecido ainda rola a página por trás, o que é desorientador.
+  // Fecha com Escape, mesmo padrão já usado no menu de usuário acima.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setMobileOpen(false);
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [mobileOpen]);
+
   function isActive(href: string) {
     return pathname === href || pathname.startsWith(href + "/");
   }
@@ -215,17 +232,41 @@ export default function AppShell({
                 gap: 10,
                 background: "none",
                 border: "none",
-                padding: "4px 6px"
+                padding: "4px 6px",
+                minWidth: 0
               }}
               aria-expanded={userMenuOpen}
               aria-haspopup="menu"
             >
-              <span className="avatar">{initials(professional.name)}</span>
-              <span style={{ textAlign: "left" }}>
-                <span style={{ display: "block", fontSize: 13.5, fontWeight: 600, color: "var(--color-text-primary)" }}>
+              <span className="avatar" style={{ flexShrink: 0 }}>
+                {initials(professional.name)}
+              </span>
+              {/* min-width:0 + ellipsis: nome longo trunca em vez de estourar o
+                  topbar em telas estreitas (topbar não encolhe padding no mobile). */}
+              <span style={{ textAlign: "left", minWidth: 0, overflow: "hidden" }}>
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: 13.5,
+                    fontWeight: 600,
+                    color: "var(--color-text-primary)",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap"
+                  }}
+                >
                   {professional.name.split(" ")[0]}
                 </span>
-                <span style={{ display: "block", fontSize: 11.5, color: "var(--color-text-muted)" }}>
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: 11.5,
+                    color: "var(--color-text-muted)",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap"
+                  }}
+                >
                   {ROLE_LABEL[professional.role ?? "admin"] ?? professional.role}
                 </span>
               </span>

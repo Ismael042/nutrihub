@@ -181,8 +181,18 @@ function AddItemForm({
   const [unit, setUnit] = useState("g");
 
   return (
-    <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-      <select aria-label="Alimento" value={foodId} onChange={(e) => setFoodId(e.target.value)} style={{ flex: 1 }}>
+    // flexWrap: sem isso o select de alimento sobrava com quase nenhum espaço em
+    // 320-375px (qtd 70px + unidade 60px + botão já tomam a maior parte da linha).
+    // flexShrink:0 nos campos pequenos garante que eles nunca fiquem mais estreitos
+    // que o necessário pra exibir o valor — quem cede espaço e quebra linha é o
+    // select, que tem espaço de sobra pro nome do alimento.
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+      <select
+        aria-label="Alimento"
+        value={foodId}
+        onChange={(e) => setFoodId(e.target.value)}
+        style={{ flex: "1 1 140px" }}
+      >
         <option value="">Alimento...</option>
         {foods.map((f) => (
           <option key={f.id} value={f.id}>
@@ -199,14 +209,14 @@ function AddItemForm({
         inputMode="decimal"
         value={quantity}
         onChange={(e) => setQuantity(e.target.value)}
-        style={{ width: 70 }}
+        style={{ width: 70, flexShrink: 0 }}
       />
       <input
         aria-label="Unidade"
         placeholder="un"
         value={unit}
         onChange={(e) => setUnit(e.target.value)}
-        style={{ width: 60 }}
+        style={{ width: 60, flexShrink: 0 }}
       />
       <button
         type="button"

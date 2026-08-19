@@ -177,7 +177,7 @@ export default function EquipePage() {
       )}
 
       {!loading && members.length > 0 && (
-        <div className="table-wrap" style={{ marginTop: 20 }}>
+        <div className="table-wrap table-responsive-cards" style={{ marginTop: 20 }}>
           <table>
             <thead>
               <tr>
@@ -190,16 +190,16 @@ export default function EquipePage() {
             <tbody>
               {members.map((m) => (
                 <tr key={m.id}>
-                  <td>
+                  <td data-label="Nome">
                     <strong>{m.name}</strong>
                   </td>
-                  <td>{m.email}</td>
-                  <td>
+                  <td data-label="E-mail">{m.email}</td>
+                  <td data-label="Papel">
                     <span className="badge">{ROLE_LABELS[m.role] ?? m.role}</span>
                   </td>
                   {isAdmin && (
-                    <td className="table-actions">
-                      <div style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+                    <td className="table-actions" data-label="Ações">
+                      <div style={{ display: "inline-flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                         <select
                           value={m.role}
                           onChange={(e) => changeRole(m.id, e.target.value)}

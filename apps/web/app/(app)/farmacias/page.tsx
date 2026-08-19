@@ -110,7 +110,7 @@ export default function FarmaciasPage() {
       )}
 
       {!loading && pharmacies.length > 0 && (
-        <div className="table-wrap" style={{ marginTop: 20 }}>
+        <div className="table-wrap table-responsive-cards" style={{ marginTop: 20 }}>
           <table>
             <thead>
               <tr>
@@ -123,12 +123,12 @@ export default function FarmaciasPage() {
             <tbody>
               {pharmacies.map((f) => (
                 <tr key={f.id}>
-                  <td>
+                  <td data-label="Nome">
                     <strong>{f.name}</strong>
                   </td>
-                  <td>{f.phone || "—"}</td>
-                  <td>{f.notes || "—"}</td>
-                  <td className="table-actions">
+                  <td data-label="Telefone">{f.phone || "—"}</td>
+                  <td data-label="Observações">{f.notes || "—"}</td>
+                  <td className="table-actions" data-label="Ações">
                     <button onClick={() => remove(f.id)} style={{ color: "var(--color-error)" }}>
                       Excluir
                     </button>

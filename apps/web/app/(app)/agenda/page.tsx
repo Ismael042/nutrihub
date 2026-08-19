@@ -126,23 +126,25 @@ export default function AgendaPage() {
             <h3 style={{ textTransform: "capitalize", color: "var(--color-text-muted)", fontSize: 14 }}>
               {formatDateHeading(items[0].scheduled_at)}
             </h3>
-            <div className="table-wrap" style={{ marginBottom: "var(--space-4)" }}>
+            <div className="table-wrap table-responsive-cards" style={{ marginBottom: "var(--space-4)" }}>
               <table>
                 <tbody>
                   {items.map((appt) => (
                     <tr key={appt.id}>
-                      <td style={{ whiteSpace: "nowrap", fontWeight: 600 }}>{formatTime(appt.scheduled_at)}</td>
-                      <td>
+                      <td data-label="Hora" style={{ whiteSpace: "nowrap", fontWeight: 600 }}>
+                        {formatTime(appt.scheduled_at)}
+                      </td>
+                      <td data-label="Paciente">
                         <a href={`/pacientes/${appt.patient_id}`}>{appt.patient_name}</a>
                         {appt.location_name && (
                           <span style={{ color: "var(--color-text-muted)" }}> · {appt.location_name}</span>
                         )}
                       </td>
-                      <td>
+                      <td data-label="Status">
                         <span className={`badge ${STATUS_BADGE[appt.status]}`}>{STATUS_LABEL[appt.status]}</span>
                       </td>
-                      <td className="table-actions">
-                        <div style={{ display: "inline-flex", gap: 6 }}>
+                      <td className="table-actions" data-label="Ações">
+                        <div style={{ display: "inline-flex", gap: 6, flexWrap: "wrap" }}>
                           {appt.status === "scheduled" && (
                             <>
                               <button className="btn-sm btn-secondary" onClick={() => updateStatus(appt.id, "completed")}>

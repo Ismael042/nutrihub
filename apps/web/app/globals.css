@@ -100,6 +100,10 @@
   /* ---- Layout do app autenticado ---- */
   --sidebar-width: 248px;
   --topbar-height: 60px;
+  /* Altura de conteúdo da tab bar do paciente, sem contar a safe-area (que soma à
+     parte via env()). Referenciada tanto pelo padding do conteúdo (PatientShell)
+     quanto pelo deslocamento do toast — muda aqui, os dois acompanham juntos. */
+  --patient-tabbar-height: 60px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -121,6 +125,10 @@ html,
 body {
   padding: 0;
   margin: 0;
+  /* Rede de segurança: qualquer overflow residual vira scroll horizontal de página
+     em vez de ficar contido. Não afeta .table-wrap (overflow-x:auto é interno a
+     ele, não do body). */
+  overflow-x: hidden;
 }
 
 html {
@@ -400,6 +408,17 @@ textarea {
     box-shadow var(--duration-fast) var(--ease-standard);
 }
 
+/* iOS Safari dá zoom automático no foco de qualquer campo com fonte computada
+   abaixo de 16px — --text-body é 15px. Só nesta faixa (não muda a tipografia
+   normal do formulário em telas maiores). */
+@media (max-width: 600px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 input::placeholder,
 textarea::placeholder {
   color: #9a9a9a;
@@ -476,8 +495,8 @@ textarea:disabled {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   padding: 0;
   border: none;
   background: none;
@@ -917,6 +936,101 @@ table {
 .table-wrap td.table-num {
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+/* ---- Tabela responsiva (vira cards abaixo de 640px) ----
+   Mecanismo único, reaproveitado por toda tabela de dado do sistema — em vez de
+   cada tela inventar sua própria versão "cartão" da mesma informação. Cada <tr>
+   vira um cartão (borda/padding/radius, mesma linguagem visual de .card); cada
+   <td> vira uma linha própria com o rótulo da coluna via `content: attr(data-label)`
+   — sem duplicar markup, sem esconder informação, sem precisar de JS. O <thead>
+   some porque o rótulo já aparece por célula. Desktop não muda: tudo aqui só ativa
+   abaixo do breakpoint. */
+@media (max-width: 640px) {
+  .table-wrap.table-responsive-cards {
+    border: none;
+    background: none;
+    overflow-x: visible;
+  }
+
+  .table-wrap.table-responsive-cards table {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .table-wrap.table-responsive-cards thead {
+    display: none;
+  }
+
+  .table-wrap.table-responsive-cards table,
+  .table-wrap.table-responsive-cards tbody,
+  .table-wrap.table-responsive-cards tr,
+  .table-wrap.table-responsive-cards td {
+    display: block;
+    width: 100%;
+  }
+
+  .table-wrap.table-responsive-cards tr {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    padding: var(--space-3) var(--space-4);
+    margin-bottom: var(--space-3);
+  }
+
+  .table-wrap.table-responsive-cards tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .table-wrap.table-responsive-cards td {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: 6px 0;
+    border-bottom: none;
+    text-align: right;
+  }
+
+  .table-wrap.table-responsive-cards td::before {
+    content: attr(data-label);
+    font: var(--text-label);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    text-align: left;
+    flex-shrink: 0;
+  }
+
+  /* Ações (botões) não levam rótulo — o texto do próprio botão já diz o que é —
+     e ficam alinhadas à direita com espaço entre elas em vez de grudadas. */
+  .table-wrap.table-responsive-cards td.table-actions {
+    justify-content: flex-end;
+    padding-top: var(--space-3);
+    margin-top: 6px;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .table-wrap.table-responsive-cards td.table-actions::before {
+    content: none;
+  }
+
+  .table-wrap.table-responsive-cards td.table-actions > * {
+    flex-wrap: wrap;
+  }
+
+  /* Escotilha pra célula com conteúdo em bloco (ex: grade de fotos), que não cabe
+     no padrão "rótulo à esquerda, valor à direita" de uma célula de texto simples —
+     rótulo empilha em cima do conteúdo em vez de espremer os dois lado a lado. */
+  .table-wrap.table-responsive-cards td.table-cell-block {
+    display: block;
+    text-align: left;
+  }
+
+  .table-wrap.table-responsive-cards td.table-cell-block::before {
+    display: block;
+    margin-bottom: 6px;
+  }
 }
 
 /* ============================================================================
@@ -1421,6 +1535,14 @@ table {
   max-width: min(360px, calc(100vw - 2 * var(--space-5)));
 }
 
+/* ToastProvider é montado uma vez no layout raiz — não sabe se está dentro do
+   shell do profissional ou do paciente. :has() detecta a tab bar fixa do
+   paciente (presente sempre que PatientShell está montado) e sobe o toast por
+   cima dela, em vez do toast aparecer atrás/sobre as abas. */
+body:has(.patient-tabbar) .toast-viewport {
+  bottom: calc(var(--patient-tabbar-height) + env(safe-area-inset-bottom) + var(--space-4));
+}
+
 .toast {
   display: flex;
   align-items: flex-start;
@@ -1458,8 +1580,10 @@ table {
   border: none;
   color: inherit;
   opacity: 0.7;
-  padding: 0;
-  width: auto;
+  /* Padding + margem negativa: alvo de toque sobe de ~14px (só o ícone) pra ~34px
+     sem deslocar o ícone visualmente nem empurrar o texto da notificação. */
+  padding: 10px;
+  margin: -10px -8px -10px 0;
   align-self: flex-start;
 }
 
@@ -1474,6 +1598,10 @@ table {
 
 .app-shell {
   min-height: 100vh;
+  /* dvh depois do vh de propósito: fallback pra navegador sem suporte fica com a
+     primeira linha; com suporte, a segunda vence e acompanha o chrome do
+     navegador mobile (barra de endereço) recolhendo/expandindo. */
+  min-height: 100dvh;
   display: flex;
 }
 
@@ -1487,6 +1615,7 @@ table {
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100dvh;
   overflow-y: auto;
   z-index: 100;
 }
@@ -1556,6 +1685,17 @@ table {
 .app-sidebar-footer {
   padding: var(--space-4);
   border-top: 1px solid rgba(255, 255, 255, 0.12);
+  /* Sticky no fim do drawer: com 20 itens de navegação, o conteúdo pode passar da
+     altura de um celular baixo (ex: iPhone SE) — sem isso o botão de sair só
+     aparece rolando até o final, e não tinha nenhuma pista visual de que dava
+     pra rolar. */
+  position: sticky;
+  bottom: 0;
+  background: var(--color-dark);
+}
+
+.app-user-menu {
+  min-width: 0;
 }
 
 .app-main {
@@ -1685,6 +1825,14 @@ table {
     inset: 0;
     background: rgba(37, 37, 37, 0.4);
     z-index: 95;
+  }
+
+  /* 34px é curto pro padrão de toque confortável — sobe só em mobile porque é
+     justamente aqui que .btn-icon vira o único gatilho do menu (hambúrguer) e do
+     logout do paciente, os dois controles de navegação mais críticos da tela. */
+  .btn-icon {
+    width: 40px;
+    height: 40px;
   }
 }
 
@@ -1874,6 +2022,11 @@ table {
   margin-top: var(--space-5);
 }
 
+.patient-shell-root {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 /* ---- Inbox de mensagens (lista de conversas + thread) ---- */
 
 .inbox-layout {
@@ -2013,6 +2166,8 @@ table {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
   padding: var(--space-5) 0;
 }
 
@@ -2219,6 +2374,7 @@ table {
 .avatar-upload {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-4);
 }
 
@@ -2324,8 +2480,8 @@ table {
   position: absolute;
   top: 2px;
   right: 2px;
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   min-width: 0;
   line-height: 1;

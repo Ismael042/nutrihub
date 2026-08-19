@@ -206,24 +206,28 @@ export default function CobrancaRecorrentePage() {
       {charges.length === 0 ? (
         <EmptyState icon={<IconRepeat />} title="Nenhuma cobrança recorrente" description="Cadastre pacotes ou mensalidades que se repetem — você gera o lançamento quando quiser." />
       ) : (
-        <div className="table-wrap">
+        <div className="table-wrap table-responsive-cards">
           <table>
             <tbody>
               {charges.map((c) => (
                 <tr key={c.id} style={{ opacity: c.active ? 1 : 0.55 }}>
-                  <td className="table-num" style={{ color: c.kind === "income" ? "var(--color-success)" : "var(--color-error)", fontWeight: 600, whiteSpace: "nowrap" }}>
+                  <td
+                    className="table-num"
+                    data-label="Valor"
+                    style={{ color: c.kind === "income" ? "var(--color-success)" : "var(--color-error)", fontWeight: 600, whiteSpace: "nowrap" }}
+                  >
                     {c.kind === "income" ? "+" : "-"}
                     {formatMoney(c.amount_cents)}
                   </td>
-                  <td>
+                  <td className="table-cell-block" data-label="Descrição">
                     {c.description}
                     {c.patient_name && <span style={{ color: "var(--color-text-muted)" }}> · {c.patient_name}</span>}
                     <div className="text-caption">
                       {c.frequency === "monthly" ? "mensal" : "semanal"} · próxima: {formatDate(c.next_due_date)}
                     </div>
                   </td>
-                  <td className="table-actions">
-                    <div style={{ display: "inline-flex", gap: 6 }}>
+                  <td className="table-actions" data-label="Ações">
+                    <div style={{ display: "inline-flex", gap: 6, flexWrap: "wrap" }}>
                       <button onClick={() => generate(c.id)} className="btn-sm btn-primary">
                         Gerar agora
                       </button>

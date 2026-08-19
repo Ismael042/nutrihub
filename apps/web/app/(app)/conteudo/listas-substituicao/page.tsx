@@ -142,20 +142,20 @@ export default function ListasSubstituicaoPage() {
             <label className="field-label">Itens</label>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {items.map((item, i) => (
-                <div key={i} style={{ display: "flex", gap: 8 }}>
+                <div key={i} style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   <input
                     aria-label={`Alimento ${i + 1}`}
                     placeholder="Alimento"
                     value={item.name}
                     onChange={(e) => updateItem(items, setItems, i, "name", e.target.value)}
-                    style={{ flex: 2 }}
+                    style={{ flex: "2 1 140px" }}
                   />
                   <input
                     aria-label={`Porção ${i + 1}`}
                     placeholder="Porção (ex: 1 unidade média)"
                     value={item.portion}
                     onChange={(e) => updateItem(items, setItems, i, "portion", e.target.value)}
-                    style={{ flex: 2 }}
+                    style={{ flex: "2 1 140px" }}
                   />
                 </div>
               ))}
@@ -209,18 +209,18 @@ export default function ListasSubstituicaoPage() {
                           <label className="field-label">Itens</label>
                           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                             {editItems.map((item, i) => (
-                              <div key={i} style={{ display: "flex", gap: 8 }}>
+                              <div key={i} style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                                 <input
                                   aria-label={`Alimento ${i + 1}`}
                                   value={item.name}
                                   onChange={(e) => updateItem(editItems, setEditItems, i, "name", e.target.value)}
-                                  style={{ flex: 2 }}
+                                  style={{ flex: "2 1 140px" }}
                                 />
                                 <input
                                   aria-label={`Porção ${i + 1}`}
                                   value={item.portion}
                                   onChange={(e) => updateItem(editItems, setEditItems, i, "portion", e.target.value)}
-                                  style={{ flex: 2 }}
+                                  style={{ flex: "2 1 140px" }}
                                 />
                               </div>
                             ))}

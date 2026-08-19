@@ -175,7 +175,7 @@ export default function FinanceiroPage() {
       )}
 
       {!loading && transactions.length > 0 && (
-        <div className="table-wrap">
+        <div className="table-wrap table-responsive-cards">
           <table>
             <thead>
               <tr>
@@ -190,20 +190,26 @@ export default function FinanceiroPage() {
             <tbody>
               {transactions.map((t) => (
                 <tr key={t.id}>
-                  <td className="table-num" style={{ color: t.kind === "income" ? "var(--color-success)" : "var(--color-error)", fontWeight: 600 }}>
+                  <td
+                    className="table-num"
+                    data-label="Valor"
+                    style={{ color: t.kind === "income" ? "var(--color-success)" : "var(--color-error)", fontWeight: 600 }}
+                  >
                     {t.kind === "income" ? "+" : "-"}
                     {formatMoney(t.amount_cents)}
                   </td>
-                  <td>{t.patient_name ?? "—"}</td>
-                  <td>{t.category ? <span className="badge">{t.category}</span> : "—"}</td>
-                  <td style={{ color: "var(--color-text-muted)" }}>{t.due_date ? formatDate(t.due_date) : "—"}</td>
-                  <td>
+                  <td data-label="Paciente">{t.patient_name ?? "—"}</td>
+                  <td data-label="Categoria">{t.category ? <span className="badge">{t.category}</span> : "—"}</td>
+                  <td data-label="Vencimento" style={{ color: "var(--color-text-muted)" }}>
+                    {t.due_date ? formatDate(t.due_date) : "—"}
+                  </td>
+                  <td data-label="Status">
                     <span className={`badge ${t.paid_at ? "badge-success" : "badge-warning"}`}>
                       {t.paid_at ? "Pago" : "Pendente"}
                     </span>
                   </td>
-                  <td className="table-actions">
-                    <div style={{ display: "inline-flex", gap: 6 }}>
+                  <td className="table-actions" data-label="Ações">
+                    <div style={{ display: "inline-flex", gap: 6, flexWrap: "wrap" }}>
                       {!t.paid_at && (
                         <button className="btn-sm btn-secondary" onClick={() => markPaid(t.id)}>
                           Marcar pago

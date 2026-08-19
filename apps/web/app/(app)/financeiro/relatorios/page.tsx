@@ -48,7 +48,7 @@ export default function RelatoriosFinanceiroPage() {
       {byCategory.length === 0 ? (
         <EmptyState icon={<IconTrendUp />} title="Sem lançamentos pagos ainda" description="Assim que você marcar lançamentos como pagos, o relatório aparece aqui." />
       ) : (
-        <div className="table-wrap">
+        <div className="table-wrap table-responsive-cards">
           <table>
             <thead>
               <tr>
@@ -61,14 +61,14 @@ export default function RelatoriosFinanceiroPage() {
             <tbody>
               {byCategory.map((row, i) => (
                 <tr key={i}>
-                  <td>{row.category}</td>
-                  <td>
+                  <td data-label="Categoria">{row.category}</td>
+                  <td data-label="Tipo">
                     <span className={`badge ${row.kind === "income" ? "badge-success" : "badge-error"}`}>
                       {row.kind === "income" ? "Entrada" : "Saída"}
                     </span>
                   </td>
-                  <td className="table-num">{row.count}</td>
-                  <td className="table-num" style={{ fontWeight: 600 }}>
+                  <td className="table-num" data-label="Lançamentos">{row.count}</td>
+                  <td className="table-num" data-label="Total" style={{ fontWeight: 600 }}>
                     {formatMoney(row.total_cents)}
                   </td>
                 </tr>

@@ -72,12 +72,12 @@ export default function SolicitacoesPage() {
       )}
 
       {!loading && requests.length > 0 && (
-        <div className="table-wrap">
+        <div className="table-wrap table-responsive-cards">
           <table>
             <tbody>
               {requests.map((r) => (
                 <tr key={r.id}>
-                  <td>
+                  <td className="table-cell-block" data-label="Solicitação">
                     <strong>{r.patient_name}</strong>
                     <div className="text-caption">
                       {new Date(r.requested_at).toLocaleString("pt-BR")}
@@ -86,8 +86,8 @@ export default function SolicitacoesPage() {
                     </div>
                     {r.message && <div style={{ fontSize: 14, marginTop: 4 }}>{r.message}</div>}
                   </td>
-                  <td className="table-actions">
-                    <div style={{ display: "inline-flex", gap: 8 }}>
+                  <td className="table-actions" data-label="Ações">
+                    <div style={{ display: "inline-flex", gap: 8, flexWrap: "wrap" }}>
                       <button onClick={() => approve(r.id, r.patient_name)} className="btn-primary btn-sm">
                         Aprovar
                       </button>

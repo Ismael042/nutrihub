@@ -249,7 +249,7 @@ export default function AntropometriaPage() {
       {/* .table-wrap (e não a antiga .table-scroll, que nunca existiu no CSS) para
           esta tabela ganhar a mesma borda, cabeçalho e padding das demais. */}
       {measurements.length > 0 && (
-      <div className="table-wrap" style={{ marginTop: 20 }}>
+      <div className="table-wrap table-responsive-cards" style={{ marginTop: 20 }}>
         <table>
           <thead>
             <tr>
@@ -269,14 +269,16 @@ export default function AntropometriaPage() {
               const measurementBmi = bmi(m.weight_kg, m.height_cm);
               return (
                 <tr key={m.id}>
-                  <td>{formatDate(m.measured_at)}</td>
+                  <td data-label="Data">{formatDate(m.measured_at)}</td>
                   {FIELDS.map((f) => (
-                    <td className="table-num" key={f.key}>
+                    <td className="table-num" data-label={f.label} key={f.key}>
                       {m[f.key] != null ? String(m[f.key]) : "—"}
                     </td>
                   ))}
-                  <td className="table-num">{measurementBmi ? measurementBmi.toFixed(1) : "—"}</td>
-                  <td>
+                  <td className="table-num" data-label="IMC">
+                    {measurementBmi ? measurementBmi.toFixed(1) : "—"}
+                  </td>
+                  <td className="table-cell-block" data-label="Fotos">
                     <div className="photo-grid">
                       {(m.photos ?? []).map((photo) => (
                         <div className="photo-thumb" key={photo.id}>
@@ -309,7 +311,7 @@ export default function AntropometriaPage() {
                       ))}
                     </div>
                   </td>
-                  <td className="table-actions">
+                  <td className="table-actions" data-label="Ações">
                     <button onClick={() => remove(m.id)} style={{ color: "var(--color-error)" }}>
                       Excluir
                     </button>

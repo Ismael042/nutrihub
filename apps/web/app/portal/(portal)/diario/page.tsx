@@ -63,29 +63,35 @@ export default function PatientDiarioPage() {
         Registre o que você comeu — seu nutricionista acompanha por aqui.
       </p>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-end" }}>
-        <div className="field field-md">
-          <label className="field-label" htmlFor="meal-kind">
-            Refeição
-          </label>
-          <select id="meal-kind" value={mealKind} onChange={(e) => setMealKind(e.target.value as MealKind)}>
-            <option value="breakfast">Café da manhã</option>
-            <option value="lunch">Almoço</option>
-            <option value="snack">Lanche</option>
-            <option value="dinner">Jantar</option>
-          </select>
-        </div>
-        <div className="field">
-          <label className="field-label" htmlFor="description">
-            O que você comeu?
-          </label>
-          <input
-            id="description"
-            placeholder="ex: Arroz, feijão e frango grelhado"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
+      {/* .field-row (não flex inline) de propósito: .field-md só tem efeito como
+          filho direto de .field-row (seletor descendente no CSS) — fora dele a
+          classe não fazia nada, e os campos ficavam "em escada" com espaço vazio
+          à direita em vez de se comportar como todo outro formulário do sistema. */}
+      <form onSubmit={handleSubmit} style={{ marginTop: 12 }}>
+        <div className="field-row">
+          <div className="field field-md">
+            <label className="field-label" htmlFor="meal-kind">
+              Refeição
+            </label>
+            <select id="meal-kind" value={mealKind} onChange={(e) => setMealKind(e.target.value as MealKind)}>
+              <option value="breakfast">Café da manhã</option>
+              <option value="lunch">Almoço</option>
+              <option value="snack">Lanche</option>
+              <option value="dinner">Jantar</option>
+            </select>
+          </div>
+          <div className="field">
+            <label className="field-label" htmlFor="description">
+              O que você comeu?
+            </label>
+            <input
+              id="description"
+              placeholder="ex: Arroz, feijão e frango grelhado"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+            />
+          </div>
         </div>
         <button type="submit" disabled={saving} className="btn-primary">
           {saving ? "Salvando..." : "Registrar"}

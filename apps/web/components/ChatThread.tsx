@@ -71,7 +71,10 @@ export default function ChatThread({
           border: "1px solid var(--color-border, #ddd)",
           borderRadius: 8,
           padding: 12,
-          height: 420,
+          // min() em vez de 420px fixo: em viewport baixo (iPhone SE, celular em
+          // paisagem) 420px sozinho já passa da altura visível, forçando a página
+          // a rolar em vez da lista de mensagens — aqui ela encolhe antes disso.
+          height: "min(420px, 55dvh)",
           overflowY: "auto",
           display: "flex",
           flexDirection: "column",

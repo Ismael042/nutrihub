@@ -31,13 +31,25 @@ export default function PatientShell({
   }
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="patient-shell-root" style={{ display: "flex", flexDirection: "column" }}>
       <header className="app-topbar">
-        <span style={{ fontWeight: 700, fontSize: 16 }}>
+        <span style={{ fontWeight: 700, fontSize: 16, flexShrink: 0 }}>
           Nutri<span style={{ color: "var(--color-primary)" }}>Hub</span>
         </span>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ fontSize: 13.5, fontWeight: 600, color: "var(--color-text-primary)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+          {/* Nome trunca com reticências em vez de estourar o topbar — mesma
+              justificativa do AppShell (topbar não encolhe padding no mobile). */}
+          <span
+            style={{
+              fontSize: 13.5,
+              fontWeight: 600,
+              color: "var(--color-text-primary)",
+              minWidth: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap"
+            }}
+          >
             {patient.name.split(" ")[0]}
           </span>
           <button
@@ -46,6 +58,7 @@ export default function PatientShell({
             onClick={handleLogout}
             aria-label="Sair"
             title="Sair"
+            style={{ flexShrink: 0 }}
           >
             <IconLogOut />
           </button>
@@ -53,8 +66,14 @@ export default function PatientShell({
       </header>
 
       {/* padding-bottom extra só aqui via style — não mexe na regra .app-content
-          compartilhada com o painel do profissional, que não tem barra fixa embaixo. */}
-      <main className="app-content" style={{ paddingBottom: "calc(var(--space-6) + 64px)" }}>
+          compartilhada com o painel do profissional, que não tem barra fixa embaixo.
+          Usa a mesma --patient-tabbar-height que .patient-tabbar e o offset do toast
+          usam, pra nunca ficar com um número chutado desincronizado do tamanho real
+          da barra. */}
+      <main
+        className="app-content"
+        style={{ paddingBottom: "calc(var(--patient-tabbar-height) + env(safe-area-inset-bottom) + var(--space-4))" }}
+      >
         {children}
       </main>
 

@@ -21,7 +21,7 @@ export default function PacientePage() {
           <span style={{ fontWeight: 700, fontSize: 18 }}>
             Nutri<span style={{ color: "var(--color-primary)" }}>Hub</span>
           </span>
-          <a href="/portal/entrar" className="btn-primary btn-sm" style={{ marginRight: 8 }}>
+          <a href="/portal/entrar" className="btn-primary btn-sm">
             Entrar
           </a>
           <a href="/" className="btn-secondary btn-sm">

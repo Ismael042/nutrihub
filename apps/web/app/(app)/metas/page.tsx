@@ -145,7 +145,7 @@ export default function MetasPage() {
       )}
 
       {!loading && goals.length > 0 && (
-        <div className="table-wrap" style={{ marginTop: 20 }}>
+        <div className="table-wrap table-responsive-cards" style={{ marginTop: 20 }}>
           <table>
             <thead>
               <tr>
@@ -158,13 +158,13 @@ export default function MetasPage() {
             <tbody>
               {goals.map((g) => (
                 <tr key={g.id}>
-                  <td>
+                  <td data-label="Meta">
                     <span style={{ textDecoration: g.achieved ? "line-through" : "none" }}>{g.description}</span>
                   </td>
-                  <td>{g.patient_name}</td>
-                  <td>{g.target_date ? formatDate(g.target_date) : "—"}</td>
-                  <td className="table-actions">
-                    <div style={{ display: "inline-flex", gap: 6 }}>
+                  <td data-label="Paciente">{g.patient_name}</td>
+                  <td data-label="Prazo">{g.target_date ? formatDate(g.target_date) : "—"}</td>
+                  <td className="table-actions" data-label="Ações">
+                    <div style={{ display: "inline-flex", gap: 6, flexWrap: "wrap" }}>
                       <button onClick={() => toggleAchieved(g)}>{g.achieved ? "Reabrir" : "Concluir"}</button>
                       <button onClick={() => remove(g.id)} style={{ color: "var(--color-error)" }}>
                         Excluir
