@@ -255,7 +255,14 @@ button:disabled {
   transform: none;
 }
 
-button:not(.btn-primary) {
+/* :not(.btn-icon) também — sem essa exceção, TODO botão-ícone (hambúrguer da
+   topbar, X de fechar o menu, sair do paciente) ficava colado no topo da sua
+   linha flex em vez de centralizado, mesmo com align-items:center no pai
+   explícito. Achado ao investigar o hambúrguer "flutuando estranho" no mobile —
+   confirmado via bounding box: y:0 numa barra de 60px com botão de 40px, devia
+   ser y:10. Pra botões normais (não-ícone) o flex-start continua valendo — é o
+   que alinha um botão ao topo de uma linha ao lado de um campo com label. */
+button:not(.btn-primary):not(.btn-icon) {
   align-self: flex-start;
 }
 
