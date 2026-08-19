@@ -2253,8 +2253,27 @@ body:has(.patient-tabbar) .toast-viewport {
   padding: var(--space-5) 0;
 }
 
+/* .btn-sm sozinho fica com ~31px de altura — ok pra nav densa do app logado
+   (mouse), mas curto pro toque confortável no celular. Sobe só aqui (não em
+   .btn-sm global, que é usado em telas de ação em lista por todo o app
+   autenticado) porque a nav da landing page tem só 1-2 botões, então dá pra
+   gastar mais espaço com eles sem apertar o layout. */
+@media (max-width: 480px) {
+  .marketing-nav a.btn-sm {
+    padding: 10px 14px;
+    font-size: 0.875rem;
+  }
+}
+
 .marketing-section {
-  padding: clamp(2.5rem, 7vw, 5rem) 0;
+  /* padding-top/bottom (não o shorthand "padding") de propósito: o shorthand
+     zera padding-left/right, o que sobrescrevia (mesma especificidade, vem
+     depois no arquivo) o padding horizontal de .marketing — toda seção de
+     conteúdo (que leva as duas classes juntas) ficava colada na borda da
+     tela no mobile, sem margem nenhuma. Só o header escapava porque não tem
+     .marketing-section. */
+  padding-top: clamp(2.5rem, 7vw, 5rem);
+  padding-bottom: clamp(2.5rem, 7vw, 5rem);
 }
 
 .marketing-section-border {
@@ -2430,9 +2449,12 @@ body:has(.patient-tabbar) .toast-viewport {
 
 .faq-item {
   border-bottom: 1px solid var(--color-border);
-  padding: var(--space-4) 0;
 }
 
+/* Padding no <summary> (não no .faq-item) de propósito: é o <summary> que é
+   nativamente clicável/tocável — com o padding só no container pai, a área de
+   toque real ficava do tamanho da linha de texto (~24px), pequena demais pra
+   mobile. Assim a faixa inteira responde ao toque. */
 .faq-item summary {
   cursor: pointer;
   font-weight: 600;
@@ -2441,6 +2463,7 @@ body:has(.patient-tabbar) .toast-viewport {
   justify-content: space-between;
   align-items: center;
   gap: var(--space-3);
+  padding: var(--space-4) 0;
 }
 
 .faq-item summary::-webkit-details-marker {
@@ -2460,7 +2483,7 @@ body:has(.patient-tabbar) .toast-viewport {
 }
 
 .faq-item p {
-  margin-top: var(--space-3);
+  margin: 0 0 var(--space-4);
   color: var(--color-text-secondary);
 }
 
