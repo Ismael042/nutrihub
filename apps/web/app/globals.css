@@ -1852,13 +1852,41 @@ body:has(.patient-tabbar) .toast-viewport {
   /* Com o drawer ocupando a tela inteira, os itens alinhados à esquerda ficam
      meio perdidos numa faixa larga vazia à direita — centralizado combina mais
      com "menu full-screen" do que com a barra estreita fixa do desktop (onde
-     isso continua à esquerda, o padrão certo pra sidebar). */
+     isso continua à esquerda, o padrão certo pra sidebar).
+
+     Tipografia própria também: os valores de 14px/peso 500 são dimensionados
+     pra uma sidebar fixa de 248px — esticados numa tela inteira ficam sem
+     presença, como se nada tivesse mudado mesmo depois do drawer virar
+     full-screen. Sobe tamanho, peso, espaçamento entre grupos e contraste da
+     cor, só nesta faixa — a sidebar fixa do desktop não muda em nada disso. */
+  .app-sidebar-nav {
+    gap: var(--space-6);
+    padding: 0 var(--space-4) var(--space-4);
+  }
+
   .app-sidebar-link {
     justify-content: center;
+    gap: 14px;
+    padding: 13px var(--space-4);
+    font-size: 1rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .app-sidebar-link.active {
+    font-weight: 700;
+  }
+
+  .app-sidebar-link .icon svg {
+    width: 20px;
+    height: 20px;
   }
 
   .app-sidebar-group-label {
     text-align: center;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
   }
 }
 
