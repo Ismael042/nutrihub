@@ -1848,6 +1848,18 @@ body:has(.patient-tabbar) .toast-viewport {
     width: 40px;
     height: 40px;
   }
+
+  /* Com o drawer ocupando a tela inteira, os itens alinhados à esquerda ficam
+     meio perdidos numa faixa larga vazia à direita — centralizado combina mais
+     com "menu full-screen" do que com a barra estreita fixa do desktop (onde
+     isso continua à esquerda, o padrão certo pra sidebar). */
+  .app-sidebar-link {
+    justify-content: center;
+  }
+
+  .app-sidebar-group-label {
+    text-align: center;
+  }
 }
 
 /* Cabeçalho de app legado (mantido — algumas telas públicas ainda podem usar) */
